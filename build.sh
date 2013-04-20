@@ -52,9 +52,9 @@ make -j$(sysctl -n hw.ncpu) depend &&
 make -j$(sysctl -n hw.ncpu) &&
 make install || exit
 
-mv ${prefix}/bin/wine{,.bin}
-install -m 0755 ${srcroot}/wine.in ${prefix}/bin/wine
-sed -i "" -e "s|@DATE@|$(date +%F)|" ${prefix}/bin/wine
+mv ${prefix}/bin/wine{,.bin} &&
+install -m 0755 ${srcroot}/wine.in ${prefix}/bin/wine &&
+sed -i "" -e "s|@DATE@|$(date +%F)|" ${prefix}/bin/wine || exit
 
 test ! -f ${dmg=${srcroot}/NXWine_$(date +%F).dmg} || rm ${dmg}
 hdiutil create -srcdir /tmp/local -volname NXWine ${dmg} &&

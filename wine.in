@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# NXWine - No X11 Wine
+# Created by mattintosh4 on @DATE@.
+# Copyright (c) 2013 mattintosh4, mattintosh4@gmx.com
+# https://github.com/mattintosh4/NXWine
+#
+prefix="$(cd "$(dirname "$0")"; pwd)"
+export PATH="${prefix}":/usr/bin:/bin:/usr/sbin:/sbin
+export DYLD_FALLBACK_LIBRARY_PATH="${prefix}"/../lib:/usr/lib
+wine.bin "$@"

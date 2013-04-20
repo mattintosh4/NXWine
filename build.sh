@@ -52,31 +52,9 @@ make -j$(sysctl -n hw.ncpu) depend &&
 make -j$(sysctl -n hw.ncpu) &&
 make install || exit
 
-find ${prefix}/lib -type f -name "*.dylib" | while read; do
-    install_name_tool -id @rpath/$(basename ${REPLY}) ${REPLY}
-    otool -L ${REPLY} | awk -v prefix=${prefix}/lib '
-        NR >= 2 && $1 ~ prefix {
-            old=$1
-            sub(prefix, "@rpath", $1)
-            print "install_name_tool -change", old, $1, "'"${REPLY}"'"
-        }
-    ' | bash -v
-done
-
 mv ${prefix}/bin/wine{,.bin}
-cat <<'__EOF__' > ${prefix}/bin/wine && chmod +x ${prefix}/bin/wine
-#!/bin/bash
-#
-# NXWine - No X11 Wine
-# Created by mattintosh4 on 2013-04-21.
-# Copyright (c) 2013 mattintosh4, mattintosh4@gmx.com
-# https://github.com/mattintosh4/NXWine
-#
-prefix="$(cd "$(dirname "$0")"; pwd)"
-export PATH="${prefix}":/usr/bin:/bin:/usr/sbin:/sbin
-export DYLD_FALLBACK_LIBRARY_PATH=/usr/lib
-wine.bin "$@"
-__EOF__
+install -m 0755 ${srcroot}/wine.in ${prefix}/bin/wine
+sed -i "" -e "s|@DATE@|$(date +%F)|" ${prefix}/bin/wine
 
 test ! -f ${dmg=${srcroot}/NXWine_$(date +%F).dmg} || rm ${dmg}
 hdiutil create -srcdir /tmp/local -volname NXWine ${dmg} &&

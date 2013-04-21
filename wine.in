@@ -8,4 +8,4 @@
 prefix="$(cd "$(dirname "$0")"; pwd)"
 export PATH="${prefix}":/usr/bin:/bin:/usr/sbin:/sbin
 export DYLD_FALLBACK_LIBRARY_PATH="${prefix}"/../lib:/usr/lib
-wine.bin "$@"
+exec wine.bin "$@"

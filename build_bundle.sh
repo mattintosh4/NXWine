@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 srcroot="$(cd "$(dirname "$0")"; pwd)"
 

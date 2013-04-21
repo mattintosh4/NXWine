@@ -29,6 +29,8 @@ on run
 end run
 __APPLESCRIPT__
 
+rm NXWine.app/Contents/Resources/droplet.icns
+
 hdiutil attach ${srcroot}/NXWine.dmg -mountpoint ${mountpoint=/tmp/local} &&
 cp -R ${mountpoint}/* NXWine.app/Contents/Resources &&
 hdiutil detach ${mountpoint}
@@ -37,6 +39,8 @@ while read
 do
     /usr/libexec/PlistBuddy -c "${REPLY}" NXWine.app/Contents/Info.plist
 done <<__CMD__
+Add :NSHumanReadableCopyright string $(NXWine.app/Contents/Resources/bin/wine --version), Copyright © 2013 mattintosh4, https://github.com/mattintosh4/NXWine
+Add :CFBundleIdentifier string com.github.mattintosh4.NXWine
 Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions array
 Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions:0 string exe
 Add :CFBundleDocumentTypes:1:CFBundleTypeName string Windows Executable File

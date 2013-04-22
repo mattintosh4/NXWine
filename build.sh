@@ -22,13 +22,13 @@ function BuildDeps_ {
 }
 
 cd $(mktemp -dt $$) &&
-tar -xf ${srcroot}/source/freetype-2.4.11.tar.gz &&
 tar -xf ${srcroot}/source/gettext-0.18.2.tar.gz &&
+tar -xf ${srcroot}/source/freetype-2.4.11.tar.gz &&
 tar -xf ${srcroot}/source/libpng-1.6.1.tar.gz &&
 tar -xf ${srcroot}/source/jpegsrc.v8d.tar.gz &&
 tar -xf ${srcroot}/source/tiff-4.0.3.tar.gz &&
-BuildDeps_ freetype-2.4.11
 BuildDeps_ gettext-0.18.2
+BuildDeps_ freetype-2.4.11
 BuildDeps_ libpng-1.6.1
 BuildDeps_ jpeg-8d
 BuildDeps_ tiff-4.0.3
@@ -52,13 +52,10 @@ make -j$(sysctl -n hw.ncpu) depend &&
 make -j$(sysctl -n hw.ncpu) &&
 make install || exit
 
-mv ${prefix}/bin/wine{,.bin} &&
-install -m 0755 ${srcroot}/wine.in ${prefix}/bin/wine &&
-sed -i "" -e "s|@DATE@|$(date +%F)|" ${prefix}/bin/wine || exit
-
 test ! -f ${dmg=${srcroot}/NXWine_$(date +%F).dmg} || rm ${dmg}
 hdiutil create -srcdir /tmp/local -volname NXWine ${dmg} &&
 rm -rf ${prefix}
+(cd ${srcroot} && ln -sf $(basename ${dmg}) NXWine.dmg)
 
 :
 afplay /System/Library/Sounds/Hero.aiff

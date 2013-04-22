@@ -5,6 +5,8 @@ winesrcroot=/Volumes/HFSPlus/src/wine
 srcroot="$(cd "$(dirname "$0")"; pwd)"
 prefix=/tmp/local
 
+jobs="-j $(($(sysctl -n hw.ncpu) + 1))"
+
 test ! -d ${prefix} || rm -rf ${prefix}
 install -d ${prefix}/{bin,include,lib}
 
@@ -19,21 +21,21 @@ export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
 function BuildDeps_ {
     cd $1 &&
     ./configure --build=x86_64-apple-darwin10 --prefix=${prefix} &&
-    make -j$(sysctl -n hw.ncpu) &&
+    make ${jobs} &&
     make install || exit
     cd -
 }
 
 cd $(mktemp -dt $$) &&
-tar -xf ${srcroot}/source/xz-5.0.4.tar.bz2 &&
 tar -xf ${srcroot}/source/gettext-0.18.2.tar.gz &&
 tar -xf ${srcroot}/source/freetype-2.4.11.tar.gz &&
+tar -xf ${srcroot}/source/xz-5.0.4.tar.bz2 &&
 tar -xf ${srcroot}/source/libpng-1.6.1.tar.gz &&
 tar -xf ${srcroot}/source/jpegsrc.v8d.tar.gz &&
 tar -xf ${srcroot}/source/tiff-4.0.3.tar.gz &&
-BuildDeps_ xz-5.0.4
 BuildDeps_ gettext-0.18.2
 BuildDeps_ freetype-2.4.11
+BuildDeps_ xz-5.0.4
 BuildDeps_ libpng-1.6.1
 BuildDeps_ jpeg-8d
 BuildDeps_ tiff-4.0.3
@@ -53,11 +55,11 @@ ${winesrcroot}/configure \
     --without-cms \
     --without-x \
 &&
-make -j$(sysctl -n hw.ncpu) depend &&
-make -j$(sysctl -n hw.ncpu) &&
+make ${jobs} depend &&
+make ${jobs} &&
 make install || exit
 
-test ! -f ${dmg=${srcroot}/NXWine_$(date +%F).dmg} || rm ${dmg}
+test ! -f ${dmg=${srcroot}/NXWine_$(date +%F)_$(${prefix}/bin/wine --version | cut -d- -f2-)_$(date +%F).dmg} || rm ${dmg}
 hdiutil create -srcdir ${prefix} -volname NXWine ${dmg} &&
 rm -rf ${prefix}
 (cd ${srcroot} && ln -sf $(basename ${dmg}) NXWine.dmg)

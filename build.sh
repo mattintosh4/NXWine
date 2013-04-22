@@ -5,6 +5,9 @@ winesrcroot=/Volumes/HFSPlus/src/wine
 srcroot="$(cd "$(dirname "$0")"; pwd)"
 prefix=/tmp/local
 
+test ! -d ${prefix} || rm -rf ${prefix}
+install -d ${prefix}/{bin,include,lib}
+
 export PATH=${prefix}/bin:$(sysctl -n user.cs_path):/usr/local/git/bin
 export CC=/usr/local/bin/clang
 export CXX=/usr/local/bin/clang++
@@ -22,11 +25,13 @@ function BuildDeps_ {
 }
 
 cd $(mktemp -dt $$) &&
+tar -xf ${srcroot}/source/xz-5.0.4.tar.bz2 &&
 tar -xf ${srcroot}/source/gettext-0.18.2.tar.gz &&
 tar -xf ${srcroot}/source/freetype-2.4.11.tar.gz &&
 tar -xf ${srcroot}/source/libpng-1.6.1.tar.gz &&
 tar -xf ${srcroot}/source/jpegsrc.v8d.tar.gz &&
 tar -xf ${srcroot}/source/tiff-4.0.3.tar.gz &&
+BuildDeps_ xz-5.0.4
 BuildDeps_ gettext-0.18.2
 BuildDeps_ freetype-2.4.11
 BuildDeps_ libpng-1.6.1
@@ -53,7 +58,7 @@ make -j$(sysctl -n hw.ncpu) &&
 make install || exit
 
 test ! -f ${dmg=${srcroot}/NXWine_$(date +%F).dmg} || rm ${dmg}
-hdiutil create -srcdir /tmp/local -volname NXWine ${dmg} &&
+hdiutil create -srcdir ${prefix} -volname NXWine ${dmg} &&
 rm -rf ${prefix}
 (cd ${srcroot} && ln -sf $(basename ${dmg}) NXWine.dmg)
 

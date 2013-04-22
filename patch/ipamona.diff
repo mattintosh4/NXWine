@@ -1,0 +1,25 @@
+--- wine.inf.orig	2013-04-22 23:18:29.000000000 +0900
++++ wine.inf	2013-04-22 23:17:50.000000000 +0900
+@@ -566,6 +566,22 @@
+ HKLM,%FontSubStr%,"Times New Roman TUR,162",,"Times New Roman,162"
+ HKLM,System\CurrentControlSet\Hardware Profiles\Current\Software\Fonts,"LogPixels",0x10003,0x00000060
+ 
++HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Microsoft Sans Serif",,"ipag-mona.ttf"
++HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Sans Serif",,"ipag-mona.ttf"
++HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Gothic",,"ipag-mona.ttf"
++HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PGothic",,"ipagp-mona.ttf"
++HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Serif",,"ipam-mona.ttf"
++HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Mincho",,"ipam-mona.ttf"
++HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PMincho",,"ipamp-mona.ttf"
++HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Tahoma",,"ipagp-mona.ttf"
++HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Verdana",,"ipagp-mona.ttf"
++
++HKCU,Software\Wine\Fonts\Replacements,"MS UI Gothic",,"IPAMonaUIGothic"
++HKCU,Software\Wine\Fonts\Replacements,"ＭＳ ゴシック",,"IPAMonaGothic"
++HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐゴシック",,"IPAMonaPGothic"
++HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"IPAMonaMincho"
++HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"IPAMonaPMincho"
++
+ [MCI]
+ HKLM,%Mci32Str%,"AVIVideo",,"mciavi32.dll"
+ HKLM,%Mci32Str%,"CDAudio",,"mcicda.dll"

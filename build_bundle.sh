@@ -4,6 +4,8 @@ srcroot="$(cd "$(dirname "$0")"; pwd)"
 
 test ! -e NXWine.app || rm -rf NXWine.app
 
+hdiutil attach ${srcroot}/NXWine.dmg -mountpoint ${mountpoint=/tmp/local} || exit
+
 osacompile -o NXWine.app <<__APPLESCRIPT__ || exit
 --
 -- NXWine.app - No X11 Wine
@@ -30,8 +32,6 @@ end run
 __APPLESCRIPT__
 
 rm NXWine.app/Contents/Resources/droplet.icns
-
-hdiutil attach ${srcroot}/NXWine.dmg -mountpoint ${mountpoint=/tmp/local} &&
 cp -R ${mountpoint}/* NXWine.app/Contents/Resources &&
 hdiutil detach ${mountpoint}
 

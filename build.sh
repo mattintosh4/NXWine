@@ -10,6 +10,8 @@ jobs="-j $(($(sysctl -n hw.ncpu) + 1))"
 test ! -d ${prefix} || rm -rf ${prefix}
 install -d ${prefix}/{bin,include,lib}
 
+test -x ${uconv=/opt/local/bin/uconv} || exit
+
 export PATH=${prefix}/bin:$(sysctl -n user.cs_path):/usr/local/git/bin
 export CC=/usr/local/bin/clang
 export CXX=/usr/local/bin/clang++
@@ -20,7 +22,7 @@ export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
 
 function BuildDeps_ {
     cd $1 &&
-    ./configure --build=x86_64-apple-darwin10 --prefix=${prefix} &&
+    ./configure --build=x86_64-apple-darwin10 --prefix=${prefix} --disable-static &&
     make ${jobs} &&
     make install || exit
     cd -
@@ -54,12 +56,18 @@ ${winesrcroot}/configure \
     --without-gsm \
     --without-cms \
     --without-x \
+    LIBS="-lxslt -lxml2 -lncurses -lcups" \
 &&
 make ${jobs} depend &&
 make ${jobs} &&
 make install || exit
 
-test ! -f ${dmg=${srcroot}/NXWine_$(date +%F)_$(${prefix}/bin/wine --version | cut -d- -f2-)_$(date +%F).dmg} || rm ${dmg}
+patch ${prefix}/share/wine/wine.inf ${srcroot}/patch/ipamona.patch
+cp ${prefix}/share/wine/wine.inf $(mktemp -t $$)
+${uconv} -f UTF-8 -t UTF-8 --add-signature $_ > ${prefix}/share/wine/wine.inf
+rm $_
+
+test ! -f ${dmg=${srcroot}/NXWine_$(date +%F)_$(${prefix}/bin/wine --version | cut -d- -f2-).dmg} || rm ${dmg}
 hdiutil create -srcdir ${prefix} -volname NXWine ${dmg} &&
 rm -rf ${prefix}
 (cd ${srcroot} && ln -sf $(basename ${dmg}) NXWine.dmg)

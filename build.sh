@@ -1,16 +1,16 @@
 #!/bin/bash -x
 
-winesrcroot=/Volumes/HFSPlus/src/wine
-
 srcroot="$(cd "$(dirname "$0")"; pwd)"
+
+winesrcroot=/Volumes/HFSPlus/src/wine
 prefix=/tmp/local
 
 jobs="-j $(($(sysctl -n hw.ncpu) + 1))"
 
-test ! -d ${prefix} || rm -rf ${prefix}
-install -d ${prefix}/{bin,include,lib}
-
 test -x ${uconv=/opt/local/bin/uconv} || exit
+
+test ! -d ${prefix} || rm -rf ${prefix}
+install -d ${prefix}/{bin,include,lib} || exit
 
 export PATH=${prefix}/bin:$(sysctl -n user.cs_path):/usr/local/git/bin
 export CC=/usr/local/bin/clang

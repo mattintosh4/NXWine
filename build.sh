@@ -62,10 +62,11 @@ make ${jobs} depend &&
 make ${jobs} &&
 make install || exit
 
-patch ${prefix}/share/wine/wine.inf ${srcroot}/patch/ipamona.patch
-cp ${prefix}/share/wine/wine.inf $(mktemp -t $$)
-${uconv} -f UTF-8 -t UTF-8 --add-signature $_ > ${prefix}/share/wine/wine.inf
-rm $_
+infsrc=${prefix}/share/wine/wine.inf
+inftmp=$(uuidgen)
+patch -o ${inftmp} ${infsrc} ${prefix}/patch/ipamona.patch &&
+${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${infsrc} ${inftmp} &&
+rm ${inftmp} || exit
 
 test ! -f ${dmg=${srcroot}/NXWine_$(date +%F)_$(${prefix}/bin/wine --version | cut -d- -f2-).dmg} || rm ${dmg}
 hdiutil create -srcdir ${prefix} -volname NXWine ${dmg} &&

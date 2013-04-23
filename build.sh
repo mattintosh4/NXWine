@@ -47,27 +47,42 @@ export CPPFLAGS="-I${prefix}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
 jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 
+cd $(mktemp -dt $$) &&
+for x in \
+    freetype-2.4.11.tar.gz \
+    gettext-0.18.2.tar.gz \
+    jasper-1.900.1.zip \
+    jpegsrc.v8d.tar.gz \
+    libicns-0.8.1.tar.gz \
+    libpng-1.6.1.tar.gz \
+    tiff-4.0.3.tar.gz \
+    xz-5.0.4.tar.bz2 \
+
+do
+    tar -xf ${srcroot}/source/${x} || exit
+done
+
 function BuildDeps_ {
-    cd $1 &&
-    ./configure --build=x86_64-apple-darwin10 --prefix=${prefix} --disable-static --disable-dependency-tracking &&
+    pushd $1 &&
+    shift &&
+    ./configure \
+        --build=x86_64-apple-darwin10 \
+        --prefix=${prefix} \
+        --disable-static \
+        --disable-dependency-tracking \
+        $@ \
+    &&
     make ${jn} &&
     make install || exit
-    cd -
+    popd
 }
-cd $TMPDIR/93297.fM835yWc &&
-tar -xf ${srcroot}/source/gettext-0.18.2.tar.gz &&
-tar -xf ${srcroot}/source/freetype-2.4.11.tar.gz &&
-tar -xf ${srcroot}/source/xz-5.0.4.tar.bz2 &&
-tar -xf ${srcroot}/source/libpng-1.6.1.tar.gz &&
-tar -xf ${srcroot}/source/jpegsrc.v8d.tar.gz &&
-tar -xf ${srcroot}/source/tiff-4.0.3.tar.gz &&
-tar -xf ${srcroot}/source/libicns-0.8.1.tar.gz &&
 BuildDeps_ gettext-0.18.2
 BuildDeps_ freetype-2.4.11
 BuildDeps_ xz-5.0.4
 BuildDeps_ libpng-1.6.1
 BuildDeps_ jpeg-8d
 BuildDeps_ tiff-4.0.3
+BuildDeps_ jasper-1.900.1 --enable-shared --disable-opengl --without-x
 BuildDeps_ libicns-0.8.1
 
 
@@ -90,6 +105,9 @@ ${winesrcroot}/configure \
 make ${jn} depend &&
 make ${jn} &&
 make install || exit
+
+install -d ${prefix}/share/doc/wine
+cp ${winesrcroot}/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README} ${prefix}/share/doc/wine
 
 infsrc=${prefix}/share/wine/wine.inf
 inftmp=$(uuidgen)

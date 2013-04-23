@@ -45,16 +45,16 @@ export CFLAGS="-pipe -m32 -arch i386 -O3 -march=core2 -mtune=core2 -mmacosx-vers
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-I${prefix}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
-jobs="-j $(($(sysctl -n hw.ncpu) + 1))"
+jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 
 function BuildDeps_ {
     cd $1 &&
     ./configure --build=x86_64-apple-darwin10 --prefix=${prefix} --disable-static --disable-dependency-tracking &&
-    make ${jobs} &&
+    make ${jn} &&
     make install || exit
     cd -
 }
-cd $(mktemp -dt $$) &&
+cd $TMPDIR/93297.fM835yWc &&
 tar -xf ${srcroot}/source/gettext-0.18.2.tar.gz &&
 tar -xf ${srcroot}/source/freetype-2.4.11.tar.gz &&
 tar -xf ${srcroot}/source/xz-5.0.4.tar.bz2 &&
@@ -87,13 +87,13 @@ ${winesrcroot}/configure \
     --without-x \
     LIBS="-lxslt -lxml2 -lncurses -lcups" \
 &&
-make ${jobs} depend &&
-make ${jobs} &&
+make ${jn} depend &&
+make ${jn} &&
 make install || exit
 
 infsrc=${prefix}/share/wine/wine.inf
 inftmp=$(uuidgen)
-patch -o ${inftmp} ${infsrc} ${srcroot}/patch/ipamona.patch &&
+patch -o ${inftmp} ${infsrc} ${srcroot}/patch/nxwine.patch &&
 ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${infsrc} ${inftmp} || exit
 
 
@@ -121,7 +121,10 @@ __CMD__
 
 
 test ! -f ${dmg=${srcroot}/NXWine_$(date +%F)_${wine_version#*-}.dmg} || rm ${dmg}
-hdiutil create -srcdir ${bundle} -volname NXWine ${dmg} &&
+dmg_srcdir=$(mktemp -dt $$)
+mv ${bundle} ${dmg_srcdir}
+ln -s /Applications ${dmg_srcdir}
+hdiutil create -srcdir ${dmg_srcdir} -volname NXWine ${dmg} &&
 
 :
 afplay /System/Library/Sounds/Hero.aiff

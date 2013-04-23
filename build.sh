@@ -2,7 +2,7 @@
 
 srcroot="$(cd "$(dirname "$0")"; pwd)"
 
-winesrcroot=/Volumes/HFSPlus/src/wine
+winesrcroot=/usr/local/src/wine
 prefix=/tmp/local
 
 jobs="-j $(($(sysctl -n hw.ncpu) + 1))"
@@ -64,7 +64,7 @@ make install || exit
 
 infsrc=${prefix}/share/wine/wine.inf
 inftmp=$(uuidgen)
-patch -o ${inftmp} ${infsrc} ${prefix}/patch/ipamona.patch &&
+patch -o ${inftmp} ${infsrc} ${srcroot}/patch/ipamona.patch &&
 ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${infsrc} ${inftmp} &&
 rm ${inftmp} || exit
 

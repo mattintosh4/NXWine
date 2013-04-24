@@ -8,7 +8,7 @@ prefix=${bundle}/Contents/Resources
 test -x ${uconv=/opt/local/bin/uconv} || exit
 
 test ! -e ${bundle} || rm -rf ${bundle}
-osacompile -o ${bundle} ${srcroot}/NXWine.applescript || exit
+sed -i "" -e "s|@DATE@|$(date +%F)|g" | osacompile -o ${bundle} || exit
 rm ${bundle}/Contents/Resources/droplet.icns
 
 
@@ -92,7 +92,6 @@ ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${infsrc} ${inftmp} || exit
 
 
 wine_version=$(${prefix}/bin/wine --version)
-sed -i "" -e "s|@DATE@|$(date +%F | tr -d '-')|g; s|@WINE_VERSION@|${wine_version}|g" ${prefix}/Scripts/main.scpt
 while read
 do
     /usr/libexec/PlistBuddy -c "${REPLY}" ${bundle}/Contents/Info.plist

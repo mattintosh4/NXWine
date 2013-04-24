@@ -15,9 +15,10 @@ rm ${bundle}/Contents/Resources/droplet.icns
 install -d ${prefix}/{bin,include,lib} || exit
 
 export PATH=${prefix}/bin:$(sysctl -n user.cs_path):/usr/local/git/bin
-export CC=/usr/local/bin/clang
-export CXX=/usr/local/bin/clang++
-export CFLAGS="-pipe -m32 -arch i386 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8 -isysroot ${sdkroot=/Developer/SDKs/MacOSX10.6.sdk}"
+export CC=$( xcrun -find i686-apple-darwin10-gcc-4.2.1)
+export CXX=$(xcrun -find i686-apple-darwin10-g++-4.2.1)
+export OBJDUMP=/usr/local/bin/llvm-objdump
+export CFLAGS="-pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8 -isysroot ${sdkroot=/Developer/SDKs/MacOSX10.6.sdk}"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-I${prefix}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
@@ -46,9 +47,8 @@ function BuildDeps_ {
     pushd $1 &&
     shift &&
     ./configure \
-        --build=x86_64-apple-darwin10 \
         --prefix=${prefix} \
-        --disable-static \
+        --enable-shared \
         --disable-dependency-tracking \
         $@ \
     &&
@@ -64,7 +64,7 @@ BuildDeps_ xz-5.0.4
 BuildDeps_ libpng-1.6.1
 BuildDeps_ jpeg-8d
 BuildDeps_ tiff-4.0.3
-BuildDeps_ jasper-1.900.1 --enable-shared --disable-opengl --without-x
+BuildDeps_ jasper-1.900.1 --disable-opengl --without-x
 BuildDeps_ libicns-0.8.1
 BuildDeps_ SDL-1.2.15 --without-x && {
     install -d ${prefix}/share/doc/SDL
@@ -84,8 +84,6 @@ install -m 0644 ${srcroot}/source/winetricks/src/COPYING $_ &&
 install -m 0755 ${srcroot}/source/winetricks/src/winetricks ${prefix}/bin
 
 
-export CC=$( xcrun -find gcc-4.2)
-export CXX=$(xcrun -find g++-4.2)
 install -d wine &&
 cd wine &&
 ${winesrcroot}/configure \

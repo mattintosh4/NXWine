@@ -25,13 +25,17 @@ jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 
 cd $(mktemp -dt $$) &&
 for x in \
+    cabextract-1.4.tar.gz \
     freetype-2.4.11.tar.gz \
     gettext-0.18.2.tar.gz \
     jasper-1.900.1.zip \
     jpegsrc.v8d.tar.gz \
     libicns-0.8.1.tar.gz \
     libpng-1.6.1.tar.gz \
+    pkg-config-0.28.tar.gz \
+    SDL-1.2.15.tar.gz \
     tiff-4.0.3.tar.gz \
+    unixODBC-2.3.1.tar.gz \
     xz-5.0.4.tar.bz2 \
 
 do
@@ -52,6 +56,8 @@ function BuildDeps_ {
     make install || exit
     popd
 }
+BuildDeps_ pkg-config-0.28 --with-internal-glib
+export PKG_CONFIG_LIBDIR=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
 BuildDeps_ gettext-0.18.2
 BuildDeps_ freetype-2.4.11
 BuildDeps_ xz-5.0.4
@@ -60,6 +66,22 @@ BuildDeps_ jpeg-8d
 BuildDeps_ tiff-4.0.3
 BuildDeps_ jasper-1.900.1 --enable-shared --disable-opengl --without-x
 BuildDeps_ libicns-0.8.1
+BuildDeps_ SDL-1.2.15 --without-x && {
+    install -d ${prefix}/share/doc/SDL
+    cp SDL-1.2.15/{BUGS,COPYING,CREDITS,README,TODO} $_
+}
+BuildDeps_ unixODBC-2.3.1 && {
+    install -d ${prefix}/share/doc/unixODBC &&
+    cp unixODBC-2.3.1/{AUTHORS,ChangeLog,COPYING,NEWS,README} $_
+}
+BuildDeps_ cabextract-1.4 && {
+    install -d ${prefix}/share/doc/cabextract &&
+    cp cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $_
+}
+# winetricks
+install -d ${prefix}/share/doc/winetricks &&
+install -m 0644 ${srcroot}/source/winetricks/src/COPYING $_ &&
+install -m 0755 ${srcroot}/source/winetricks/src/winetricks ${prefix}/bin
 
 
 export CC=$( xcrun -find gcc-4.2)

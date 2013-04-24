@@ -8,7 +8,7 @@ prefix=${bundle}/Contents/Resources
 test -x ${uconv=/opt/local/bin/uconv} || exit
 
 test ! -e ${bundle} || rm -rf ${bundle}
-sed -i "" -e "s|@DATE@|$(date +%F)|g" | osacompile -o ${bundle} || exit
+sed "s|@DATE@|$(date +%F)|g" ${srcroot}/NXWine.applescript | osacompile -o ${bundle} || exit
 rm ${bundle}/Contents/Resources/droplet.icns
 
 

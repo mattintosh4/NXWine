@@ -8,31 +8,7 @@ prefix=${bundle}/Contents/Resources
 test -x ${uconv=/opt/local/bin/uconv} || exit
 
 test ! -e ${bundle} || rm -rf ${bundle}
-osacompile -o ${bundle} <<__APPLESCRIPT__ || exit
---
--- NXWine.app - No X11 Wine
--- Created by mattintosh4 on $(date +%F).
--- Copyright (c) 2013 mattintosh4, mattintosh4@gmx.com
--- https://github.com/mattintosh4/NXWine
---
-
-on main(input)
-    set wine to quoted form of (POSIX path of (path to me) & "Contents/Resources/bin/wine")
-    try
-        do shell script wine & space & input
-    end try
-end main
-
-on open argv
-    repeat with aFile in argv
-        main("start /Unix" & space & quoted form of (POSIX path of aFile))
-    end repeat
-end open
-
-on run
-    main("explorer")
-end run
-__APPLESCRIPT__
+osacompile -o ${bundle} ${srcroot}/NXWine.applescript || exit
 rm ${bundle}/Contents/Resources/droplet.icns
 
 
@@ -116,6 +92,7 @@ ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${infsrc} ${inftmp} || exit
 
 
 wine_version=$(${prefix}/bin/wine --version)
+sed -i "" -e "s|@DATE@|$(date +%F | tr -d '-')|g; s|@WINE_VERSION@|${wine_version}|g" ${prefix}/Scripts/main.scpt
 while read
 do
     /usr/libexec/PlistBuddy -c "${REPLY}" ${bundle}/Contents/Info.plist

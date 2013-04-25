@@ -24,16 +24,22 @@ export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
 jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 
 cd $(mktemp -dt $$) &&
+#install -d $TMPDIR/buildNXWine
+#cd $_
 for x in \
     cabextract-1.4.tar.gz \
+    flac-1.2.1.tar.gz \
     freetype-2.4.11.tar.gz \
     gettext-0.18.2.tar.gz \
     jasper-1.900.1.zip \
     jpegsrc.v8d.tar.gz \
     libicns-0.8.1.tar.gz \
     libpng-1.6.1.tar.gz \
+    libogg-1.3.0.tar.gz \
+    libvorbis-1.3.3.tar.gz \
     pkg-config-0.28.tar.gz \
     SDL-1.2.15.tar.gz \
+    SDL_sound-1.0.3.tar.gz \
     tiff-4.0.3.tar.gz \
     unixODBC-2.3.1.tar.gz \
     xz-5.0.4.tar.bz2 \
@@ -68,10 +74,14 @@ BuildDeps_ jpeg-8d
 BuildDeps_ tiff-4.0.3
 BuildDeps_ jasper-1.900.1 --disable-opengl --without-x
 BuildDeps_ libicns-0.8.1
+BuildDeps_ libogg-1.3.0
+BuildDeps_ libvorbis-1.3.3
+BuildDeps_ flac-1.2.1 --disable-asm-optimizations --disable-xmms-plugin
 BuildDeps_ SDL-1.2.15 --without-x && {
     install -d ${prefix}/share/doc/SDL
     cp SDL-1.2.15/{BUGS,COPYING,CREDITS,README,TODO} $_
 }
+BuildDeps_ SDL_sound-1.0.3
 BuildDeps_ unixODBC-2.3.1 && {
     install -d ${prefix}/share/doc/unixODBC &&
     cp unixODBC-2.3.1/{AUTHORS,ChangeLog,COPYING,NEWS,README} $_
@@ -104,11 +114,14 @@ ${winesrcroot}/configure \
     --without-gsm \
     --without-cms \
     --without-x \
-    LDFLAGS="${LDFLAGS} -Wl,-rpath,/usr/lib" \
 &&
 make ${jn} depend &&
 make ${jn} &&
 make install || exit
+
+install_name_tool -add_rpath /usr/lib ${prefix}/bin/wine &&
+install_name_tool -add_rpath /usr/lib ${prefix}/bin/wineserver &&
+install_name_tool -add_rpath /usr/lib ${prefix}/lib/libwine.1.0.dylib || exit
 
 install -d ${prefix}/share/doc/wine
 cp ${winesrcroot}/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README} ${prefix}/share/doc/wine

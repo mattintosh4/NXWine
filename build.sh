@@ -81,7 +81,13 @@ BuildDeps_ cabextract-1.4 && {
 # winetricks
 install -d ${prefix}/share/doc/winetricks &&
 install -m 0644 ${srcroot}/source/winetricks/src/COPYING $_ &&
-install -m 0755 ${srcroot}/source/winetricks/src/winetricks ${prefix}/bin
+install -m 0755 ${srcroot}/source/winetricks/src/winetricks ${prefix}/bin/winetricks.bin &&
+cat <<'__EOF__' > ${prefix}/bin/winetricks && chmod +x ${prefix}/bin/winetricks || exit
+#!/bin/bash
+export PATH="$(cd "$(dirname "$0")"; pwd)":/usr/bin:/bin:/usr/sbin:/sbin
+which wine || { echo "wine not found."; exit; }
+exec winetricks.bin "$@"
+__EOF__
 
 
 install -d wine &&

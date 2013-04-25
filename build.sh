@@ -17,7 +17,6 @@ install -d ${prefix}/{bin,include,lib} || exit
 export PATH=${prefix}/bin:$(sysctl -n user.cs_path):/usr/local/git/bin
 export CC=$( xcrun -find i686-apple-darwin10-gcc-4.2.1)
 export CXX=$(xcrun -find i686-apple-darwin10-g++-4.2.1)
-export OBJDUMP=/usr/local/bin/llvm-objdump
 export CFLAGS="-pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8 -isysroot ${sdkroot=/Developer/SDKs/MacOSX10.6.sdk}"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-I${prefix}/include"
@@ -56,8 +55,11 @@ function BuildDeps_ {
     make install || exit
     popd
 }
-BuildDeps_ pkg-config-0.28 --with-internal-glib
-export PKG_CONFIG_LIBDIR=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
+BuildDeps_ pkg-config-0.28 \
+    --disable-debug \
+    --disable-host-tool \
+    --with-internal-glib \
+    --with-pc-path=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
 BuildDeps_ gettext-0.18.2
 BuildDeps_ freetype-2.4.11
 BuildDeps_ xz-5.0.4
@@ -102,7 +104,7 @@ ${winesrcroot}/configure \
     --without-gsm \
     --without-cms \
     --without-x \
-    LIBS="-lxslt -lxml2 -lncurses -lcups" \
+    LDFLAGS="${LDFLAGS} -Wl,-rpath,/usr/lib" \
 &&
 make ${jn} depend &&
 make ${jn} &&

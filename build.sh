@@ -83,7 +83,7 @@ BuildDeps_ SDL-1.2.15 --without-x && {
 }
 BuildDeps_ SDL_sound-1.0.3 && {
     install -d ${prefix}/share/doc/SDL_sound
-    cp SDL_sound-1.0.3{CHANGELOG,COPYING,CREDITS,README,TODO} $_
+    cp SDL_sound-1.0.3/{CHANGELOG,COPYING,CREDITS,README,TODO} $_
 }
 BuildDeps_ unixODBC-2.3.1 && {
     install -d ${prefix}/share/doc/unixODBC &&

@@ -5,6 +5,7 @@ winesrcroot=/usr/local/src/wine
 bundle=/Applications/NXWine.app
 prefix=${bundle}/Contents/Resources
 
+test -x /usr/local/bin/ccache &&
 test -x ${uconv=/opt/local/bin/uconv} || exit
 
 test ! -e ${bundle} || rm -rf ${bundle}
@@ -15,8 +16,8 @@ rm ${bundle}/Contents/Resources/droplet.icns
 install -d ${prefix}/{bin,include,lib} || exit
 
 export PATH=${prefix}/bin:$(sysctl -n user.cs_path):/usr/local/git/bin
-export CC=$( xcrun -find i686-apple-darwin10-gcc-4.2.1)
-export CXX=$(xcrun -find i686-apple-darwin10-g++-4.2.1)
+export CC="/usr/local/bin/ccache $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
+export CXX="/usr/local/bin/ccache $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
 export CFLAGS="-pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8 -isysroot ${sdkroot=/Developer/SDKs/MacOSX10.6.sdk}"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-I${prefix}/include"
@@ -24,8 +25,7 @@ export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
 jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 
 cd $(mktemp -dt $$) &&
-#install -d $TMPDIR/buildNXWine
-#cd $_
+#install -d $TMPDIR/buildNXWine && cd $_ &&
 for x in \
     cabextract-1.4.tar.gz \
     flac-1.2.1.tar.gz \
@@ -81,7 +81,10 @@ BuildDeps_ SDL-1.2.15 --without-x && {
     install -d ${prefix}/share/doc/SDL
     cp SDL-1.2.15/{BUGS,COPYING,CREDITS,README,TODO} $_
 }
-BuildDeps_ SDL_sound-1.0.3
+BuildDeps_ SDL_sound-1.0.3 && {
+    install -d ${prefix}/share/doc/SDL_sound
+    cp SDL_sound-1.0.3{CHANGELOG,COPYING,CREDITS,README,TODO} $_
+}
 BuildDeps_ unixODBC-2.3.1 && {
     install -d ${prefix}/share/doc/unixODBC &&
     cp unixODBC-2.3.1/{AUTHORS,ChangeLog,COPYING,NEWS,README} $_

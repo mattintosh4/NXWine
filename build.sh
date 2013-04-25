@@ -24,31 +24,18 @@ export CPPFLAGS="-I${prefix}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
 jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 
-cd $(mktemp -dt $$) &&
-#install -d $TMPDIR/buildNXWine && cd $_ &&
-for x in \
-    cabextract-1.4.tar.gz \
-    flac-1.2.1.tar.gz \
-    freetype-2.4.11.tar.gz \
-    gettext-0.18.2.tar.gz \
-    jasper-1.900.1.zip \
-    jpegsrc.v8d.tar.gz \
-    libicns-0.8.1.tar.gz \
-    libpng-1.6.1.tar.gz \
-    libogg-1.3.0.tar.gz \
-    libvorbis-1.3.3.tar.gz \
-    pkg-config-0.28.tar.gz \
-    SDL-1.2.15.tar.gz \
-    SDL_sound-1.0.3.tar.gz \
-    tiff-4.0.3.tar.gz \
-    unixODBC-2.3.1.tar.gz \
-    xz-5.0.4.tar.bz2 \
-
-do
-    tar -xf ${srcroot}/source/${x} || exit
-done
+cd $(mktemp -dt $$)
 
 function BuildDeps_ {
+    case $1 in
+        *.tar.xz)
+            xzcat ${srcroot}/source/$1 | tar -x - || exit
+        ;;
+        *)
+            tar -xf ${srcroot}/source/$1 || exit
+        ;;
+    esac
+    shift &&
     pushd $1 &&
     shift &&
     ./configure \
@@ -61,35 +48,37 @@ function BuildDeps_ {
     make install || exit
     popd
 }
-BuildDeps_ pkg-config-0.28 \
+BuildDeps_ pkg-config-0.28{.tar.gz,} \
     --disable-debug \
     --disable-host-tool \
     --with-internal-glib \
     --with-pc-path=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
-BuildDeps_ gettext-0.18.2
-BuildDeps_ freetype-2.4.11
-BuildDeps_ xz-5.0.4
-BuildDeps_ libpng-1.6.1
-BuildDeps_ jpeg-8d
-BuildDeps_ tiff-4.0.3
-BuildDeps_ jasper-1.900.1 --disable-opengl --without-x
-BuildDeps_ libicns-0.8.1
-BuildDeps_ libogg-1.3.0
-BuildDeps_ libvorbis-1.3.3
-BuildDeps_ flac-1.2.1 --disable-asm-optimizations --disable-xmms-plugin
-BuildDeps_ SDL-1.2.15 --without-x && {
+BuildDeps_ gettext-0.18.2{.tar.gz,}
+BuildDeps_ xz-5.0.4{.tar.bz2,}
+BuildDeps_ libffi-3.0.13{.tar.gz,}
+BuildDeps_ glib-2.34.3{.tar.xz,}
+BuildDeps_ freetype-2.4.11{.tar.gz,}
+BuildDeps_ libpng-1.6.1{.tar.gz,}
+BuildDeps_ jpegsrc.v8d.tar.gz jpeg-8d
+BuildDeps_ tiff-4.0.3{.tar.gz,}
+BuildDeps_ jasper-1.900.1{.zip,} --disable-opengl --without-x
+BuildDeps_ libicns-0.8.1{.tar.gz,}
+BuildDeps_ libogg-1.3.0{.tar.gz,}
+BuildDeps_ libvorbis-1.3.3{.tar.gz,}
+BuildDeps_ flac-1.2.1{.tar.gz,} --disable-asm-optimizations --disable-xmms-plugin
+BuildDeps_ SDL-1.2.15{.tar.gz,} --without-x && {
     install -d ${prefix}/share/doc/SDL
     cp SDL-1.2.15/{BUGS,COPYING,CREDITS,README,TODO} $_
 }
-BuildDeps_ SDL_sound-1.0.3 && {
+BuildDeps_ SDL_sound-1.0.3{.tar.gz,} && {
     install -d ${prefix}/share/doc/SDL_sound
     cp SDL_sound-1.0.3/{CHANGELOG,COPYING,CREDITS,README,TODO} $_
 }
-BuildDeps_ unixODBC-2.3.1 && {
+BuildDeps_ unixODBC-2.3.1{.tar.gz,} && {
     install -d ${prefix}/share/doc/unixODBC &&
     cp unixODBC-2.3.1/{AUTHORS,ChangeLog,COPYING,NEWS,README} $_
 }
-BuildDeps_ cabextract-1.4 && {
+BuildDeps_ cabextract-1.4{.tar.gz,} && {
     install -d ${prefix}/share/doc/cabextract &&
     cp cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $_
 }

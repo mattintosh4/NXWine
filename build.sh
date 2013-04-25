@@ -5,8 +5,9 @@ winesrcroot=/usr/local/src/wine
 bundle=/Applications/NXWine.app
 prefix=${bundle}/Contents/Resources
 
-test -x /usr/local/bin/ccache &&
-test -x ${uconv=/opt/local/bin/uconv} || exit
+test -x /usr/local/bin/ccache && ccache=$_ || exit
+test -x /usr/local/bin/make && make=$_ || exit
+test -x /usr/local/bin/uconv && uconv=$_ || exit
 
 test ! -e ${bundle} || rm -rf ${bundle}
 sed "s|@DATE@|$(date +%F)|g" ${srcroot}/NXWine.applescript | osacompile -o ${bundle} || exit
@@ -16,8 +17,8 @@ rm ${bundle}/Contents/Resources/droplet.icns
 install -d ${prefix}/{bin,include,lib} || exit
 
 export PATH=${prefix}/bin:$(sysctl -n user.cs_path):/usr/local/git/bin
-export CC="/usr/local/bin/ccache $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
-export CXX="/usr/local/bin/ccache $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
+export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
+export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
 export CFLAGS="-pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8 -isysroot ${sdkroot=/Developer/SDKs/MacOSX10.6.sdk}"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-I${prefix}/include"
@@ -44,8 +45,8 @@ function BuildDeps_ {
         --disable-dependency-tracking \
         $@ \
     &&
-    make ${jn} &&
-    make install || exit
+    ${make} ${jn} &&
+    ${make} install || exit
     popd
 }
 BuildDeps_ pkg-config-0.28{.tar.gz,} \
@@ -107,9 +108,9 @@ ${winesrcroot}/configure \
     --without-cms \
     --without-x \
 &&
-make ${jn} depend &&
-make ${jn} &&
-make install || exit
+${make} ${jn} depend &&
+${make} ${jn} &&
+${make} install || exit
 
 install_name_tool -add_rpath /usr/lib ${prefix}/bin/wine &&
 install_name_tool -add_rpath /usr/lib ${prefix}/bin/wineserver &&

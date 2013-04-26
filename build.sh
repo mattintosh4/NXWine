@@ -63,14 +63,6 @@ BuildDeps_ xz-5.0.4{.tar.bz2,}
 BuildDeps_ libffi-3.0.13{.tar.gz,}
 BuildDeps_ glib-2.34.3{.tar.xz,}
 BuildDeps_ freetype-2.4.11{.tar.gz,}
-BuildDeps_ valgrind-3.8.1{.tar.bz2,} \
-    --build=i386-apple-darwin10 \
-    --enable-only32bit \
-    CC=$( xcrun -find gcc-4.2) \
-    CXX=$(xcrun -find g++-4.2) \
-    CFLAGS="-isysroot ${sdkroot}" \
-    CXXFLAGS="-isysroot ${sdkroot}"
-# orc required valgrind; to build with gcc failed
 BuildDeps_ orc-0.4.17{.tar.gz,} \
     CC="${ccache} ${clang}" \
     CXX="${ccache} ${clangxx}" \

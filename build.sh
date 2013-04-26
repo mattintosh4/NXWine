@@ -77,23 +77,28 @@ BuildDeps_ pkg-config-0.28{.tar.gz,} \
 BuildDeps_ gettext-0.18.2{.tar.gz,}
 BuildDeps_ xz-5.0.4{.tar.bz2,}
 BuildDeps_ libffi-3.0.13{.tar.gz,}
+} # end stage 1
 
-# glib
 : && {
     ditto ${srcroot}/source/glib glib &&
     (
         cd glib &&
-        ./autogen.sh &&
-        make clean &&
-        ./configure --build=i386-apple-darwin10 \
+        patch -Np1 < ${srcroot}/patch/glib_autogen.patch &&
+        (bash --login ./autogen.sh --disable-maintainer-mode --disable-gtk-doc) &&
+        ${make} clean &&
+        ./configure --prefix=${prefix} \
+                    --build=i386-apple-darwin10 \
                     --enable-shared \
         &&
         ${make} ${jn} &&
-        ${make} install || exit 1
+        ${make} install
     ) || exit
 } # end glib
 
+# stage 2
+: && {
 BuildDeps_ freetype-2.4.11{.tar.gz,}
+# valgrind add '-arch' flag
 BuildDeps_ valgrind-3.8.1{.tar.bz2,} \
     --enable-only32bit \
     CC=$( xcrun -find gcc-4.2) \
@@ -133,7 +138,7 @@ BuildDeps_ libtheora-1.1.1{.tar.bz2,} \
     --disable-examples \
     --disable-asm
 
-} # end stage 1
+} # end stage 2
 
 
 # GStreamer

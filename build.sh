@@ -1,9 +1,13 @@
 #!/bin/bash -x
 
+uuid=9C727687-28A1-47CE-9C4A-97128FADE79A
 srcroot="$(cd "$(dirname "$0")"; pwd)"
 winesrcroot=/usr/local/src/wine
 bundle=/Applications/NXWine.app
 prefix=${bundle}/Contents/Resources
+
+git_dir=/usr/local/git/bin
+python_dir=/Library/Frameworks/Python.framework/Versions/Current/bin
 
 test -x /usr/local/bin/ccache && ccache=$_ || exit
 test -x /usr/local/bin/clang && { clang=$_; clangxx="${clang} -x c++ -stdlib=libstdc++"; } || exit
@@ -16,9 +20,8 @@ function BuildBundle_ {
     rm ${bundle}/Contents/Resources/droplet.icns
     install -d ${prefix}/{bin,include,lib} || exit
 }
-BuildBundle_
 
-export PATH=${prefix}/bin:$(sysctl -n user.cs_path):/usr/local/git/bin
+export PATH=${prefix}/bin:${git_dir}:${python_dir}:$(sysctl -n user.cs_path)
 export ARCHFLAGS="-arch i386"
 export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
@@ -28,7 +31,16 @@ export CPPFLAGS="-I${prefix}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
 jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 
-cd $(mktemp -dt $$)
+case 1 in
+    0)
+        BuildBundle_
+        cd $(mktemp -dt $$)
+    ;;
+    1)  # test mode
+        test -e ${bundle} || BuildBundle_
+        install -d $TMPDIR/${uuid} && cd $_
+    ;;
+esac
 
 function BuildDeps_ {
     (( $# > 1 )) || exit
@@ -44,6 +56,7 @@ function BuildDeps_ {
     pushd $1 &&
     shift &&
     ./configure \
+        --build=i386-apple-darwin10 \
         --prefix=${prefix} \
         --enable-shared \
         --disable-dependency-tracking \
@@ -53,6 +66,9 @@ function BuildDeps_ {
     ${make} install || exit
     popd
 }
+
+# stage 1
+: && {
 BuildDeps_ pkg-config-0.28{.tar.gz,} \
     --disable-debug \
     --disable-host-tool \
@@ -61,8 +77,30 @@ BuildDeps_ pkg-config-0.28{.tar.gz,} \
 BuildDeps_ gettext-0.18.2{.tar.gz,}
 BuildDeps_ xz-5.0.4{.tar.bz2,}
 BuildDeps_ libffi-3.0.13{.tar.gz,}
-BuildDeps_ glib-2.34.3{.tar.xz,}
+
+# glib
+: && {
+    ditto ${srcroot}/source/glib glib &&
+    (
+        cd glib &&
+        ./autogen.sh &&
+        make clean &&
+        ./configure --build=i386-apple-darwin10 \
+                    --enable-shared \
+        &&
+        ${make} ${jn} &&
+        ${make} install || exit 1
+    ) || exit
+} # end glib
+
 BuildDeps_ freetype-2.4.11{.tar.gz,}
+BuildDeps_ valgrind-3.8.1{.tar.bz2,} \
+    --enable-only32bit \
+    CC=$( xcrun -find gcc-4.2) \
+    CXX=$(xcrun -find g++-4.2) \
+    CFLAGS="-isysroot ${sdkroot}" \
+    CXXFLAGS="-isysroot ${sdkroot}"
+# orc required valgrind; to build with gcc failed
 BuildDeps_ orc-0.4.17{.tar.gz,} \
     CC="${ccache} ${clang}" \
     CXX="${ccache} ${clangxx}" \
@@ -94,35 +132,53 @@ BuildDeps_ libtheora-1.1.1{.tar.bz2,} \
     --disable-vorbistest \
     --disable-examples \
     --disable-asm
-BuildDeps_ gstreamer-0.11.99{.tar.xz,} \
-    --disable-tests \
-    --disable-benchmarks \
-    --disable-examples \
-    CC="${ccache} ${clang}" \
-    CXX="${ccache} ${clangxx}" \
-    CFLAGS="-m32 -arch i386 ${CFLAGS}" \
-    CXXFLAGS="-m32 -arch i386 ${CFLAGS}" && {
-        install -d ${prefix}/share/doc/gstreamer
-        cp gstramer-0.11.99/{AUTHORS,ChangeLog,COPYING,NEWS,README,RELEASE,TODO} $_
-}
-BuildDeps_ gst-plugins-base-0.11.99{.tar.xz,} \
-    --enable-experimental \
-    --disable-examples \
-    --disable-x \
-    --disable-xvideo \
-    --disable-xshm \
-    --disable-alsa \
-    --disable-cdparanoia \
-    --disable-ivorbis \
-    --disable-libvisual \
-    --disable-pango \
-    CC="${ccache} ${clang}" \
-    CXX="${ccache} ${clangxx}" \
-    CFLAGS="-m32 -arch i386 ${CFLAGS}" \
-    CXXFLAGS="-m32 -arch i386 ${CFLAGS}" && {
-        install -d ${prefix}/share/doc/gst-plugins-base
-        cp gst-plugins-base-0.11.99/{AUTHORS,ChangeLog,COPYING,COPYING.LIB,NEWS,README,RELEASE} $_
-}
+
+} # end stage 1
+
+
+# GStreamer
+: && {
+    for x in \
+        gstreamer \
+        gst-plugins-base \
+        gst-plugins-good \
+        
+    do
+        case ${x} in (-*) continue;; esac
+        ditto ${srcroot}/source/${x} ${x} &&
+        (
+            cd ${x} &&
+            ./autogen.sh --disable-maintainer-mode --disable-gtk-doc &&
+            ${make} clean &&
+            ./configure --prefix=${prefix} \
+                        --disable-alsa \
+                        --disable-audioconvert \
+                        --disable-examples \
+                        --disable-ffmpegcolorspace \
+                        --disable-gst_v4l2 \
+                        --disable-gtk-doc \
+                        --disable-gtk-doc-html \
+                        --disable-osx_audio \
+                        --disable-osx_video \
+                        --disable-videorate \
+                        --disable-videoscale \
+                        --disable-volume \
+                        --disable-x \
+                        --disable-xshm \
+                        --disable-xvideo \
+                        --enable-experimental \
+                        --enable-shared \
+                        --without-x \
+            &&
+            ${make} ${jn} &&
+            ${make} install || exit 1
+            install -d ${prefix}/share/doc/${x} &&
+            cp $(find -E . -depth 1 -regex '.*(AUTHORS|ChangeLog|COPYING|COPYING.LIB|NEWS|README|RELEASE|TODO)') $_
+        ) || exit
+    done
+} # end GStreamer
+
+
 BuildDeps_ cabextract-1.4{.tar.gz,} && {
     install -d ${prefix}/share/doc/cabextract &&
     cp cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $_
@@ -151,6 +207,7 @@ ${winesrcroot}/configure \
     --without-gsm \
     --without-cms \
     --without-x \
+    CPPFLAGS="${CPPFLAGS} -I${prefix}/include/gstreamer-1.0" \
 &&
 ${make} ${jn} depend &&
 ${make} ${jn} &&

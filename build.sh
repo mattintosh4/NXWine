@@ -6,17 +6,20 @@ bundle=/Applications/NXWine.app
 prefix=${bundle}/Contents/Resources
 
 test -x /usr/local/bin/ccache && ccache=$_ || exit
+test -x /usr/local/bin/clang && { clang=$_; clangxx="${clang} -x c++ -stdlib=libstdc++"; } || exit
 test -x /usr/local/bin/make && make=$_ || exit
 test -x /usr/local/bin/uconv && uconv=$_ || exit
 
-test ! -e ${bundle} || rm -rf ${bundle}
-sed "s|@DATE@|$(date +%F)|g" ${srcroot}/NXWine.applescript | osacompile -o ${bundle} || exit
-rm ${bundle}/Contents/Resources/droplet.icns
-
-
-install -d ${prefix}/{bin,include,lib} || exit
+function BuildBundle_ {
+    test ! -e ${bundle} || rm -rf ${bundle}
+    sed "s|@DATE@|$(date +%F)|g" ${srcroot}/NXWine.applescript | osacompile -o ${bundle} || exit
+    rm ${bundle}/Contents/Resources/droplet.icns
+    install -d ${prefix}/{bin,include,lib} || exit
+}
+BuildBundle_
 
 export PATH=${prefix}/bin:$(sysctl -n user.cs_path):/usr/local/git/bin
+export ARCHFLAGS="-arch i386"
 export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
 export CFLAGS="-pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8 -isysroot ${sdkroot=/Developer/SDKs/MacOSX10.6.sdk}"
@@ -28,6 +31,7 @@ jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 cd $(mktemp -dt $$)
 
 function BuildDeps_ {
+    (( $# > 1 )) || exit
     case $1 in
         *.tar.xz)
             xzcat ${srcroot}/source/$1 | tar -x - || exit
@@ -43,7 +47,7 @@ function BuildDeps_ {
         --prefix=${prefix} \
         --enable-shared \
         --disable-dependency-tracking \
-        $@ \
+        "$@" \
     &&
     ${make} ${jn} &&
     ${make} install || exit
@@ -59,6 +63,16 @@ BuildDeps_ xz-5.0.4{.tar.bz2,}
 BuildDeps_ libffi-3.0.13{.tar.gz,}
 BuildDeps_ glib-2.34.3{.tar.xz,}
 BuildDeps_ freetype-2.4.11{.tar.gz,}
+BuildDeps_ valgrind-3.8.1{.tar.bz2,} \
+    --enable-only32bit \
+    CC=$(xcrun -find gcc-4.2) \
+    CXX=$(xcrun -find g++-4.2)
+# orc required valgrind; to build with gcc failed
+BuildDeps_ orc-0.4.17{.tar.gz,} \
+    CC="${ccache} ${clang}" \
+    CXX="${ccache} ${clangxx}" \
+    CFLAGS="-m32 -arch i386 ${CFLAGS}" \
+    CXXFLAGS="-m32 -arch i386 ${CFLAGS}"
 BuildDeps_ libpng-1.6.1{.tar.gz,}
 BuildDeps_ jpegsrc.v8d.tar.gz jpeg-8d
 BuildDeps_ tiff-4.0.3{.tar.gz,}
@@ -79,6 +93,32 @@ BuildDeps_ unixODBC-2.3.1{.tar.gz,} && {
     install -d ${prefix}/share/doc/unixODBC &&
     cp unixODBC-2.3.1/{AUTHORS,ChangeLog,COPYING,NEWS,README} $_
 }
+# libtheora required SDL
+BuildDeps_ libtheora-1.1.1{.tar.bz2,} \
+    --disable-oggtest \
+    --disable-vorbistest \
+    --disable-examples \
+    --disable-asm
+BuildDeps_ gstreamer-0.11.99{.tar.xz,} \
+    CC="${ccache} ${clang}" \
+    CXX="${ccache} ${clangxx}" \
+    CFLAGS="-m32 -arch i386 ${CFLAGS}" \
+    CXXFLAGS="-m32 -arch i386 ${CFLAGS}"
+BuildDeps_ gst-plugins-base-0.11.99{.tar.xz,} \
+    --enable-experimental \
+    --disable-examples \
+    --disable-x \
+    --disable-xvideo \
+    --disable-xshm \
+    --disable-alsa \
+    --disable-cdparanoia \
+    --disable-ivorbis \
+    --disable-libvisual \
+    --disable-pango \
+    CC="${ccache} ${clang}" \
+    CXX="${ccache} ${clangxx}" \
+    CFLAGS="-m32 -arch i386 ${CFLAGS}" \
+    CXXFLAGS="-m32 -arch i386 ${CFLAGS}"
 BuildDeps_ cabextract-1.4{.tar.gz,} && {
     install -d ${prefix}/share/doc/cabextract &&
     cp cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $_

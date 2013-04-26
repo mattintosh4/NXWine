@@ -64,9 +64,12 @@ BuildDeps_ libffi-3.0.13{.tar.gz,}
 BuildDeps_ glib-2.34.3{.tar.xz,}
 BuildDeps_ freetype-2.4.11{.tar.gz,}
 BuildDeps_ valgrind-3.8.1{.tar.bz2,} \
+    --build=i386-apple-darwin10 \
     --enable-only32bit \
-    CC=$(xcrun -find gcc-4.2) \
-    CXX=$(xcrun -find g++-4.2)
+    CC=$( xcrun -find gcc-4.2) \
+    CXX=$(xcrun -find g++-4.2) \
+    CFLAGS="-isysroot ${sdkroot}" \
+    CXXFLAGS="-isysroot ${sdkroot}"
 # orc required valgrind; to build with gcc failed
 BuildDeps_ orc-0.4.17{.tar.gz,} \
     CC="${ccache} ${clang}" \
@@ -100,10 +103,16 @@ BuildDeps_ libtheora-1.1.1{.tar.bz2,} \
     --disable-examples \
     --disable-asm
 BuildDeps_ gstreamer-0.11.99{.tar.xz,} \
+    --disable-tests \
+    --disable-benchmarks \
+    --disable-examples \
     CC="${ccache} ${clang}" \
     CXX="${ccache} ${clangxx}" \
     CFLAGS="-m32 -arch i386 ${CFLAGS}" \
-    CXXFLAGS="-m32 -arch i386 ${CFLAGS}"
+    CXXFLAGS="-m32 -arch i386 ${CFLAGS}" && {
+        install -d ${prefix}/share/doc/gstreamer
+        cp gstramer-0.11.99/{AUTHORS,ChangeLog,COPYING,NEWS,README,RELEASE,TODO} $_
+}
 BuildDeps_ gst-plugins-base-0.11.99{.tar.xz,} \
     --enable-experimental \
     --disable-examples \
@@ -118,7 +127,10 @@ BuildDeps_ gst-plugins-base-0.11.99{.tar.xz,} \
     CC="${ccache} ${clang}" \
     CXX="${ccache} ${clangxx}" \
     CFLAGS="-m32 -arch i386 ${CFLAGS}" \
-    CXXFLAGS="-m32 -arch i386 ${CFLAGS}"
+    CXXFLAGS="-m32 -arch i386 ${CFLAGS}" && {
+        install -d ${prefix}/share/doc/gst-plugins-base
+        cp gst-plugins-base-0.11.99/{AUTHORS,ChangeLog,COPYING,COPYING.LIB,NEWS,README,RELEASE} $_
+}
 BuildDeps_ cabextract-1.4{.tar.gz,} && {
     install -d ${prefix}/share/doc/cabextract &&
     cp cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $_
@@ -193,6 +205,7 @@ dmg_srcdir=$(mktemp -dt $$)
 mv ${bundle} ${dmg_srcdir}
 ln -s /Applications ${dmg_srcdir}
 hdiutil create -srcdir ${dmg_srcdir} -volname NXWine ${dmg} &&
+rm -rf ${dmg_srcdir}
 
 :
 afplay /System/Library/Sounds/Hero.aiff

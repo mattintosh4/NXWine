@@ -186,23 +186,24 @@ __EOF__
 }
 
 
-install -d wine &&
-cd wine &&
-${srcroot}/source/wine/configure \
-    --prefix=${prefix} \
-    --without-sane \
-    --without-v4l \
-    --without-gphoto \
-    --without-oss \
-    --without-capi \
-    --without-gsm \
-    --without-cms \
-    --without-x \
-    CPPFLAGS="${CPPFLAGS} -I${prefix}/include/gstreamer-1.0" \
-&&
-${make} ${jn} depend &&
-${make} ${jn} &&
-${make} install || exit
+install -d wine && (
+    cd wine &&
+    ${srcroot}/source/wine/configure \
+        --prefix=${prefix} \
+        --without-sane \
+        --without-v4l \
+        --without-gphoto \
+        --without-oss \
+        --without-capi \
+        --without-gsm \
+        --without-cms \
+        --without-x \
+    &&
+    ${make} ${jn} depend &&
+    ${make} ${jn} &&
+    ${make} install
+) || exit
+
 
 install_name_tool -add_rpath /usr/lib ${prefix}/bin/wine &&
 install_name_tool -add_rpath /usr/lib ${prefix}/bin/wineserver &&

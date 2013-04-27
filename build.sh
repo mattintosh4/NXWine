@@ -38,7 +38,10 @@ case 1 in
     ;;
     1)  # test mode
         test -e ${bundle} || BuildBundle_
-        install -d $TMPDIR/${uuid} && cd $_
+        workdir=${TMPDIR}${uuid}
+        install -d ${workdir} &&
+        cd ${workdir} &&
+        : trap "rm -rf ${workdir}" EXIT 0
     ;;
 esac
 

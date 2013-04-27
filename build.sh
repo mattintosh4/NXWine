@@ -8,20 +8,22 @@ readonly workdir=${TMPDIR}/${uuid}
 readonly bundle=/Applications/NXWine.app
 readonly prefix=${bundle}/Contents/Resources
 
-for x in \
-    ccache \
-    clang \
-    make \
-    nasm \
-    uconv \
-    
-do
-    f=/usr/local/bin/${x}
-    test -x ${f} || exit
-    eval ${x}=${f}
-    case ${x} in clang) clangxx=${clang}++;; esac
-done
-unset f x
+function ToolCheck_ {
+    while test -n "$1"
+    do
+        f=/usr/local/bin/$1
+        test -x ${f} || exit
+        eval $1=${f}
+        shift
+    done
+}
+ToolCheck_  ccache \
+            clang \
+            make \
+            nasm \
+            uconv
+
+clangxx=${clang}++
 
 readonly git_dir=/usr/local/git/bin
 readonly python_dir=/Library/Frameworks/Python.framework/Versions/2.7/bin
@@ -36,8 +38,8 @@ export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-I${prefix}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
 
-test -x /usr/local/bin/pkg-config || exit
-export PKG_CONFIG=$_
+export PKG_CONFIG=/usr/local/bin/pkg-config
+test -x ${PKG_CONFIG} || exit
 export PKG_CONFIG_PATH=
 export PKG_CONFIG_LIBDIR=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
 export NASM=${nasm}

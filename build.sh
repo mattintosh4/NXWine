@@ -33,8 +33,9 @@ export CFLAGS="-pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8 -
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-I${prefix}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
-jn="-j $(($(sysctl -n hw.ncpu) + 1))"
+
 configure_args="--build=i386-apple-darwin10 --prefix=${prefix} --enable-shared"
+jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 
 case 0 in
     0)

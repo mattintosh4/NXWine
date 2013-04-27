@@ -1,29 +1,30 @@
 #!/bin/bash -x
 
-uuid=9C727687-28A1-47CE-9C4A-97128FADE79A
-srcroot="$(cd "$(dirname "$0")"; pwd)"
-bundle=/Applications/NXWine.app
-prefix=${bundle}/Contents/Resources
+readonly srcroot="$(cd "$(dirname "$0")"; pwd)"
 
-git_dir=/usr/local/git/bin
-python_dir=/Library/Frameworks/Python.framework/Versions/2.7/bin
+readonly uuid=9C727687-28A1-47CE-9C4A-97128FADE79A
+readonly workdir=${TMPDIR}/${uuid}
 
-test -x /usr/local/bin/ccache && ccache=$_ || exit
-test -x /usr/local/bin/clang && { clang=$_; clangxx=${clang}++; } || exit
-test -x /usr/local/bin/make && make=$_ || exit
-test -x /usr/local/bin/uconv && uconv=$_ || exit
-test -x /usr/local/bin/pkg-config && {
-    export PKG_CONFIG=$_
-    export PKG_CONFIG_PATH=
-    export PKG_CONFIG_LIBDIR=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
-} || exit
+readonly bundle=/Applications/NXWine.app
+readonly prefix=${bundle}/Contents/Resources
 
-function BuildBundle_ {
-    test ! -e ${bundle} || rm -rf ${bundle}
-    sed "s|@DATE@|$(date +%F)|g" ${srcroot}/NXWine.applescript | osacompile -o ${bundle} || exit
-    rm ${bundle}/Contents/Resources/droplet.icns
-    install -d ${prefix}/{bin,include,lib} || exit
-}
+for x in \
+    ccache \
+    clang \
+    make \
+    pkg-config \
+    uconv \
+    
+do
+    test -x /usr/local/bin/${x} || exit
+    eval ${x}=$_
+    case ${x} in clang) clangxx=${clang}++;; esac
+done
+unset x
+
+readonly git_dir=/usr/local/git/bin
+readonly python_dir=/Library/Frameworks/Python.framework/Versions/2.7/bin
+test -x ${git_dir}/git -a -x ${python_dir}/python2.7 || exit
 
 export PATH=${prefix}/bin:${git_dir}:${python_dir}:$(sysctl -n user.cs_path)
 export ARCHFLAGS="-arch i386"
@@ -33,25 +34,35 @@ export CFLAGS="-pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8 -
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-I${prefix}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
+export PKG_CONFIG=${pkg-config}
+export PKG_CONFIG_PATH=
+export PKG_CONFIG_LIBDIR=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
 
 configure_args="--build=i386-apple-darwin10 --prefix=${prefix} --enable-shared"
 jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 
-case 0 in
-    0)
+
+
+function BuildBundle_ {
+    test ! -e ${bundle} || rm -rf ${bundle}
+    sed "s|@DATE@|$(date +%F)|g" ${srcroot}/NXWine.applescript | osacompile -o ${bundle} || exit
+    rm ${bundle}/Contents/Resources/droplet.icns
+    install -d ${prefix}/{bin,include,lib} || exit
+}
+
+case 1 in
+    0)  # release build mode
         BuildBundle_
-        readonly workdir=$(mktemp -dt $$)
+        rm -rf ${workdir}
     ;;
-    1)  # test mode
+    1)  # test build mode
         test -e ${bundle} || BuildBundle_
-        readonly workdir=${TMPDIR}${uuid}
-        install -d ${workdir} &&
-        : trap "rm -rf ${workdir}" EXIT 0
     ;;
 esac
 
-
+install -d ${workdir}
 cd ${workdir} || exit
+
 
 
 function BuildDeps_ {
@@ -111,7 +122,7 @@ function DocCopy_ {
     } # end glib
 } # end stage 1
 
-# stage 2
+# begin stage 2
 : && {
     ditto ${srcroot}/source/freetype2 freetype2 && (
         cd freetype2 &&
@@ -184,7 +195,7 @@ export PATH="$(cd "$(dirname "$0")"; pwd)":/usr/bin:/bin:/usr/sbin:/sbin
 which wine || { echo "wine not found."; exit; }
 exec winetricks.bin "$@"
 __EOF__
-}
+} # end stage 4
 
 
 install -d wine && (

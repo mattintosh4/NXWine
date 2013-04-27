@@ -16,11 +16,12 @@ for x in \
     uconv \
     
 do
-    test -x /usr/local/bin/${x} || exit
-    eval ${x}=$_
+    f=/usr/local/bin/${x}
+    test -x ${f} || exit
+    eval ${x}=${f}
     case ${x} in clang) clangxx=${clang}++;; esac
 done
-unset x
+unset f x
 
 readonly git_dir=/usr/local/git/bin
 readonly python_dir=/Library/Frameworks/Python.framework/Versions/2.7/bin
@@ -35,7 +36,8 @@ export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-I${prefix}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
 
-test -x /usr/local/bin/pkg-config && export PKG_CONFIG=$_
+test -x /usr/local/bin/pkg-config || exit
+export PKG_CONFIG=$_
 export PKG_CONFIG_PATH=
 export PKG_CONFIG_LIBDIR=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
 export NASM=${nasm}
@@ -108,21 +110,21 @@ function DocCopy_ {
         ${make} install &&
         DocCopy_ libffi
     )
-    
-    # begin glib
-    : && {
-        ditto ${srcroot}/source/glib glib && (
-            cd glib &&
-            git checkout -f glib-2-36 &&
-            (bash --login ./autogen.sh --disable-maintainer-mode --disable-gtk-doc) &&
-            ${make} clean &&
-            ./configure ${configure_args} &&
-            ${make} ${jn} &&
-            ${make} install &&
-            DocCopy_ glib
-        ) || exit
-    } # end glib
 } # end stage 1
+
+# begin glib
+: && {
+    ditto ${srcroot}/source/glib glib && (
+        cd glib &&
+        git checkout -f glib-2-36 &&
+        (bash --login ./autogen.sh --disable-maintainer-mode --disable-gtk-doc) &&
+        ${make} clean &&
+        ./configure ${configure_args} &&
+        ${make} ${jn} &&
+        ${make} install &&
+        DocCopy_ glib
+    ) || exit
+} # end glib
 
 # begin stage 2
 : && {
@@ -152,7 +154,7 @@ function DocCopy_ {
         CXXFLAGS="-m32 -arch i386 ${CFLAGS}"
     
     BuildDeps_ unixODBC-2.3.1{.tar.gz,} && DocCopy_ unixODBC-2.3.1
-    
+
     ditto ${srcroot}/source/libpng libpng && (
         cd libpng &&
         git checkout -f libpng16 &&
@@ -163,7 +165,7 @@ function DocCopy_ {
         DocCopy_ libpng
     ) || exit
     
-    BuildDeps_ libjpeg-turbo-1.2.1{,.tar.gz} --with-jpeg8
+    BuildDeps_ libjpeg-turbo-1.2.1{.tar.gz,} --with-jpeg8
     BuildDeps_ tiff-4.0.3{.tar.gz,}
     BuildDeps_ jasper-1.900.1{.zip,} --disable-opengl --without-x
     BuildDeps_ libicns-0.8.1{.tar.gz,}

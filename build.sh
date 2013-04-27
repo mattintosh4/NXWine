@@ -167,7 +167,10 @@ function DocCopy_ {
         DocCopy_ libpng
     ) || exit
     
-    BuildDeps_ libjpeg-turbo-1.2.1{.tar.gz,} --with-jpeg8
+    BuildDeps_ libjpeg-turbo-1.2.1{.tar.gz,} --with-jpeg8 && {
+        install -d ${prefix}/share/doc/libjpeg-turbo-1.2.1
+        mv ${prefix}/share/doc/{example.c,libjpeg.txt,README,README-turbo.txt,structure.txt,usage.txt,wizard.txt} $_
+    }
     BuildDeps_ tiff-4.0.3{.tar.gz,}
     BuildDeps_ jasper-1.900.1{.zip,} --disable-opengl --without-x
     BuildDeps_ libicns-0.8.1{.tar.gz,}

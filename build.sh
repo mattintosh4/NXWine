@@ -99,7 +99,7 @@ function DocCopy_ {
     : && {
         ditto ${srcroot}/source/glib glib && (
             cd glib &&
-            git checkout -f glib-2-36
+            git checkout -f glib-2-36 &&
             (bash --login ./autogen.sh --disable-maintainer-mode --disable-gtk-doc) &&
             ${make} clean &&
             ./configure ${configure_args} &&
@@ -114,7 +114,7 @@ function DocCopy_ {
 : && {
     ditto ${srcroot}/source/freetype2 freetype2 && (
         cd freetype2 &&
-        git checkout -f .
+        git checkout -f . &&
         (bash --login ./autogen.sh) &&
         ./configure ${configure_args} &&
         ${make} ${jn} &&

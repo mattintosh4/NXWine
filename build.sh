@@ -13,7 +13,6 @@ for x in \
     clang \
     make \
     nasm \
-    pkg-config \
     uconv \
     
 do
@@ -35,7 +34,8 @@ export CFLAGS="-pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8 -
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-I${prefix}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
-export PKG_CONFIG=${pkg-config}
+
+test -x /usr/local/bin/pkg-config && export PKG_CONFIG=$_
 export PKG_CONFIG_PATH=
 export PKG_CONFIG_LIBDIR=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
 export NASM=${nasm}

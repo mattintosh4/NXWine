@@ -6,7 +6,7 @@ bundle=/Applications/NXWine.app
 prefix=${bundle}/Contents/Resources
 
 git_dir=/usr/local/git/bin
-python_dir=/Library/Frameworks/Python.framework/Versions/Current/bin
+python_dir=/Library/Frameworks/Python.framework/Versions/2.7/bin
 
 test -x /usr/local/bin/ccache && ccache=$_ || exit
 test -x /usr/local/bin/clang && { clang=$_; clangxx="${clang} -x c++ -stdlib=libstdc++"; } || exit

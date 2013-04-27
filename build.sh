@@ -201,15 +201,14 @@ install -d wine && (
     &&
     ${make} ${jn} depend &&
     ${make} ${jn} &&
-    ${make} install
+    ${make} install &&
 ) || exit
 
+DocCopy_ wine
 
 install_name_tool -add_rpath /usr/lib ${prefix}/bin/wine &&
 install_name_tool -add_rpath /usr/lib ${prefix}/bin/wineserver &&
 install_name_tool -add_rpath /usr/lib ${prefix}/lib/libwine.1.0.dylib || exit
-
-DocCopy_ wine
 
 infsrc=${prefix}/share/wine/wine.inf
 inftmp=$(uuidgen)

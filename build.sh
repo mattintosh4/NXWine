@@ -201,7 +201,7 @@ install -d wine && (
     &&
     ${make} ${jn} depend &&
     ${make} ${jn} &&
-    ${make} install &&
+    ${make} install
 ) || exit
 
 DocCopy_ wine

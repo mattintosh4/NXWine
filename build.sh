@@ -12,6 +12,7 @@ for x in \
     ccache \
     clang \
     make \
+    nasm \
     pkg-config \
     uconv \
     
@@ -37,6 +38,7 @@ export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
 export PKG_CONFIG=${pkg-config}
 export PKG_CONFIG_PATH=
 export PKG_CONFIG_LIBDIR=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
+export NASM=${nasm}
 
 configure_args="--build=i386-apple-darwin10 --prefix=${prefix} --enable-shared"
 jn="-j $(($(sysctl -n hw.ncpu) + 1))"
@@ -161,7 +163,7 @@ function DocCopy_ {
         DocCopy_ libpng
     ) || exit
     
-    BuildDeps_ jpegsrc.v8d.tar.gz jpeg-8d
+    BuildDeps_ libjpeg-turbo-1.2.1{,.tar.gz} --with-jpeg8
     BuildDeps_ tiff-4.0.3{.tar.gz,}
     BuildDeps_ jasper-1.900.1{.zip,} --disable-opengl --without-x
     BuildDeps_ libicns-0.8.1{.tar.gz,}

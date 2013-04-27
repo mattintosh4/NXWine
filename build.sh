@@ -205,7 +205,8 @@ install -d wine && (
     ${make} install
 ) || exit
 
-DocCopy_ wine
+install -d ${prefix}/share/doc/wine &&
+cp ${srcroot}/source/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $_ || exit
 
 install_name_tool -add_rpath /usr/lib ${prefix}/bin/wine &&
 install_name_tool -add_rpath /usr/lib ${prefix}/bin/wineserver &&

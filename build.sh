@@ -11,19 +11,18 @@ readonly prefix=${bundle}/Contents/Resources
 function ToolCheck_ {
     while test -n "$1"
     do
-        f=/usr/local/bin/$1
+        local f=/usr/local/bin/$1
         test -x ${f} || exit
         eval $1=${f}
         shift
     done
+    clangxx=${clang}++
 }
 ToolCheck_  ccache \
             clang \
             make \
             nasm \
             uconv
-
-clangxx=${clang}++
 
 readonly git_dir=/usr/local/git/bin
 readonly python_dir=/Library/Frameworks/Python.framework/Versions/2.7/bin

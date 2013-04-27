@@ -2,7 +2,6 @@
 
 uuid=9C727687-28A1-47CE-9C4A-97128FADE79A
 srcroot="$(cd "$(dirname "$0")"; pwd)"
-winesrcroot=/usr/local/src/wine
 bundle=/Applications/NXWine.app
 prefix=${bundle}/Contents/Resources
 
@@ -13,6 +12,11 @@ test -x /usr/local/bin/ccache && ccache=$_ || exit
 test -x /usr/local/bin/clang && { clang=$_; clangxx="${clang} -x c++ -stdlib=libstdc++"; } || exit
 test -x /usr/local/bin/make && make=$_ || exit
 test -x /usr/local/bin/uconv && uconv=$_ || exit
+test -x /usr/local/bin/pkg-config && {
+    export PKG_CONFIG=$_
+    export PKG_CONFIG_PATH=
+    export PKG_CONFIG_LIBDIR=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
+} || exit
 
 function BuildBundle_ {
     test ! -e ${bundle} || rm -rf ${bundle}
@@ -30,20 +34,24 @@ export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-I${prefix}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
 jn="-j $(($(sysctl -n hw.ncpu) + 1))"
+configure_args="--build=i386-apple-darwin10 --prefix=${prefix} --enable-shared"
 
-case 1 in
+case 0 in
     0)
         BuildBundle_
-        cd $(mktemp -dt $$)
+        readonly workdir=$(mktemp -dt $$)
     ;;
     1)  # test mode
         test -e ${bundle} || BuildBundle_
-        workdir=${TMPDIR}${uuid}
+        readonly workdir=${TMPDIR}${uuid}
         install -d ${workdir} &&
-        cd ${workdir} &&
         : trap "rm -rf ${workdir}" EXIT 0
     ;;
 esac
+
+
+cd ${workdir} || exit
+
 
 function BuildDeps_ {
     (( $# > 1 )) || exit
@@ -58,154 +66,129 @@ function BuildDeps_ {
     shift &&
     pushd $1 &&
     shift &&
-    ./configure \
-        --build=i386-apple-darwin10 \
-        --prefix=${prefix} \
-        --enable-shared \
-        --disable-dependency-tracking \
-        "$@" \
-    &&
+    ./configure ${configure_args} "$@" &&
     ${make} ${jn} &&
     ${make} install || exit
     popd
-}
+} # end BuildDeps_
 
-# stage 1
-: && {
-BuildDeps_ pkg-config-0.28{.tar.gz,} \
-    --disable-debug \
-    --disable-host-tool \
-    --with-internal-glib \
-    --with-pc-path=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
-BuildDeps_ gettext-0.18.2{.tar.gz,}
-BuildDeps_ xz-5.0.4{.tar.bz2,}
-BuildDeps_ libffi-3.0.13{.tar.gz,}
-} # end stage 1
+function DocCopy_ {
+    test -n "$1" || exit
+    local dest=${prefix}/share/doc/$1
+    install -d ${dest} &&
+    cp $(find -E ${workdir}/$1 -depth 1 -regex '.*(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING|COPYING.LIB|LICENSE|NEWS|README|RELEASE|TODO)') ${dest} || exit
+} # end DocCopy_
 
+
+
+# begin stage 1
 : && {
-    ditto ${srcroot}/source/glib glib &&
-    (
-        cd glib &&
-        patch -Np1 < ${srcroot}/patch/glib_autogen.patch &&
-        (bash --login ./autogen.sh --disable-maintainer-mode --disable-gtk-doc) &&
-        ${make} clean &&
-        ./configure --prefix=${prefix} \
-                    --build=i386-apple-darwin10 \
-                    --enable-shared \
-        &&
+    BuildDeps_ gettext-0.18.2{.tar.gz,}
+    BuildDeps_ xz-5.0.4{.tar.bz2,}
+
+    ditto ${srcroot}/source/libffi libffi && (
+        cd libffi &&
+        git checkout -f . &&
+        ./configure ${configure_args} &&
         ${make} ${jn} &&
-        ${make} install
-    ) || exit
-} # end glib
+        ${make} install &&
+        DocCopy_ libffi
+    )
+    
+    # begin glib
+    : && {
+        ditto ${srcroot}/source/glib glib && (
+            cd glib &&
+            git checkout -f glib-2-36
+            (bash --login ./autogen.sh --disable-maintainer-mode --disable-gtk-doc) &&
+            ${make} clean &&
+            ./configure ${configure_args} &&
+            ${make} ${jn} &&
+            ${make} install &&
+            DocCopy_ glib
+        ) || exit
+    } # end glib
+} # end stage 1
 
 # stage 2
 : && {
-BuildDeps_ freetype-2.4.11{.tar.gz,}
-# valgrind add '-arch' flag
-BuildDeps_ valgrind-3.8.1{.tar.bz2,} \
-    --enable-only32bit \
-    CC=$( xcrun -find gcc-4.2) \
-    CXX=$(xcrun -find g++-4.2) \
-    CFLAGS="-isysroot ${sdkroot}" \
-    CXXFLAGS="-isysroot ${sdkroot}"
-# orc required valgrind; to build with gcc failed
-BuildDeps_ orc-0.4.17{.tar.gz,} \
-    CC="${ccache} ${clang}" \
-    CXX="${ccache} ${clangxx}" \
-    CFLAGS="-m32 -arch i386 ${CFLAGS}" \
-    CXXFLAGS="-m32 -arch i386 ${CFLAGS}"
-BuildDeps_ libpng-1.6.1{.tar.gz,}
-BuildDeps_ jpegsrc.v8d.tar.gz jpeg-8d
-BuildDeps_ tiff-4.0.3{.tar.gz,}
-BuildDeps_ jasper-1.900.1{.zip,} --disable-opengl --without-x
-BuildDeps_ libicns-0.8.1{.tar.gz,}
-BuildDeps_ libogg-1.3.0{.tar.gz,}
-BuildDeps_ libvorbis-1.3.3{.tar.gz,}
-BuildDeps_ flac-1.2.1{.tar.gz,} --disable-asm-optimizations --disable-xmms-plugin
-BuildDeps_ SDL-1.2.15{.tar.gz,} --without-x && {
-    install -d ${prefix}/share/doc/SDL
-    cp SDL-1.2.15/{BUGS,COPYING,CREDITS,README,TODO} $_
-}
-BuildDeps_ SDL_sound-1.0.3{.tar.gz,} && {
-    install -d ${prefix}/share/doc/SDL_sound
-    cp SDL_sound-1.0.3/{CHANGELOG,COPYING,CREDITS,README,TODO} $_
-}
-BuildDeps_ unixODBC-2.3.1{.tar.gz,} && {
-    install -d ${prefix}/share/doc/unixODBC &&
-    cp unixODBC-2.3.1/{AUTHORS,ChangeLog,COPYING,NEWS,README} $_
-}
-# libtheora required SDL
-BuildDeps_ libtheora-1.1.1{.tar.bz2,} \
-    --disable-oggtest \
-    --disable-vorbistest \
-    --disable-examples \
-    --disable-asm
-
+    ditto ${srcroot}/source/freetype2 freetype2 && (
+        cd freetype2 &&
+        git checkout -f .
+        (bash --login ./autogen.sh) &&
+        ./configure ${configure_args} &&
+        ${make} ${jn} &&
+        ${make} install &&
+        DocCopy_ freetype2
+    ) || exit
+    
+    # valgrind add '-arch' flag
+    BuildDeps_ valgrind-3.8.1{.tar.bz2,} \
+        --enable-only32bit \
+        CC=$( xcrun -find gcc-4.2) \
+        CXX=$(xcrun -find g++-4.2) \
+        CFLAGS="-isysroot ${sdkroot}" \
+        CXXFLAGS="-isysroot ${sdkroot}"
+    
+    # orc required valgrind; to build with gcc failed
+    BuildDeps_ orc-0.4.17{.tar.gz,} \
+        CC="${ccache} ${clang}" \
+        CXX="${ccache} ${clangxx}" \
+        CFLAGS="-m32 -arch i386 ${CFLAGS}" \
+        CXXFLAGS="-m32 -arch i386 ${CFLAGS}"
+    
+    BuildDeps_ unixODBC-2.3.1{.tar.gz,} && DocCopy_ unixODBC-2.3.1
+    
+    ditto ${srcroot}/source/libpng libpng && (
+        cd libpng &&
+        git checkout -f libpng16 &&
+        (bash --login autoreconf -i) &&
+        ./configure ${configure_args} &&
+        ${make} ${jn} &&
+        ${make} install &&
+        DocCopy_ libpng
+    ) || exit
+    
+    BuildDeps_ jpegsrc.v8d.tar.gz jpeg-8d
+    BuildDeps_ tiff-4.0.3{.tar.gz,}
+    BuildDeps_ jasper-1.900.1{.zip,} --disable-opengl --without-x
+    BuildDeps_ libicns-0.8.1{.tar.gz,}
 } # end stage 2
 
-
-# GStreamer
+# begin stage 3
 : && {
-    for x in \
-        gstreamer \
-        gst-plugins-base \
-        gst-plugins-good \
-        
-    do
-        case ${x} in (-*) continue;; esac
-        ditto ${srcroot}/source/${x} ${x} &&
-        (
-            cd ${x} &&
-            ./autogen.sh --disable-maintainer-mode --disable-gtk-doc &&
-            ${make} clean &&
-            ./configure --prefix=${prefix} \
-                        --disable-alsa \
-                        --disable-audioconvert \
-                        --disable-examples \
-                        --disable-ffmpegcolorspace \
-                        --disable-gst_v4l2 \
-                        --disable-gtk-doc \
-                        --disable-gtk-doc-html \
-                        --disable-osx_audio \
-                        --disable-osx_video \
-                        --disable-videorate \
-                        --disable-videoscale \
-                        --disable-volume \
-                        --disable-x \
-                        --disable-xshm \
-                        --disable-xvideo \
-                        --enable-experimental \
-                        --enable-shared \
-                        --without-x \
-            &&
-            ${make} ${jn} &&
-            ${make} install || exit 1
-            install -d ${prefix}/share/doc/${x} &&
-            cp $(find -E . -depth 1 -regex '.*(AUTHORS|ChangeLog|COPYING|COPYING.LIB|NEWS|README|RELEASE|TODO)') $_
-        ) || exit
-    done
-} # end GStreamer
+    BuildDeps_ libogg-1.3.0{.tar.gz,}
+    BuildDeps_ libvorbis-1.3.3{.tar.gz,}
+    BuildDeps_ flac-1.2.1{.tar.gz,} --disable-asm-optimizations --disable-xmms-plugin    
+    BuildDeps_ SDL-1.2.15{.tar.gz,} --without-x && DocCopy_ SDL-1.2.15
+    BuildDeps_ SDL_sound-1.0.3{.tar.gz,}        && DocCopy_ SDL_sound-1.0.3
+    # libtheora required SDL
+    BuildDeps_ libtheora-1.1.1{.tar.bz2,} \
+        --disable-oggtest \
+        --disable-vorbistest \
+        --disable-examples \
+        --disable-asm
+} # end stage 3
 
-
-BuildDeps_ cabextract-1.4{.tar.gz,} && {
-    install -d ${prefix}/share/doc/cabextract &&
-    cp cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $_
-}
-# winetricks
-install -d ${prefix}/share/doc/winetricks &&
-install -m 0644 ${srcroot}/source/winetricks/src/COPYING $_ &&
-install -m 0755 ${srcroot}/source/winetricks/src/winetricks ${prefix}/bin/winetricks.bin &&
-cat <<'__EOF__' > ${prefix}/bin/winetricks && chmod +x ${prefix}/bin/winetricks || exit
+# begin stage 4
+: && {
+    BuildDeps_ cabextract-1.4{.tar.gz,} && DocCopy_ cabextract-1.4
+    # winetricks
+    install -d ${prefix}/share/doc/winetricks &&
+    install -m 0644 ${srcroot}/source/winetricks/src/COPYING $_ &&
+    install -m 0755 ${srcroot}/source/winetricks/src/winetricks ${prefix}/bin/winetricks.bin &&
+    cat <<'__EOF__' > ${prefix}/bin/winetricks && chmod +x ${prefix}/bin/winetricks || exit
 #!/bin/bash
 export PATH="$(cd "$(dirname "$0")"; pwd)":/usr/bin:/bin:/usr/sbin:/sbin
 which wine || { echo "wine not found."; exit; }
 exec winetricks.bin "$@"
 __EOF__
+}
 
 
 install -d wine &&
 cd wine &&
-${winesrcroot}/configure \
+${srcroot}/source/wine/configure \
     --prefix=${prefix} \
     --without-sane \
     --without-v4l \
@@ -225,8 +208,7 @@ install_name_tool -add_rpath /usr/lib ${prefix}/bin/wine &&
 install_name_tool -add_rpath /usr/lib ${prefix}/bin/wineserver &&
 install_name_tool -add_rpath /usr/lib ${prefix}/lib/libwine.1.0.dylib || exit
 
-install -d ${prefix}/share/doc/wine
-cp ${winesrcroot}/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README} ${prefix}/share/doc/wine
+DocCopy_ wine
 
 infsrc=${prefix}/share/wine/wine.inf
 inftmp=$(uuidgen)

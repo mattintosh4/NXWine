@@ -8,16 +8,9 @@ case $1 in
 esac
 
 readonly srcroot="$(cd "$(dirname "$0")"; pwd)"
-
-readonly uuid=9C727687-28A1-47CE-9C4A-97128FADE79A
-readonly workdir=${TMPDIR}/${uuid}
-
+readonly workdir=${TMPDIR}/9C727687-28A1-47CE-9C4A-97128FADE79A
 readonly bundle=/Applications/NXWine.app
 readonly prefix=${bundle}/Contents/Resources
-
-readonly git_dir=/usr/local/git/bin
-readonly python_dir=/Library/Frameworks/Python.framework/Versions/2.7/bin
-test -x ${git_dir}/git -a -x ${python_dir}/python2.7 || exit
 
 test -x /usr/local/bin/ccache       && ccache=$_            || exit
 test -x /usr/local/bin/clang        && clang=$_             || exit
@@ -27,11 +20,14 @@ test -x /usr/local/bin/nasm         && export NASM=$_       || exit
 test -x /usr/local/bin/objdump      && export OBJDUMP=$_    || :
 test -x /usr/local/bin/objcopy      && export OBJCOPY=$_    || :
 
+test -x /usr/local/git/bin/git && readonly git_dir=$(dirname $_) || exit
+test -x /Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7 && readonly python_dir=$(dirname $_) || exit
+
 export SHELL=/bin/bash
 export LC_ALL=C
 export PATH=${prefix}/bin:${git_dir}:${python_dir}:$(sysctl -n user.cs_path)
 export ARCHFLAGS="-arch i386"
-export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
+export CC="${ccache} $(xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${CC/gcc/g++}"
 export CFLAGS="-pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8"
 export CXXFLAGS="${CFLAGS}"
@@ -47,9 +43,8 @@ function BuildBundle_ {
     sed "s|@DATE@|$(date +%F)|g" ${srcroot}/NXWine.applescript | osacompile -o ${bundle} || exit
     rm ${bundle}/Contents/Resources/droplet.icns
     install -d ${prefix}/{bin,include,lib} || exit
-}
-
-test -n "${test_mode+x}" || rm -rf ${workdir}
+} # end BuildBundle_
+test -n "${test_mode+x}" || rm -rf ${bundle} ${workdir}
 test -e ${bundle} || BuildBundle_
 install -d ${workdir}
 cd ${workdir} || exit
@@ -98,7 +93,7 @@ function BuildDevel_ {
         glib)
             ditto ${srcroot}/source/glib glib && (
                 cd glib &&
-                git checkout -f master &&
+                git checkout -f 2.36.1 &&
                 ./autogen.sh ${configure_args} &&
                 make ${jn} &&
                 make install &&

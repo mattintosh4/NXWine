@@ -19,26 +19,13 @@ readonly git_dir=/usr/local/git/bin
 readonly python_dir=/Library/Frameworks/Python.framework/Versions/2.7/bin
 test -x ${git_dir}/git -a -x ${python_dir}/python2.7 || exit
 
-function ToolCheck_ {
-    while test -n "$1"
-    do
-        local f=/usr/local/bin/$1
-        test -x ${f} || exit
-        eval $1=${f}
-        shift
-    done
-    clangxx=${clang}++
-}
-ToolCheck_  ccache \
-            clang \
-            uconv
-export MAKE=/usr/local/bin/make
-export NASM=/usr/local/bin/nasm
-export PKG_CONFIG=/usr/local/bin/pkg-config
-test \
-    -x ${MAKE} -a \
-    -x ${NASM} -a \
-    -x ${PKG_CONFIG} || exit
+test -x /usr/local/bin/ccache       && ccache=$_            || exit
+test -x /usr/local/bin/clang        && clang=$_             || exit
+test -x /usr/local/bin/uconv        && uconv=$_             || exit
+test -x /usr/local/bin/make         && export MAKE=$_       || exit
+test -x /usr/local/bin/nasm         && export NASM=$_       || exit
+test -x /usr/local/bin/objdump      && export OBJDUMP=$_    || :
+test -x /usr/local/bin/objcopy      && export OBJCOPY=$_    || :
 
 export SHELL=/bin/bash
 export LC_ALL=C
@@ -50,12 +37,9 @@ export CFLAGS="-pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS=" -isysroot ${sdkroot=/Developer/SDKs/MacOSX10.6.sdk} -I${prefix}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
-export PARALLELMFLAGS="-j $(($(sysctl -n hw.ncpu) + 1))"
-export PKG_CONFIG_PATH=
-export PKG_CONFIG_LIBDIR=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
 
-configure_args="--prefix=${prefix} --build=i386-apple-darwin10 --enable-shared"
-
+configure_args="--prefix=${prefix} --build=i386-apple-darwin10.8.0 --enable-shared --disable-maintainer-mode --disable-gtk-doc"
+jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 
 
 function BuildBundle_ {
@@ -74,7 +58,7 @@ cd ${workdir} || exit
 
 function BuildDeps_ {
     local f=${srcroot}/source/$1
-    local name=$(echo $1 | sed 's|\.tar\..*||') || exit
+    local name=$(echo $1 | sed -E 's#\.(zip|tar\..*)$##') || exit
     shift
     case ${f} in
         *.xz)
@@ -86,7 +70,7 @@ function BuildDeps_ {
     esac
     pushd ${name} &&
     ./configure ${configure_args} "$@" &&
-    make &&
+    make ${jn} &&
     make install || exit
     popd
 } # end BuildDeps_
@@ -106,7 +90,7 @@ function BuildDevel_ {
                 cd libffi &&
                 git checkout -f master &&
                 ./configure ${configure_args} &&
-                make &&
+                make ${jn} &&
                 make install &&
                 DocCopy_ libffi
             ) || exit
@@ -114,9 +98,9 @@ function BuildDevel_ {
         glib)
             ditto ${srcroot}/source/glib glib && (
                 cd glib &&
-                git checkout -f 2.36.1 &&
-                (bash --login ./autogen.sh ${configure_args} --disable-gtk-doc) &&
-                make &&
+                git checkout -f master &&
+                ./autogen.sh ${configure_args} &&
+                make ${jn} &&
                 make install &&
                 DocCopy_ glib
             ) || exit
@@ -127,7 +111,7 @@ function BuildDevel_ {
                 git checkout -f master &&
                 ./autogen.sh &&
                 ./configure ${configure_args} &&
-                make &&
+                make ${jn} &&
                 make install &&
                 DocCopy_ freetype2
             ) || exit
@@ -138,7 +122,7 @@ function BuildDevel_ {
                 git checkout -f libpng16 &&
                 autoreconf -i &&
                 ./configure ${configure_args} &&
-                make &&
+                make ${jn} &&
                 make install &&
                 DocCopy_ libpng
             ) || exit
@@ -149,6 +133,11 @@ function BuildDevel_ {
 
 # begin stage 1
 : && {
+    BuildDeps_ pkg-config-0.28.tar.gz \
+        --disable-debug \
+        --disable-host-tool \
+        --with-internal-glib \
+        --with-pc-path=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
     BuildDeps_ autoconf-2.69.tar.gz
     BuildDeps_ automake-1.13.1.tar.gz
     BuildDeps_ libtool-2.4.2.tar.gz
@@ -174,7 +163,7 @@ function BuildDevel_ {
     # orc required valgrind; to build with gcc failed
     BuildDeps_ orc-0.4.17.tar.gz \
         CC="${ccache} ${clang}" \
-        CXX="${ccache} ${clangxx}" \
+        CXX="${ccache} ${clang}++" \
         CFLAGS="-m32 -arch i386 ${CFLAGS}" \
         CXXFLAGS="-m32 -arch i386 ${CFLAGS}"
     
@@ -235,20 +224,14 @@ ditto ${srcroot}/source/wine wine && (
         --without-cms \
         --without-x \
     &&
-    make depend &&
-    make &&
+    make ${jn} depend &&
+    make ${jn} &&
     make install || exit
     
     # add rpath to /usr/lib
-    for x in \
-        wine \
-        wineserver \
-        libwine.1.0.dylib \
-        
-    do
-        install_name_tool -add_rpath /usr/lib ${prefix}/bin/${x} || exit
-    done
-    unset x
+    install_name_tool -add_rpath /usr/lib ${prefix}/bin/wine &&
+    install_name_tool -add_rpath /usr/lib ${prefix}/bin/wineserver &&
+    install_name_tool -add_rpath /usr/lib ${prefix}/lib/libwine.1.0.dylib || exit
 
     # copy documents
     DocCopy_ wine

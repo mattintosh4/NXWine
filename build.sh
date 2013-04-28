@@ -34,7 +34,7 @@ export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS=" -isysroot ${sdkroot=/Developer/SDKs/MacOSX10.6.sdk} -I${prefix}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
 
-configure_args="--prefix=${prefix} --build=i386-apple-darwin10.8.0 --enable-shared --disable-maintainer-mode --disable-gtk-doc"
+configure_args="--prefix=${prefix} --build=i386-apple-darwin10.8.0 --enable-shared"
 jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 
 
@@ -57,7 +57,11 @@ function BuildDeps_ {
     shift
     case ${f} in
         *.xz)
-            xzcat ${f} | tar -x - || exit
+            if which xzcat; then
+                xzcat ${f} | tar -x - || exit
+            else
+                /usr/local/bin/xzcat ${f} | tar -x - || exit
+            fi
         ;;
         *)
             tar -xf ${f} || exit
@@ -84,7 +88,7 @@ function BuildDevel_ {
             ditto ${srcroot}/source/libffi libffi && (
                 cd libffi &&
                 git checkout -f master &&
-                ./configure ${configure_args} &&
+                sh configure ${configure_args} &&
                 make ${jn} &&
                 make install &&
                 DocCopy_ libffi
@@ -94,7 +98,7 @@ function BuildDevel_ {
             ditto ${srcroot}/source/glib glib && (
                 cd glib &&
                 git checkout -f 2.36.1 &&
-                ./autogen.sh ${configure_args} &&
+                sh autogen.sh ${configure_args} --disable-gtk-doc &&
                 make ${jn} &&
                 make install &&
                 DocCopy_ glib
@@ -104,9 +108,9 @@ function BuildDevel_ {
             ditto ${srcroot}/source/freetype2 freetype2 && (
                 cd freetype2 &&
                 git checkout -f master &&
-                ./autogen.sh &&
-                ./configure ${configure_args} &&
-                make ${jn} &&
+                sh autogen.sh
+                sh configure ${configure_args} --with-old-mac-fonts &&
+                make &&
                 make install &&
                 DocCopy_ freetype2
             ) || exit
@@ -116,7 +120,7 @@ function BuildDevel_ {
                 cd libpng &&
                 git checkout -f libpng16 &&
                 autoreconf -i &&
-                ./configure ${configure_args} &&
+                sh configure ${configure_args} &&
                 make ${jn} &&
                 make install &&
                 DocCopy_ libpng
@@ -125,9 +129,9 @@ function BuildDevel_ {
     esac
 } # end BuildDevel_
 
-
 # begin stage 1
 : && {
+    BuildDeps_ coreutils-8.21.tar.xz
     BuildDeps_ pkg-config-0.28.tar.gz \
         --disable-debug \
         --disable-host-tool \
@@ -135,15 +139,24 @@ function BuildDevel_ {
         --with-pc-path=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
     BuildDeps_ autoconf-2.69.tar.gz
     BuildDeps_ automake-1.13.1.tar.gz
-    BuildDeps_ libtool-2.4.2.tar.gz
+    BuildDeps_ libtool-2.4.2.tar.gz --program-prefix=g && {
+        export LIBTOOL=${prefix}/bin/glibtool
+        export LIBTOOLIZE=${prefix}/bin/glibtoolize
+    }
     BuildDeps_ gettext-0.18.2.tar.gz
     # m4 required gettext
-    BuildDeps_ m4-1.4.16.tar.bz2
+    BuildDeps_ m4-1.4.16.tar.bz2 --program-prefix=g && {
+        export M4=${prefix}/bin/gm4
+    }
     BuildDeps_ xz-5.0.4.tar.bz2
     BuildDevel_ libffi
+} # end stage 1
+
+# begin stage 1+
+: && {
     BuildDevel_ glib
     BuildDevel_ freetype2
-} # end stage 1
+} # end stage 1+
 
 # begin stage 2
 : && {

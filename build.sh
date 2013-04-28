@@ -246,7 +246,7 @@ ditto ${srcroot}/source/wine wine && (
     
     # update wine.inf
     infsrc=${prefix}/share/wine/wine.inf
-    inftmp=$(mktemp -t $$)
+    inftmp=/tmp/$(uuidgen)
     patch -o ${inftmp} ${infsrc} ${srcroot}/patch/nxwine.patch &&
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${infsrc} ${inftmp} &&
     rm ${inftmp} || exit

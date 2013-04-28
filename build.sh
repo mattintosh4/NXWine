@@ -245,11 +245,10 @@ ditto ${srcroot}/source/wine wine && (
     DocCopy_ wine
     
     # update wine.inf
-    infsrc=${prefix}/share/wine/wine.inf
-    inftmp=/tmp/$(uuidgen)
-    patch -o ${inftmp} ${infsrc} ${srcroot}/patch/nxwine.patch &&
-    ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${infsrc} ${inftmp} &&
-    rm ${inftmp} || exit
+    inf=${prefix}/share/wine/wine.inf
+    mv ${inf}{,.orig}
+    ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf}{,.orig} &&
+    patch ${inf} ${srcroot}/patch/nxwine.patch || exit
 ) || exit
 
 

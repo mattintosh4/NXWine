@@ -82,51 +82,37 @@ function DocCopy_ {
 } # end DocCopy_
 
 function BuildDevel_ {
-    cd ${workdir}
+    local name=$1
+    cd ${workdir} &&
+    ditto ${srcroot}/source/${name} ${name} &&
+    pushd ${name} || exit
+    
     case $1 in
         libffi)
-            ditto ${srcroot}/source/libffi libffi && (
-                cd libffi &&
-                git checkout -f master &&
-                sh configure ${configure_args} &&
-                make ${jn} &&
-                make install &&
-                DocCopy_ libffi
-            ) || exit
+            git checkout -f master &&
+            sh configure ${configure_args}
         ;;
         glib)
-            ditto ${srcroot}/source/glib glib && (
-                cd glib &&
-                git checkout -f 2.36.1 &&
-                sh autogen.sh ${configure_args} --disable-gtk-doc &&
-                make ${jn} &&
-                make install &&
-                DocCopy_ glib
-            ) || exit
+            git checkout -f 2.36.1 &&
+            sh autogen.sh ${configure_args} --disable-gtk-doc
         ;;
         freetype2)
-            ditto ${srcroot}/source/freetype2 freetype2 && (
-                cd freetype2 &&
-                git checkout -f master &&
-                sh autogen.sh
-                sh configure ${configure_args} --with-old-mac-fonts &&
-                make &&
-                make install &&
-                DocCopy_ freetype2
-            ) || exit
+            git checkout -f master &&
+            sh autogen.sh &&
+            sh configure ${configure_args}
         ;;
         libpng)
-            ditto ${srcroot}/source/libpng libpng && (
-                cd libpng &&
-                git checkout -f libpng16 &&
-                autoreconf -i &&
-                sh configure ${configure_args} &&
-                make ${jn} &&
-                make install &&
-                DocCopy_ libpng
-            ) || exit
+            git checkout -f libpng16 &&
+            autoreconf -i &&
+            sh configure ${configure_args}
         ;;
     esac
+    
+    (($? == 0)) &&
+    make ${jn} &&
+    make install &&
+    DocCopy_ ${name} || exit
+    popd
 } # end BuildDevel_
 
 # begin stage 1

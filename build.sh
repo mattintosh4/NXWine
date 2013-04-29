@@ -26,8 +26,8 @@ export SHELL=/bin/bash
 export LC_ALL=C
 export PATH=${prefix}/bin:${git_dir}:${python_dir}:$(sysctl -n user.cs_path)
 export ARCHFLAGS="-arch i386"
-export CC="${ccache} $(xcrun -find i686-apple-darwin10-gcc-4.2.1)"
-export CXX="${CC/gcc/g++}"
+export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
+export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
 export CFLAGS="-pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS=" -isysroot ${sdkroot=/Developer/SDKs/MacOSX10.6.sdk} -I${prefix}/include"

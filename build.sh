@@ -96,7 +96,7 @@ function BuildDevel_ {
             git checkout -f 2.36.1 &&
             sh autogen.sh ${configure_args} --disable-gtk-doc
         ;;
-        freetype2)
+        freetype)
             git checkout -f master &&
             sh autogen.sh &&
             sh configure ${configure_args}
@@ -142,7 +142,7 @@ function BuildDevel_ {
 # begin stage 1+
 : && {
     BuildDevel_ glib
-    BuildDevel_ freetype2
+    BuildDevel_ freetype
 } # end stage 1+
 
 # begin stage 2

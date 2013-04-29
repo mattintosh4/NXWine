@@ -9,8 +9,11 @@ esac
 
 readonly srcroot="$(cd "$(dirname "$0")"; pwd)"
 readonly workdir=${TMPDIR}/9C727687-28A1-47CE-9C4A-97128FADE79A
-readonly bundle=/Applications/NXWine.app
-readonly prefix=${bundle}/Contents/Resources
+
+readonly destroot=/tmp/com.github.mattintosh4 && install -d ${destroot} || exit
+readonly bundle=${destroot}/NXWine.app
+readonly deps_destroot=${bundle}/Contents/SharedSupport
+readonly wine_destroot=${bundle}/Contents/Resources
 
 test -x /usr/local/bin/ccache       && readonly ccache=$_   || exit
 test -x /usr/local/bin/clang        && readonly clang=$_    || exit
@@ -24,16 +27,16 @@ test -x /Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7 && reado
 
 export SHELL=/bin/bash
 export LC_ALL=C
-export PATH=${prefix}/bin:${git_dir}:${python_dir}:$(sysctl -n user.cs_path)
+export PATH=${deps_destroot}/bin:${git_dir}:${python_dir}:$(sysctl -n user.cs_path)
 export ARCHFLAGS="-arch i386"
 export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
 export CFLAGS="-pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8"
 export CXXFLAGS="${CFLAGS}"
-export CPPFLAGS=" -isysroot ${sdkroot=/Developer/SDKs/MacOSX10.6.sdk} -I${prefix}/include"
-export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${prefix}/lib"
+export CPPFLAGS=" -isysroot ${sdkroot=/Developer/SDKs/MacOSX10.6.sdk} -I${deps_destroot}/include"
+export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${deps_destroot}/lib"
 
-configure_args="--prefix=${prefix} --build=i386-apple-darwin10.8.0 --enable-shared"
+configure_args="--prefix=${deps_destroot} --build=i386-apple-darwin10.8.0 --enable-shared"
 jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 
 
@@ -41,7 +44,7 @@ function BuildBundle_ {
     test ! -e ${bundle} || rm -rf ${bundle}
     sed "s|@DATE@|$(date +%F)|g" ${srcroot}/NXWine.applescript | osacompile -o ${bundle} || exit
     rm ${bundle}/Contents/Resources/droplet.icns
-    install -d ${prefix}/{bin,include,lib} || exit
+    install -d ${deps_destroot}/{bin,include,lib} || exit
 } # end BuildBundle_
 test -n "${test_mode+x}" || rm -rf ${bundle} ${workdir}
 test -e ${bundle} || BuildBundle_
@@ -75,7 +78,7 @@ function BuildDeps_ {
 
 function DocCopy_ {
     test -n "$1" || exit
-    local dest=${prefix}/share/doc/$1
+    local dest=${deps_destroot}/share/doc/$1
     install -d ${dest} &&
     cp $(find -E ${workdir}/$1 -depth 1 -regex '.*(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING|COPYING.LIB|LICENSE|NEWS|README|RELEASE|TODO|VERSION)') ${dest} || exit
 } # end DocCopy_
@@ -120,19 +123,19 @@ function BuildDevel_ {
     # readline is required from unixODBC
     BuildDeps_ readline-6.2.tar.gz --with-curses && DocCopy_ readline-6.2
     BuildDeps_ m4-1.4.16.tar.bz2 --program-prefix=g && {
-    export M4=${prefix}/bin/gm4
+    export M4=${deps_destroot}/bin/gm4
     }
     BuildDeps_ autoconf-2.69.tar.gz
     BuildDeps_ automake-1.13.1.tar.gz
     BuildDeps_ libtool-2.4.2.tar.gz --program-prefix=g && {
-        export LIBTOOL=${prefix}/bin/glibtool
-        export LIBTOOLIZE=${prefix}/bin/glibtoolize
+        export LIBTOOL=${deps_destroot}/bin/glibtool
+        export LIBTOOLIZE=${deps_destroot}/bin/glibtoolize
     }
     BuildDeps_ pkg-config-0.28.tar.gz \
         --disable-debug \
         --disable-host-tool \
         --with-internal-glib \
-        --with-pc-path=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
+        --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
     BuildDeps_ gettext-0.18.2.tar.gz
     # m4 required gettext
     BuildDeps_ xz-5.0.4.tar.bz2
@@ -168,8 +171,8 @@ function BuildDevel_ {
     # nasm is required from libjpeg-turbo
     BuildDeps_ nasm-2.10.07.tar.xz && DocCopy_ nasm-2.10.07
     BuildDeps_ libjpeg-turbo-1.2.1.tar.gz --with-jpeg8 && {
-        install -d ${prefix}/share/doc/libjpeg-turbo-1.2.1
-        mv ${prefix}/share/doc/{example.c,libjpeg.txt,README,README-turbo.txt,structure.txt,usage.txt,wizard.txt} $_
+        install -d ${deps_destroot}/share/doc/libjpeg-turbo-1.2.1
+        mv ${deps_destroot}/share/doc/{example.c,libjpeg.txt,README,README-turbo.txt,structure.txt,usage.txt,wizard.txt} $_
     }
     BuildDeps_ tiff-4.0.3.tar.gz
     BuildDeps_ jasper-1.900.1.zip --disable-opengl --without-x
@@ -193,12 +196,22 @@ function BuildDevel_ {
 
 # begin stage 4
 : && {
-    BuildDeps_ cabextract-1.4.tar.gz && DocCopy_ cabextract-1.4
+    # cabextract
+    (
+        cd ${workdir} &&
+        tar -xf ${srcroot}/source/cabextract-1.4.tar.gz &&
+        cd cabextract-1.4 &&
+        ./configure ${configure_args/${deps_destroot}/${wine_destroot}} &&
+        make ${jn} &&
+        make install &&
+        DocCopy_ cabextract-1.4
+    ) || exit
+    
     # winetricks
-    install -d ${prefix}/share/doc/winetricks &&
+    install -d ${wine_destroot}/share/doc/winetricks &&
     install -m 0644 ${srcroot}/source/winetricks/src/COPYING $_ &&
-    install -m 0755 ${srcroot}/source/winetricks/src/winetricks ${prefix}/bin/winetricks.bin &&
-    cat <<'__EOF__' > ${prefix}/bin/winetricks && chmod +x ${prefix}/bin/winetricks || exit
+    install -m 0755 ${srcroot}/source/winetricks/src/winetricks ${wine_destroot}/bin/winetricks.bin &&
+    cat <<'__EOF__' > ${wine_destroot}/bin/winetricks && chmod +x ${wine_destroot}/bin/winetricks || exit
 #!/bin/bash
 export PATH="$(cd "$(dirname "$0")"; pwd)":/usr/bin:/bin:/usr/sbin:/sbin
 which wine || { echo "wine not found."; exit; }
@@ -211,7 +224,7 @@ __EOF__
 ditto ${srcroot}/source/wine wine && (
     cd wine &&
     ./configure \
-        --prefix=${prefix} \
+        --prefix=${wine_destroot} \
         --without-sane \
         --without-v4l \
         --without-gphoto \
@@ -225,24 +238,47 @@ ditto ${srcroot}/source/wine wine && (
     make ${jn} &&
     make install || exit
     
-    # add rpath to /usr/lib
-    install_name_tool -add_rpath /usr/lib ${prefix}/bin/wine &&
-    install_name_tool -add_rpath /usr/lib ${prefix}/bin/wineserver &&
-    install_name_tool -add_rpath /usr/lib ${prefix}/lib/libwine.1.0.dylib || exit
+    # add rpath to ${deps_destroot} and /usr/lib
+    for x in \
+        bin/wine \
+        bin/wineserver \
+        lib/libwine.1.0.dylib
+    do
+        install_name_tool -add_rpath ${deps_destroot}/lib   ${wine_destroot}/${x} &&
+        install_name_tool -add_rpath /usr/lib               ${wine_destroot}/${x} || exit
+    done
+    unset x
+    
+    # WINELOADER
+    mv ${wine_destroot}/bin/wine{,.bin} &&
+    cat <<__EOF__ > ${wine_destroot}/bin/wine && chmod +x ${wine_destroot}/bin/wine
+#!/bin/bash
+install -d ${destroot}
+ln -sf "\$(cd "\$(dirname "\$0")/../.." && pwd)" ${destroot}
+exec ${wine_destroot}/bin/wine "\$@"
+__EOF__
 
     # copy documents
     DocCopy_ wine
     
-    # update wine.inf
-    inf=${prefix}/share/wine/wine.inf
+    # wine.inf
+    inf=${wine_destroot}/share/wine/wine.inf
     mv ${inf}{,.orig}
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf}{,.orig} &&
     patch ${inf} ${srcroot}/patch/nxwine.patch || exit
+    
+    # native dlls
+    fakedlls_dir=${wine_destroot}/lib/wine/fakedlls
+    nativedlls_dir=${srcroot}/nativedlls
+    mv ${fakedlls_dir}/quartz.dll{,.orig} &&
+    install -m 0644 ${nativedlls_dir}/quartz.dll ${fakedlls_dir} &&
+    mv ${fakedlls_dir}/gdiplus.dll{,.orig} &&
+    install -m 0644 ${nativedlls_dir}/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 ${fakedlls_dir}/gdiplus.dll || exit
 ) || exit
 
 
 
-wine_version=$(${prefix}/bin/wine --version)
+wine_version=$(${wine_destroot}/bin/wine --version)
 while read
 do
     /usr/libexec/PlistBuddy -c "${REPLY}" ${bundle}/Contents/Info.plist
@@ -264,13 +300,9 @@ Add :CFBundleDocumentTypes:3:CFBundleTypeName string Windows Shortcut File
 Add :CFBundleDocumentTypes:3:CFBundleTypeRole string Viewer
 __CMD__
 
-
 test ! -f ${dmg=${srcroot}/NXWine_$(date +%F)_${wine_version#*-}.dmg} || rm ${dmg}
-dmg_srcdir=$(install -d /tmp/$(uuidgen); cd $_; pwd) &&
-mv ${bundle} ${dmg_srcdir} &&
-ln -s /Applications ${dmg_srcdir} &&
-hdiutil create -format UDBZ -srcdir ${dmg_srcdir} -volname NXWine ${dmg} &&
-rm -rf ${dmg_srcdir} || exit
+ln -s /Applications ${destroot} &&
+hdiutil create -format UDBZ -srcdir ${destroot} -volname NXWine ${dmg}
 
 :
 afplay /System/Library/Sounds/Hero.aiff

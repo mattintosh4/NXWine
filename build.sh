@@ -269,7 +269,7 @@ test ! -f ${dmg=${srcroot}/NXWine_$(date +%F)_${wine_version#*-}.dmg} || rm ${dm
 dmg_srcdir=$(install -d /tmp/$(uuidgen); cd $_; pwd) &&
 mv ${bundle} ${dmg_srcdir} &&
 ln -s /Applications ${dmg_srcdir} &&
-hdiutil create -srcdir ${dmg_srcdir} -volname NXWine ${dmg} &&
+hdiutil create -format UDBZ -srcdir ${dmg_srcdir} -volname NXWine ${dmg} &&
 rm -rf ${dmg_srcdir} || exit
 
 :

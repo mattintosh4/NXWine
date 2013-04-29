@@ -119,22 +119,22 @@ function BuildDevel_ {
 : && {
     # readline is required from unixODBC
     BuildDeps_ readline-6.2.tar.gz --with-curses && DocCopy_ readline-6.2
-    BuildDeps_ pkg-config-0.28.tar.gz \
-        --disable-debug \
-        --disable-host-tool \
-        --with-internal-glib \
-        --with-pc-path=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
+    BuildDeps_ m4-1.4.16.tar.bz2 --program-prefix=g && {
+    export M4=${prefix}/bin/gm4
+    }
     BuildDeps_ autoconf-2.69.tar.gz
     BuildDeps_ automake-1.13.1.tar.gz
     BuildDeps_ libtool-2.4.2.tar.gz --program-prefix=g && {
         export LIBTOOL=${prefix}/bin/glibtool
         export LIBTOOLIZE=${prefix}/bin/glibtoolize
     }
+    BuildDeps_ pkg-config-0.28.tar.gz \
+        --disable-debug \
+        --disable-host-tool \
+        --with-internal-glib \
+        --with-pc-path=${prefix}/lib/pkgconfig:${prefix}/share/pkgconfig:/usr/lib/pkgconfig
     BuildDeps_ gettext-0.18.2.tar.gz
     # m4 required gettext
-    BuildDeps_ m4-1.4.16.tar.bz2 --program-prefix=g && {
-        export M4=${prefix}/bin/gm4
-    }
     BuildDeps_ xz-5.0.4.tar.bz2
     BuildDevel_ libffi
 } # end stage 1

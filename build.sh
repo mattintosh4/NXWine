@@ -166,7 +166,7 @@ function BuildDevel_ {
     
     BuildDevel_ libpng
     # nasm is required from libjpeg-turbo
-    buildDeps_ nasm-2.10.07.tar.xz && DocCopy_ nasm-2.10.07
+    BuildDeps_ nasm-2.10.07.tar.xz && DocCopy_ nasm-2.10.07
     BuildDeps_ libjpeg-turbo-1.2.1.tar.gz --with-jpeg8 && {
         install -d ${prefix}/share/doc/libjpeg-turbo-1.2.1
         mv ${prefix}/share/doc/{example.c,libjpeg.txt,README,README-turbo.txt,structure.txt,usage.txt,wizard.txt} $_

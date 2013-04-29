@@ -15,7 +15,6 @@ readonly prefix=${bundle}/Contents/Resources
 test -x /usr/local/bin/ccache       && readonly ccache=$_   || exit
 test -x /usr/local/bin/clang        && readonly clang=$_    || exit
 test -x /usr/local/bin/uconv        && readonly uconv=$_    || exit
-test -x /usr/local/bin/nasm         && export NASM=$_       || exit
 test -x /usr/local/bin/make         && export MAKE=$_       || :
 test -x /usr/local/bin/objdump      && export OBJDUMP=$_    || :
 test -x /usr/local/bin/objcopy      && export OBJCOPY=$_    || :
@@ -166,6 +165,8 @@ function BuildDevel_ {
     BuildDeps_ unixODBC-2.3.1.tar.gz && DocCopy_ unixODBC-2.3.1
     
     BuildDevel_ libpng
+    # nasm is required from libjpeg-turbo
+    buildDeps_ nasm-2.10.07.tar.xz && DocCopy_ nasm-2.10.07
     BuildDeps_ libjpeg-turbo-1.2.1.tar.gz --with-jpeg8 && {
         install -d ${prefix}/share/doc/libjpeg-turbo-1.2.1
         mv ${prefix}/share/doc/{example.c,libjpeg.txt,README,README-turbo.txt,structure.txt,usage.txt,wizard.txt} $_

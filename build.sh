@@ -84,8 +84,8 @@ function DocCopy_ {
 function BuildDevel_ {
     local name=$1
     cd ${workdir} &&
-    ditto ${srcroot}/source/${name} ${name} &&
-    pushd ${name} || exit
+    ditto ${srcroot}/source/$1 $1 &&
+    pushd $1 || exit
     
     case $1 in
         libffi)
@@ -111,7 +111,7 @@ function BuildDevel_ {
     (($? == 0)) &&
     make ${jn} &&
     make install &&
-    DocCopy_ ${name} || exit
+    DocCopy_ $1 || exit
     popd
 } # end BuildDevel_
 

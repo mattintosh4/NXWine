@@ -131,7 +131,6 @@ function BuildDevel_ {
 
 # begin stage 1
 : && {
-    BuildDeps_ coreutils-8.21.tar.xz
     BuildDeps_ pkg-config-0.28.tar.gz \
         --disable-debug \
         --disable-host-tool \
@@ -277,11 +276,11 @@ __CMD__
 
 
 test ! -f ${dmg=${srcroot}/NXWine_$(date +%F)_${wine_version#*-}.dmg} || rm ${dmg}
-dmg_srcdir=$(mktemp -dt $$)
-mv ${bundle} ${dmg_srcdir}
-ln -s /Applications ${dmg_srcdir}
+dmg_srcdir=$(install -d /tmp/$(uuidgen); cd $_; pwd) &&
+mv ${bundle} ${dmg_srcdir} &&
+ln -s /Applications ${dmg_srcdir} &&
 hdiutil create -srcdir ${dmg_srcdir} -volname NXWine ${dmg} &&
-rm -rf ${dmg_srcdir}
+rm -rf ${dmg_srcdir} || exit
 
 :
 afplay /System/Library/Sounds/Hero.aiff

@@ -12,11 +12,11 @@ readonly workdir=${TMPDIR}/9C727687-28A1-47CE-9C4A-97128FADE79A
 readonly bundle=/Applications/NXWine.app
 readonly prefix=${bundle}/Contents/Resources
 
-test -x /usr/local/bin/ccache       && ccache=$_            || exit
-test -x /usr/local/bin/clang        && clang=$_             || exit
-test -x /usr/local/bin/uconv        && uconv=$_             || exit
-test -x /usr/local/bin/make         && export MAKE=$_       || exit
+test -x /usr/local/bin/ccache       && readonly ccache=$_   || exit
+test -x /usr/local/bin/clang        && readonly clang=$_    || exit
+test -x /usr/local/bin/uconv        && readonly uconv=$_    || exit
 test -x /usr/local/bin/nasm         && export NASM=$_       || exit
+test -x /usr/local/bin/make         && export MAKE=$_       || :
 test -x /usr/local/bin/objdump      && export OBJDUMP=$_    || :
 test -x /usr/local/bin/objcopy      && export OBJCOPY=$_    || :
 
@@ -118,6 +118,8 @@ function BuildDevel_ {
 
 # begin stage 1
 : && {
+    # readline is required from unixODBC
+    BuildDeps_ readline-6.2.tar.gz --with-curses && DocCopy_ readline-6.2
     BuildDeps_ pkg-config-0.28.tar.gz \
         --disable-debug \
         --disable-host-tool \

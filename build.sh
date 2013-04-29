@@ -108,8 +108,8 @@ function BuildDevel_ {
             sh configure ${configure_args}
         ;;
     esac
+    (($? == 0)) || exit
     
-    (($? == 0)) &&
     make ${jn} &&
     make install &&
     DocCopy_ $1 || exit

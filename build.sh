@@ -82,7 +82,8 @@ function DocCopy_ {
 } # end DocCopy_
 
 function BuildDevel_ {
-    local name=$1
+    test -n "$1" || exit
+    
     cd ${workdir} &&
     ditto ${srcroot}/source/$1 $1 &&
     pushd $1 || exit

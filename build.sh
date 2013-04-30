@@ -226,9 +226,10 @@ exec winetricks.bin "$@"
 __EOF__
 } # end stage 4
 
-
-
-ditto ${srcroot}/source/wine wine && (
+# begin stage wine
+: && {
+    cd ${workdir} &&
+    ditto ${srcroot}/source/wine wine &&
     cd wine &&
     ./configure \
         --prefix=${wine_destroot} \

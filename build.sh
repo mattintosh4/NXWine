@@ -31,13 +31,13 @@ export PATH=${deps_destroot}/bin:${git_dir}:${python_dir}:$(sysctl -n user.cs_pa
 export ARCHFLAGS="-arch i386"
 export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
-export CFLAGS="-pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8"
+export CFLAGS="-m32 -pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS=" -isysroot ${sdkroot=/Developer/SDKs/MacOSX10.6.sdk} -I${deps_destroot}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${deps_destroot}/lib"
 
 configure_args="--prefix=${deps_destroot} --build=i386-apple-darwin10.8.0 --enable-shared"
-jn="-j $(($(sysctl -n hw.ncpu) + 1))"
+jn="-j $(($(sysctl -n hw.ncpu) + 2))"
 
 
 function BuildBundle_ {
@@ -119,24 +119,24 @@ function BuildDevel_ {
     popd
 } # end BuildDevel_
 
+
+
 # begin stage 1
 : && {
     # readline is required from unixODBC
     BuildDeps_ readline-6.2.tar.gz --with-curses && DocCopy_ readline-6.2
     BuildDeps_ m4-1.4.16.tar.bz2 --program-prefix=g && {
-        (
-            cd ${deps_destroot}/bin &&
-            ln -s {g,}m4
-        ) || exit
+        pushd ${deps_destroot}/bin &&
+            ln -s {g,}m4 && ./$_ --version >/dev/null &&
+        popd || exit
     }
     BuildDeps_ autoconf-2.69.tar.gz
     BuildDeps_ automake-1.13.1.tar.gz
     BuildDeps_ libtool-2.4.2.tar.gz --program-prefix=g && {
-        (
-            cd ${deps_destroot}/bin &&
-            ln -sf {g,}libtool &&
-            ln -sf {g,}libtoolze
-        ) || exit
+        pushd ${deps_destroot}/bin &&
+            ln -sf {g,}libtool    && ./$_ --version >/dev/null &&
+            ln -sf {g,}libtoolize && ./$_ --version >/dev/null &&
+        popd || exit
     }
     BuildDeps_ pkg-config-0.28.tar.gz \
         --disable-debug \
@@ -144,27 +144,39 @@ function BuildDevel_ {
         --with-internal-glib \
         --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
     BuildDeps_ gettext-0.18.2.tar.gz
-    # m4 required gettext
     BuildDeps_ xz-5.0.4.tar.bz2
-    BuildDevel_ libffi
 } # end stage 1
 
 # begin stage 1+
 : && {
+    # valgrind add '-arch' flag, i686-apple-darwin10-gcc-4.2.1 will not work
+    BuildDeps_ valgrind-3.8.1.tar.bz2 --enable-only32bit CC=$( xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2)
+    
+    cd ${workdir} &&
+    tar -xf ${srcroot}/source/gmp-5.1.1.tar.bz2 &&
+    pushd gmp-5.1.1 &&
+        sh configure ${configure_args} ABI=32 --enable-cxx &&
+        make ${jn} &&
+        make check &&
+        make install &&
+    popd || exit
+    BuildDeps_ libtasn1-3.3.tar.gz # libtasn1 required valgrind
+    BuildDeps_ nettle-2.7.tar.gz
+    BuildDeps_ gnutls-3.1.8.tar.xz \
+        --with-libnettle-prefix=${deps_destroot} \
+        LIBTASN1_CFLAGS="$(pkg-config --cflags libtasn1)" \
+        LIBTASN1_LIBS="$(pkg-config --libs libtasn1)"
+} # end stage 1+
+
+# begin stage 1++
+: && {
+    BuildDevel_ libffi
     BuildDevel_ glib
     BuildDevel_ freetype
-} # end stage 1+
+} # end stage 1++
 
 # begin stage 2
 : && {
-    # valgrind add '-arch' flag
-    BuildDeps_ valgrind-3.8.1.tar.bz2 \
-        --enable-only32bit \
-        CC=$( xcrun -find gcc-4.2) \
-        CXX=$(xcrun -find g++-4.2) \
-        CFLAGS="-isysroot ${sdkroot}" \
-        CXXFLAGS="-isysroot ${sdkroot}"
-    
     # orc required valgrind; to build with gcc failed
     BuildDeps_ orc-0.4.17.tar.gz \
         CC="${ccache} ${clang}" \
@@ -187,7 +199,7 @@ function BuildDevel_ {
 } # end stage 2
 
 # begin stage 3
-: && {
+! : && {
     BuildDeps_ libogg-1.3.0.tar.gz
     BuildDeps_ libvorbis-1.3.3.tar.gz
     BuildDeps_ flac-1.2.1.tar.gz --disable-asm-optimizations --disable-xmms-plugin
@@ -204,16 +216,15 @@ function BuildDevel_ {
 # begin stage 4
 : && {
     # cabextract
-    (
-        cd ${workdir} &&
-        tar -xf ${srcroot}/source/cabextract-1.4.tar.gz &&
-        cd cabextract-1.4 &&
-        ./configure ${configure_args/${deps_destroot}/${wine_destroot}} &&
+    cd ${workdir} &&
+    tar -xf ${srcroot}/source/cabextract-1.4.tar.gz &&
+    pushd cabextract-1.4 &&
+        sh configure ${configure_args/${deps_destroot}/${wine_destroot}} &&
         make ${jn} &&
         make install &&
-        DocCopy_ cabextract-1.4
-    ) || exit
-    
+    popd || exit
+    DocCopy_ cabextract-1.4 &&
+
     # winetricks
     install -d ${wine_destroot}/share/doc/winetricks &&
     install -m 0644 ${srcroot}/source/winetricks/src/COPYING $_ &&
@@ -278,13 +289,7 @@ __EOF__
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf}{,.orig} &&
     patch ${inf} ${srcroot}/patch/nxwine.patch || exit
     
-    # native dlls
-    fakedlls_dir=${wine_destroot}/lib/wine/fakedlls
-    nativedlls_dir=${srcroot}/nativedlls
-    mv ${fakedlls_dir}/quartz.dll{,.orig} &&
-    install -m 0644 ${nativedlls_dir}/quartz.dll ${fakedlls_dir} &&
-    mv ${fakedlls_dir}/gdiplus.dll{,.orig} &&
-    install -m 0644 ${nativedlls_dir}/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 ${fakedlls_dir}/gdiplus.dll || exit
+
 } || exit # end stage wine
 
 

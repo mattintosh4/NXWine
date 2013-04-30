@@ -48,7 +48,7 @@ make_args="-j $(($(sysctl -n hw.ncpu) + 2))"
 
 function BuildDeps_ {
     local f=${srcroot}/source/$1
-    local name=$(echo $1 | sed -E 's#\.(zip|tar\..*)$##') || exit
+    local n=$(echo $1 | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##') || exit
     shift
     case ${f} in
         *.xz)
@@ -62,7 +62,7 @@ function BuildDeps_ {
             tar -xf ${f} || exit
         ;;
     esac
-    pushd ${name} &&
+    pushd ${n} &&
         ./configure ${configure_args} "$@" &&
         make ${make_args} &&
         make install &&

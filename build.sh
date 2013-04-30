@@ -33,6 +33,7 @@ PATH=${git_dir}:${python_dir}:$PATH
 PATH=${deps_destdir}/bin:${deps_destdir}/sbin:$PATH
 export PATH
 export SHELL=/bin/bash
+export LC_ALL=C
 export ARCHFLAGS="-arch i386"
 export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"

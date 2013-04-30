@@ -119,7 +119,7 @@ function BuildBundle_ {
 
 # test mode check
 if test -n "${test_mode+x}"; then
-    # test
+    # test build
     test -e ${bundle} || BuildBundle_
 else
     # clean build
@@ -132,7 +132,7 @@ cd ${buildroot} || exit
 # bootstrap check
 build_bootstrap=
 readonly bootstrap_tar=${srcroot}/bootstrap.tbz2
-if test -f ${bootstrap_tar}; then
+if test -f "${bootstrap_tar}"; then
     tar -xf $_ -C ${bundle}/Contents &&
     test -d ${deps_destdir} &&
     unset build_bootstrap || exit

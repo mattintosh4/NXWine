@@ -1,11 +1,14 @@
-#!/usr/bin/env - bash -x
+#!/usr/bin/env - LC_ALL=C SHELL=/bin/bash bash -x
 
-case $1 in
-    --test)
-        test_mode=
-        shift
-    ;;
-esac
+while test -n "$1"
+do
+    case $1 in
+        --test)
+            test_mode= 
+            shift
+        ;;
+    esac
+done
 
 readonly srcroot="$(cd "$(dirname "$0")"; pwd)"
 readonly buildroot=/tmp/9C727687-28A1-47CE-9C4A-97128FADE79A
@@ -32,8 +35,6 @@ PATH=/usr/bin:/bin:/usr/sbin:/sbin
 PATH=${git_dir}:${python_dir}:$PATH
 PATH=${deps_destdir}/bin:${deps_destdir}/sbin:$PATH
 export PATH
-export SHELL=/bin/bash
-export LC_ALL=C
 export ARCHFLAGS="-arch i386"
 export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"

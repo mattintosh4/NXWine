@@ -227,8 +227,9 @@ cd ${buildroot} || exit
         sh configure ${configure_args/${deps_destdir}/${wine_destdir}} &&
         make ${make_args} &&
         make install &&
+        install -d ${wine_destdir}/share/doc/cabextract-1.4 &&
+        cp AUTHORS ChangeLog COPYING NEWS README TODO $_ &&
     popd || exit
-    DocCopy_ cabextract-1.4 &&
 
     # winetricks
     install -d ${wine_destdir}/share/doc/winetricks &&
@@ -261,7 +262,9 @@ __EOF__
     &&
     make ${make_args} depend &&
     make ${make_args} &&
-    make install || exit
+    make install &&
+    install -d ${wine_destdir}/share/doc/wine &&
+    cp ANNOUNCE AUTHORS COPYING.LIB LICENSE README VERSION $_ || exit
         
     wine_version=$(${wine_destdir}/bin/wine --version)
     
@@ -272,7 +275,7 @@ __EOF__
         lib/libwine.1.0.dylib \
         
     do
-        install_name_tool -add_rpath ${deps_destdir}/lib   ${wine_destdir}/${x} &&
+        install_name_tool -add_rpath ${deps_destdir}/lib    ${wine_destdir}/${x} &&
         install_name_tool -add_rpath /usr/lib               ${wine_destdir}/${x} || exit
     done
     unset x
@@ -285,9 +288,6 @@ install -d ${destroot}
 ln -sf "\$(cd "\$(dirname "\$0")/../../.." && pwd)" ${destroot}
 exec ${wine_destdir}/bin/wine.bin "\$@"
 __EOF__
-
-    # copy documents
-    DocCopy_ wine
     
     # wine.inf
     inf=${wine_destdir}/share/wine/wine.inf

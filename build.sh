@@ -124,13 +124,19 @@ function BuildDevel_ {
     # readline is required from unixODBC
     BuildDeps_ readline-6.2.tar.gz --with-curses && DocCopy_ readline-6.2
     BuildDeps_ m4-1.4.16.tar.bz2 --program-prefix=g && {
-    export M4=${deps_destroot}/bin/gm4
+        (
+            cd ${deps_destroot}/bin &&
+            ln -s {g,}m4
+        ) || exit
     }
     BuildDeps_ autoconf-2.69.tar.gz
     BuildDeps_ automake-1.13.1.tar.gz
     BuildDeps_ libtool-2.4.2.tar.gz --program-prefix=g && {
-        export LIBTOOL=${deps_destroot}/bin/glibtool
-        export LIBTOOLIZE=${deps_destroot}/bin/glibtoolize
+        (
+            cd ${deps_destroot}/bin &&
+            ln -sf {g,}libtool &&
+            ln -sf {g,}libtoolze
+        ) || exit
     }
     BuildDeps_ pkg-config-0.28.tar.gz \
         --disable-debug \

@@ -244,12 +244,15 @@ ditto ${srcroot}/source/wine wine && (
     make ${jn} depend &&
     make ${jn} &&
     make install || exit
+        
+    wine_version=$(${wine_destroot}/bin/wine --version)
     
     # add rpath to ${deps_destroot} and /usr/lib
     for x in \
         bin/wine \
         bin/wineserver \
-        lib/libwine.1.0.dylib
+        lib/libwine.1.0.dylib \
+        
     do
         install_name_tool -add_rpath ${deps_destroot}/lib   ${wine_destroot}/${x} &&
         install_name_tool -add_rpath /usr/lib               ${wine_destroot}/${x} || exit
@@ -258,11 +261,11 @@ ditto ${srcroot}/source/wine wine && (
     
     # WINELOADER
     mv ${wine_destroot}/bin/wine{,.bin} &&
-    cat <<__EOF__ > ${wine_destroot}/bin/wine && chmod +x ${wine_destroot}/bin/wine
+    cat <<__EOF__ > ${wine_destroot}/bin/wine && chmod +x ${wine_destroot}/bin/wine || exit
 #!/bin/bash
 install -d ${destroot}
-ln -sf "\$(cd "\$(dirname "\$0")/../.." && pwd)" ${destroot}
-exec ${wine_destroot}/bin/wine "\$@"
+ln -sf "\$(cd "\$(dirname "\$0")/../../.." && pwd)" ${destroot}
+exec ${wine_destroot}/bin/wine.bin "\$@"
 __EOF__
 
     # copy documents
@@ -281,11 +284,10 @@ __EOF__
     install -m 0644 ${nativedlls_dir}/quartz.dll ${fakedlls_dir} &&
     mv ${fakedlls_dir}/gdiplus.dll{,.orig} &&
     install -m 0644 ${nativedlls_dir}/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 ${fakedlls_dir}/gdiplus.dll || exit
-) || exit
+} || exit # end stage wine
 
 
 
-wine_version=$(${wine_destroot}/bin/wine --version)
 while read
 do
     /usr/libexec/PlistBuddy -c "${REPLY}" ${bundle}/Contents/Info.plist

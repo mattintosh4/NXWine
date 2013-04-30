@@ -33,7 +33,6 @@ PATH=${git_dir}:${python_dir}:$PATH
 PATH=${deps_destdir}/bin:${deps_destdir}/sbin:$PATH
 export PATH
 export SHELL=/bin/bash
-export LANG=ja_JP.UTF-8
 export ARCHFLAGS="-arch i386"
 export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
@@ -61,10 +60,10 @@ function BuildDeps_ {
         ;;
     esac
     pushd ${name} &&
-    ./configure ${configure_args} "$@" &&
-    make ${make_args} &&
-    make install || exit
-    popd
+        ./configure ${configure_args} "$@" &&
+        make ${make_args} &&
+        make install &&
+    popd|| exit
 } # end BuildDeps_
 
 function DocCopy_ {
@@ -324,7 +323,7 @@ __CMD__
 
 test ! -f ${dmg=${srcroot}/NXWine_$(date +%F)_${wine_version#*-}.dmg} || rm ${dmg}
 ln -s /Applications ${destroot} &&
-hdiutil create -format UDBZ -srcdir ${destroot} -volname NXWine ${dmg}
+hdiutil create -format UDBZ -srcdir ${destroot} -volname NXWine ${dmg} || exit
 
 :
 afplay /System/Library/Sounds/Hero.aiff

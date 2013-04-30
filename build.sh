@@ -12,7 +12,8 @@ done
 
 readonly srcroot="$(cd "$(dirname "$0")"; pwd)"
 readonly buildroot=/tmp/9C727687-28A1-47CE-9C4A-97128FADE79A
-readonly destroot=/tmp/com.github.mattintosh4 && install -d ${destroot} || exit
+readonly domain=com.github.mattintosh4
+readonly destroot=/tmp/${domain} && install -d ${destroot} || exit
 readonly bundle=${destroot}/NXWine.app
 readonly deps_destdir=${bundle}/Contents/SharedSupport
 readonly wine_destdir=${bundle}/Contents/Resources
@@ -283,7 +284,7 @@ __EOF__
     make install &&
     install -d ${wine_destdir}/share/doc/wine &&
     cp ANNOUNCE AUTHORS COPYING.LIB LICENSE README VERSION $_ || exit
-        
+    
     wine_version=$(${wine_destdir}/bin/wine --version)
     
     # add rpath to ${deps_destdir} and /usr/lib
@@ -309,7 +310,7 @@ __EOF__
     
     # wine.inf
     inf=${wine_destdir}/share/wine/wine.inf
-    mv ${inf}{,.orig}
+    mv ${inf}{,.orig} &&
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf}{,.orig} &&
     patch ${inf} ${srcroot}/patch/nxwine.patch || exit
     
@@ -324,7 +325,7 @@ do
 done <<__CMD__
 Add :NSHumanReadableCopyright string ${wine_version}, Copyright © 2013 mattintosh4, https://github.com/mattintosh4/NXWine
 Add :CFBundleVersion string $(date +%F)
-Add :CFBundleIdentifier string com.github.mattintosh4.NXWine
+Add :CFBundleIdentifier string ${domain}.NXWine
 Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions array
 Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions:0 string exe
 Add :CFBundleDocumentTypes:1:CFBundleTypeName string Windows Executable File

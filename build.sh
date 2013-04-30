@@ -256,7 +256,7 @@ test -n "${build_bootstrap+x}" && {
     cat <<'__EOF__' > ${wine_destdir}/bin/winetricks && chmod +x ${wine_destdir}/bin/winetricks || exit
 #!/bin/bash
 export PATH="$(cd "$(dirname "$0")"; pwd)":/usr/bin:/bin:/usr/sbin:/sbin
-which wine || { echo "wine not found."; exit; }
+which wine || { echo "wine not found."; exit 1; }
 exec winetricks.bin "$@"
 __EOF__
 } # end stage 4

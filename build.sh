@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/usr/bin/env - bash -x
 
 case $1 in
     --test)
@@ -8,62 +8,41 @@ case $1 in
 esac
 
 readonly srcroot="$(cd "$(dirname "$0")"; pwd)"
-readonly workdir=/tmp/9C727687-28A1-47CE-9C4A-97128FADE79A
-
+readonly buildroot=/tmp/9C727687-28A1-47CE-9C4A-97128FADE79A
 readonly destroot=/tmp/com.github.mattintosh4 && install -d ${destroot} || exit
 readonly bundle=${destroot}/NXWine.app
-readonly deps_destroot=${bundle}/Contents/SharedSupport
-readonly wine_destroot=${bundle}/Contents/Resources
-
-unset \
-    ACLOCAL \
-    AUTOCONF \
-    AUTOM4TE \
-    AUTOMAKE \
-    AUTOPOINT \
-    LIBTOOL \
-    LIBTOOLIZE \
-    M4 \
-    PKG_CONFIG \
-    PKG_CONFIG_LIBDIR \
-    PKG_CONFIG_PATH
+readonly deps_destdir=${bundle}/Contents/SharedSupport
+readonly wine_destdir=${bundle}/Contents/Resources
 
 test -x /usr/local/bin/ccache   && readonly ccache=$_   || exit
 test -x /usr/local/bin/clang    && readonly clang=$_    || exit
 test -x /usr/local/bin/uconv    && readonly uconv=$_    || exit
 test -x /usr/local/bin/make     && export MAKE=$_       || :
 
-test -x /usr/local/git/bin/git && readonly git_dir=$(dirname $_) || exit
+### Git and Python
+test -x /usr/local/git/bin/git  && readonly git_dir=$(dirname $_) || exit
 test -x /Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7 && readonly python_dir=$(dirname $_) || exit
 
+### Xcode
+[ $(sw_vers -productVersion) == 10.6.8 ] &&
+sdkroot=$(xcodebuild -version -sdk macosx10.6 | sed -n '/^Path/{;s/^Path: //;p;}') &&
+test -d ${sdkroot} && readonly sdkroot || exit
+
+PATH=/usr/bin:/bin:/usr/sbin:/sbin
+PATH=${git_dir}:${python_dir}:$PATH
+PATH=${deps_destdir}/bin:${deps_destdir}/sbin:$PATH
+export PATH
 export SHELL=/bin/bash
-export LC_ALL=C
-export PATH=${deps_destroot}/bin:${git_dir}:${python_dir}:$(sysctl -n user.cs_path)
+export LANG=ja_JP.UTF-8
 export ARCHFLAGS="-arch i386"
 export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
 export CFLAGS="-m32 -pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=10.6.8"
 export CXXFLAGS="${CFLAGS}"
-export CPPFLAGS=" -isysroot ${sdkroot=/Developer/SDKs/MacOSX10.6.sdk} -I${deps_destroot}/include"
-export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${deps_destroot}/lib"
-
-configure_args="--prefix=${deps_destroot} --build=i386-apple-darwin10.8.0 --enable-shared"
-jn="-j $(($(sysctl -n hw.ncpu) + 2))"
-
-
-function BuildBundle_ {
-    test ! -e ${bundle} || rm -rf ${bundle}
-    sed "s|@DATE@|$(date +%F)|g" ${srcroot}/NXWine.applescript | osacompile -o ${bundle} &&
-    rm ${bundle}/Contents/Resources/droplet.icns &&
-    install -d ${deps_destroot}/{bin,include,lib,share/man} &&
-    (cd ${deps_destroot} && ln -s share/man man) || exit
-} # end BuildBundle_
-test -n "${test_mode+x}" || rm -rf ${bundle} ${workdir}
-test -e ${bundle} || BuildBundle_
-install -d ${workdir}
-cd ${workdir} || exit
-
-
+export CPPFLAGS="-isysroot ${sdkroot} -I${deps_destdir}/include"
+export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${deps_destdir}/lib"
+configure_args="--prefix=${deps_destdir} --build=i386-apple-darwin10.8.0 --enable-shared"
+make_args="-j $(($(sysctl -n hw.ncpu) + 2))"
 
 function BuildDeps_ {
     local f=${srcroot}/source/$1
@@ -83,22 +62,22 @@ function BuildDeps_ {
     esac
     pushd ${name} &&
     ./configure ${configure_args} "$@" &&
-    make ${jn} &&
+    make ${make_args} &&
     make install || exit
     popd
 } # end BuildDeps_
 
 function DocCopy_ {
     test -n "$1" || exit
-    local dest=${deps_destroot}/share/doc/$1
+    local dest=${deps_destdir}/share/doc/$1
     install -d ${dest} &&
-    cp $(find -E ${workdir}/$1 -depth 1 -regex '.*(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING|COPYING.LIB|LICENSE|NEWS|README|RELEASE|TODO|VERSION)') ${dest} || exit
+    cp $(find -E ${buildroot}/$1 -depth 1 -regex '.*(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING|COPYING.LIB|LICENSE|NEWS|README|RELEASE|TODO|VERSION)') ${dest} || exit
 } # end DocCopy_
 
 function BuildDevel_ {
     test -n "$1" || exit
     
-    cd ${workdir} &&
+    cd ${buildroot} &&
     ditto ${srcroot}/source/$1 $1 &&
     pushd $1 || exit
     
@@ -124,11 +103,27 @@ function BuildDevel_ {
     esac
     (($? == 0)) || exit
     
-    make ${jn} &&
+    make ${make_args} &&
     make install &&
     DocCopy_ $1 || exit
     popd
 } # end BuildDevel_
+
+function BuildBundle_ {
+    sed "s|@DATE@|$(date +%F)|g" ${srcroot}/NXWine.applescript | osacompile -o ${bundle} &&
+    cp -f {${srcroot},${bundle}/Contents/Resources}/droplet.icns &&
+    install -d ${deps_destdir}/{bin,include,lib,share/man} &&
+    (cd ${deps_destdir} && ln -s share/man man) || exit
+} # end BuildBundle_
+
+if test -z "${test_mode+x}"; then
+    rm -rf ${bundle} ${buildroot}
+    BuildBundle_
+else
+    test -e ${bundle} || BuildBundle_
+fi
+install -d ${buildroot}
+cd ${buildroot} || exit
 
 
 
@@ -137,14 +132,14 @@ function BuildDevel_ {
     # readline is required from unixODBC
     BuildDeps_ readline-6.2.tar.gz --with-curses && DocCopy_ readline-6.2
     BuildDeps_ m4-1.4.16.tar.bz2 --program-prefix=g && {
-        pushd ${deps_destroot}/bin &&
+        pushd ${deps_destdir}/bin &&
             ln -s {g,}m4 && ./$_ --version >/dev/null &&
         popd || exit
     }
     BuildDeps_ autoconf-2.69.tar.gz
     BuildDeps_ automake-1.13.1.tar.gz
     BuildDeps_ libtool-2.4.2.tar.gz --program-prefix=g && {
-        pushd ${deps_destroot}/bin &&
+        pushd ${deps_destdir}/bin &&
             ln -sf {g,}libtool    && ./$_ --version >/dev/null &&
             ln -sf {g,}libtoolize && ./$_ --version >/dev/null &&
         popd || exit
@@ -153,7 +148,7 @@ function BuildDevel_ {
         --disable-debug \
         --disable-host-tool \
         --with-internal-glib \
-        --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
+        --with-pc-path=${deps_destdir}/lib/pkgconfig:${deps_destdir}/share/pkgconfig:/usr/lib/pkgconfig
     BuildDeps_ gettext-0.18.2.tar.gz
     BuildDeps_ xz-5.0.4.tar.bz2
 } # end stage 1
@@ -163,18 +158,18 @@ function BuildDevel_ {
     # valgrind add '-arch' flag, i686-apple-darwin10-gcc-4.2.1 will not work
     BuildDeps_ valgrind-3.8.1.tar.bz2 --enable-only32bit CC=$(xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2)
     
-    cd ${workdir} &&
+    cd ${buildroot} &&
     tar -xf ${srcroot}/source/gmp-5.1.1.tar.bz2 &&
     pushd gmp-5.1.1 &&
         sh configure ${configure_args} ABI=32 --enable-cxx &&
-        make ${jn} &&
+        make ${make_args} &&
         make check &&
         make install &&
     popd || exit
     BuildDeps_ libtasn1-3.3.tar.gz # libtasn1 required valgrind
     BuildDeps_ nettle-2.7.tar.gz
     BuildDeps_ gnutls-3.1.8.tar.xz \
-        --with-libnettle-prefix=${deps_destroot} \
+        --with-libnettle-prefix=${deps_destdir} \
         LIBTASN1_CFLAGS="$(pkg-config --cflags libtasn1)" \
         LIBTASN1_LIBS="$(pkg-config --libs libtasn1)"
 } # end stage 1+
@@ -201,8 +196,8 @@ function BuildDevel_ {
     # nasm is required from libjpeg-turbo
     BuildDeps_ nasm-2.10.07.tar.xz && DocCopy_ nasm-2.10.07
     BuildDeps_ libjpeg-turbo-1.2.1.tar.gz --with-jpeg8 && {
-        install -d ${deps_destroot}/share/doc/libjpeg-turbo-1.2.1
-        mv ${deps_destroot}/share/doc/{example.c,libjpeg.txt,README,README-turbo.txt,structure.txt,usage.txt,wizard.txt} $_
+        install -d ${deps_destdir}/share/doc/libjpeg-turbo-1.2.1
+        mv ${deps_destdir}/share/doc/{example.c,libjpeg.txt,README,README-turbo.txt,structure.txt,usage.txt,wizard.txt} $_
     }
     BuildDeps_ tiff-4.0.3.tar.gz
     BuildDeps_ jasper-1.900.1.zip --disable-opengl --without-x
@@ -227,20 +222,20 @@ function BuildDevel_ {
 # begin stage 4
 : && {
     # cabextract
-    cd ${workdir} &&
+    cd ${buildroot} &&
     tar -xf ${srcroot}/source/cabextract-1.4.tar.gz &&
     pushd cabextract-1.4 &&
-        sh configure ${configure_args/${deps_destroot}/${wine_destroot}} &&
-        make ${jn} &&
+        sh configure ${configure_args/${deps_destdir}/${wine_destdir}} &&
+        make ${make_args} &&
         make install &&
     popd || exit
     DocCopy_ cabextract-1.4 &&
 
     # winetricks
-    install -d ${wine_destroot}/share/doc/winetricks &&
+    install -d ${wine_destdir}/share/doc/winetricks &&
     install -m 0644 ${srcroot}/source/winetricks/src/COPYING $_ &&
-    install -m 0755 ${srcroot}/source/winetricks/src/winetricks ${wine_destroot}/bin/winetricks.bin &&
-    cat <<'__EOF__' > ${wine_destroot}/bin/winetricks && chmod +x ${wine_destroot}/bin/winetricks || exit
+    install -m 0755 ${srcroot}/source/winetricks/src/winetricks ${wine_destdir}/bin/winetricks.bin &&
+    cat <<'__EOF__' > ${wine_destdir}/bin/winetricks && chmod +x ${wine_destdir}/bin/winetricks || exit
 #!/bin/bash
 export PATH="$(cd "$(dirname "$0")"; pwd)":/usr/bin:/bin:/usr/sbin:/sbin
 which wine || { echo "wine not found."; exit; }
@@ -250,11 +245,11 @@ __EOF__
 
 # begin stage wine
 : && {
-    cd ${workdir} &&
+    cd ${buildroot} &&
     ditto ${srcroot}/source/wine wine &&
     cd wine &&
     ./configure \
-        --prefix=${wine_destroot} \
+        --prefix=${wine_destdir} \
         --without-sane \
         --without-v4l \
         --without-gphoto \
@@ -263,40 +258,40 @@ __EOF__
         --without-gsm \
         --without-cms \
         --without-x \
-        PKG_CONFIG=${deps_destroot}/bin/pkg-config \
+        PKG_CONFIG=${deps_destdir}/bin/pkg-config \
     &&
-    make ${jn} depend &&
-    make ${jn} &&
+    make ${make_args} depend &&
+    make ${make_args} &&
     make install || exit
         
-    wine_version=$(${wine_destroot}/bin/wine --version)
+    wine_version=$(${wine_destdir}/bin/wine --version)
     
-    # add rpath to ${deps_destroot} and /usr/lib
+    # add rpath to ${deps_destdir} and /usr/lib
     for x in \
         bin/wine \
         bin/wineserver \
         lib/libwine.1.0.dylib \
         
     do
-        install_name_tool -add_rpath ${deps_destroot}/lib   ${wine_destroot}/${x} &&
-        install_name_tool -add_rpath /usr/lib               ${wine_destroot}/${x} || exit
+        install_name_tool -add_rpath ${deps_destdir}/lib   ${wine_destdir}/${x} &&
+        install_name_tool -add_rpath /usr/lib               ${wine_destdir}/${x} || exit
     done
     unset x
     
     # WINELOADER
-    mv ${wine_destroot}/bin/wine{,.bin} &&
-    cat <<__EOF__ > ${wine_destroot}/bin/wine && chmod +x ${wine_destroot}/bin/wine || exit
+    mv ${wine_destdir}/bin/wine{,.bin} &&
+    cat <<__EOF__ > ${wine_destdir}/bin/wine && chmod +x ${wine_destdir}/bin/wine || exit
 #!/bin/bash
 install -d ${destroot}
 ln -sf "\$(cd "\$(dirname "\$0")/../../.." && pwd)" ${destroot}
-exec ${wine_destroot}/bin/wine.bin "\$@"
+exec ${wine_destdir}/bin/wine.bin "\$@"
 __EOF__
 
     # copy documents
     DocCopy_ wine
     
     # wine.inf
-    inf=${wine_destroot}/share/wine/wine.inf
+    inf=${wine_destdir}/share/wine/wine.inf
     mv ${inf}{,.orig}
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf}{,.orig} &&
     patch ${inf} ${srcroot}/patch/nxwine.patch || exit

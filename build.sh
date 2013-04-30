@@ -15,12 +15,12 @@ readonly bundle=${destroot}/NXWine.app
 readonly deps_destroot=${bundle}/Contents/SharedSupport
 readonly wine_destroot=${bundle}/Contents/Resources
 
-test -x /usr/local/bin/ccache       && readonly ccache=$_   || exit
-test -x /usr/local/bin/clang        && readonly clang=$_    || exit
-test -x /usr/local/bin/uconv        && readonly uconv=$_    || exit
-test -x /usr/local/bin/make         && export MAKE=$_       || :
-test -x /usr/local/bin/objdump      && export OBJDUMP=$_    || :
-test -x /usr/local/bin/objcopy      && export OBJCOPY=$_    || :
+test -x /usr/local/bin/ccache   && readonly ccache=$_   || exit
+test -x /usr/local/bin/clang    && readonly clang=$_    || exit
+test -x /usr/local/bin/uconv    && readonly uconv=$_    || exit
+test -x /usr/local/bin/make     && export MAKE=$_       || :
+test -x /usr/local/bin/objdump  && export OBJDUMP=$_    || :
+test -x /usr/local/bin/objcopy  && export OBJCOPY=$_    || :
 
 test -x /usr/local/git/bin/git && readonly git_dir=$(dirname $_) || exit
 test -x /Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7 && readonly python_dir=$(dirname $_) || exit

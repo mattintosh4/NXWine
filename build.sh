@@ -8,19 +8,30 @@ case $1 in
 esac
 
 readonly srcroot="$(cd "$(dirname "$0")"; pwd)"
-readonly workdir=${TMPDIR}/9C727687-28A1-47CE-9C4A-97128FADE79A
+readonly workdir=/tmp/9C727687-28A1-47CE-9C4A-97128FADE79A
 
 readonly destroot=/tmp/com.github.mattintosh4 && install -d ${destroot} || exit
 readonly bundle=${destroot}/NXWine.app
 readonly deps_destroot=${bundle}/Contents/SharedSupport
 readonly wine_destroot=${bundle}/Contents/Resources
 
+unset \
+    ACLOCAL \
+    AUTOCONF \
+    AUTOM4TE \
+    AUTOMAKE \
+    AUTOPOINT \
+    LIBTOOL \
+    LIBTOOLIZE \
+    M4 \
+    PKG_CONFIG \
+    PKG_CONFIG_LIBDIR \
+    PKG_CONFIG_PATH
+
 test -x /usr/local/bin/ccache   && readonly ccache=$_   || exit
 test -x /usr/local/bin/clang    && readonly clang=$_    || exit
 test -x /usr/local/bin/uconv    && readonly uconv=$_    || exit
 test -x /usr/local/bin/make     && export MAKE=$_       || :
-test -x /usr/local/bin/objdump  && export OBJDUMP=$_    || :
-test -x /usr/local/bin/objcopy  && export OBJCOPY=$_    || :
 
 test -x /usr/local/git/bin/git && readonly git_dir=$(dirname $_) || exit
 test -x /Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7 && readonly python_dir=$(dirname $_) || exit
@@ -150,7 +161,7 @@ function BuildDevel_ {
 # begin stage 1+
 : && {
     # valgrind add '-arch' flag, i686-apple-darwin10-gcc-4.2.1 will not work
-    BuildDeps_ valgrind-3.8.1.tar.bz2 --enable-only32bit CC=$( xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2)
+    BuildDeps_ valgrind-3.8.1.tar.bz2 --enable-only32bit CC=$(xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2)
     
     cd ${workdir} &&
     tar -xf ${srcroot}/source/gmp-5.1.1.tar.bz2 &&
@@ -181,8 +192,8 @@ function BuildDevel_ {
     BuildDeps_ orc-0.4.17.tar.gz \
         CC="${ccache} ${clang}" \
         CXX="${ccache} ${clang}++" \
-        CFLAGS="-m32 -arch i386 ${CFLAGS}" \
-        CXXFLAGS="-m32 -arch i386 ${CFLAGS}"
+        CFLAGS="-arch i386 ${CFLAGS}" \
+        CXXFLAGS="-arch i386 ${CFLAGS}"
     
     BuildDeps_ unixODBC-2.3.1.tar.gz && DocCopy_ unixODBC-2.3.1
     
@@ -252,6 +263,7 @@ __EOF__
         --without-gsm \
         --without-cms \
         --without-x \
+        PKG_CONFIG=${deps_destroot}/bin/pkg-config \
     &&
     make ${jn} depend &&
     make ${jn} &&

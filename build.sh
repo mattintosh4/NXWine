@@ -81,6 +81,10 @@ function BuildDevel_ {
     pushd $1 || exit
     
     case $1 in
+        libusb)
+            git checkout -f master &&
+            sh autogen.sh ${configure_args}
+        ;;
         libffi)
             git checkout -f master &&
             sh configure ${configure_args}
@@ -150,6 +154,7 @@ cd ${buildroot} || exit
         --with-pc-path=${deps_destdir}/lib/pkgconfig:${deps_destdir}/share/pkgconfig:/usr/lib/pkgconfig
     BuildDeps_ gettext-0.18.2.tar.gz
     BuildDeps_ xz-5.0.4.tar.bz2
+    BuildDevel_ libusb
 } # end stage 1
 
 # begin stage 1+

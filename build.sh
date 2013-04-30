@@ -223,7 +223,7 @@ test -n "${build_bootstrap+x}" && {
 } # end stage 2
 
 # begin stage 3
-! : && {
+: && {
     BuildDeps_ libogg-1.3.0.tar.gz
     BuildDeps_ libvorbis-1.3.3.tar.gz
     BuildDeps_ flac-1.2.1.tar.gz --disable-asm-optimizations --disable-xmms-plugin

@@ -81,10 +81,6 @@ function BuildDevel_ {
     pushd $1 || exit
     
     case $1 in
-        libusb)
-            git checkout -f master &&
-            sh autogen.sh ${configure_args}
-        ;;
         libffi)
             git checkout -f master &&
             sh configure ${configure_args}
@@ -119,19 +115,29 @@ function BuildBundle_ {
     (cd ${deps_destdir} && ln -s share/man man) || exit
 } # end BuildBundle_
 
-if test -z "${test_mode+x}"; then
+# test mode check
+if test -n "${test_mode+x}"; then
+    # test
+    test -e ${bundle} || BuildBundle_
+else
+    # clean build
     rm -rf ${bundle} ${buildroot}
     BuildBundle_
-else
-    test -e ${bundle} || BuildBundle_
 fi
 install -d ${buildroot}
 cd ${buildroot} || exit
 
+# bootstrap check
+build_bootstrap=
+readonly bootstrap_tar=${srcroot}/bootstrap.tbz2
+if test -f ${bootstrap_tar}; then
+    tar -xf $_ -C ${bundle}/Contents &&
+    test -d ${deps_destdir} &&
+    unset build_bootstrap || exit
+fi
 
-
-# begin stage 1
-: && {
+# begin bootstrap
+test -n "${build_bootstrap+x}" && {
     # readline is required from unixODBC
     BuildDeps_ readline-6.2.tar.gz --with-curses && DocCopy_ readline-6.2
     BuildDeps_ m4-1.4.16.tar.bz2 --program-prefix=g && {
@@ -154,11 +160,16 @@ cd ${buildroot} || exit
         --with-pc-path=${deps_destdir}/lib/pkgconfig:${deps_destdir}/share/pkgconfig:/usr/lib/pkgconfig
     BuildDeps_ gettext-0.18.2.tar.gz
     BuildDeps_ xz-5.0.4.tar.bz2
-    BuildDevel_ libusb
-} # end stage 1
+    
+    ditto -cj --keepParent ${deps_destdir} ${bootstrap_tar} || exit
+} # end bootstrap
 
-# begin stage 1+
+
+# begin stage 1
 : && {
+    BuildDeps_ libusb-1.0.9.tar.bz2
+    BuildDeps_ libusb-compat-0.1.4.tar.bz2
+    
     # valgrind add '-arch' flag, i686-apple-darwin10-gcc-4.2.1 will not work
     BuildDeps_ valgrind-3.8.1.tar.bz2 --enable-only32bit CC=$(xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2)
     
@@ -176,14 +187,14 @@ cd ${buildroot} || exit
         --with-libnettle-prefix=${deps_destdir} \
         LIBTASN1_CFLAGS="$(pkg-config --cflags libtasn1)" \
         LIBTASN1_LIBS="$(pkg-config --libs libtasn1)"
-} # end stage 1+
+} # end stage 1
 
-# begin stage 1++
+# begin stage 1+
 : && {
     BuildDevel_ libffi
     BuildDevel_ glib
     BuildDevel_ freetype
-} # end stage 1++
+} # end stage 1+
 
 # begin stage 2
 : && {

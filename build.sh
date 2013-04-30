@@ -339,7 +339,7 @@ Add :CFBundleDocumentTypes:3:CFBundleTypeName string Windows Shortcut File
 Add :CFBundleDocumentTypes:3:CFBundleTypeRole string Viewer
 __CMD__
 
-test ! -f ${dmg=${srcroot}/NXWine_$(date +%F)_${wine_version#*-}.dmg} || rm ${dmg}
+test ! -f "${dmg=${srcroot}/NXWine_$(date +%F)_${wine_version/wine-}.dmg}" || rm ${dmg}
 ln -s /Applications ${destroot} &&
 hdiutil create -format UDBZ -srcdir ${destroot} -volname NXWine ${dmg} || exit
 

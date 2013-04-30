@@ -42,9 +42,10 @@ jn="-j $(($(sysctl -n hw.ncpu) + 1))"
 
 function BuildBundle_ {
     test ! -e ${bundle} || rm -rf ${bundle}
-    sed "s|@DATE@|$(date +%F)|g" ${srcroot}/NXWine.applescript | osacompile -o ${bundle} || exit
-    rm ${bundle}/Contents/Resources/droplet.icns
-    install -d ${deps_destroot}/{bin,include,lib} || exit
+    sed "s|@DATE@|$(date +%F)|g" ${srcroot}/NXWine.applescript | osacompile -o ${bundle} &&
+    rm ${bundle}/Contents/Resources/droplet.icns &&
+    install -d ${deps_destroot}/{bin,include,lib,share/man} &&
+    (cd ${deps_destroot} && ln -s share/man man) || exit
 } # end BuildBundle_
 test -n "${test_mode+x}" || rm -rf ${bundle} ${workdir}
 test -e ${bundle} || BuildBundle_

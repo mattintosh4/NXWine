@@ -4,11 +4,10 @@ readonly srcroot="$(cd "$(dirname "$0")"; pwd)"
 readonly build_version=$(date +%Y%m%d)
 readonly domain=com.github.mattintosh4
 
-readonly destroot=/tmp/${domain}
 readonly workroot=/tmp/9C727687-28A1-47CE-9C4A-97128FADE79A
-readonly bundle=${destroot}/NXWine.app
-readonly deps_destdir=${bundle}/Contents/SharedSupport
-readonly wine_destdir=${bundle}/Contents/Resources
+readonly destroot=/tmp/${domain}
+readonly wine_destdir=${destroot}/NXWine.app/Contents/Resources
+readonly deps_destdir=${destroot}/NXWine.app/Contents/SharedSupport
 
 readonly bootstrap_tar=${srcroot}/bootstrap.tar.bz2
 readonly deps_tar=${srcroot}/deps.tar.bz2

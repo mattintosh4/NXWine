@@ -22,6 +22,7 @@ https://code.google.com/p/mattintosh4-devel/downloads/list?q=label:NXWine
 
 ```sh
 $ /Applications/NXWine.app/Contents/Resources/bin/wine [args]
+```
 
 ### How to customize AppleScript
 

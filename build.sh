@@ -1,5 +1,9 @@
 #!/usr/bin/env - LC_ALL=C SHELL=/bin/bash bash -x
 
+## bash info
+# GNU bash, version 3.2.48(1)-release (x86_64-apple-darwin10.0)
+# Copyright (C) 2007 Free Software Foundation, Inc.
+
 readonly srcroot="$(cd "$(dirname "$0")"; pwd)"
 readonly build_version=$(date +%Y%m%d)
 readonly domain=com.github.mattintosh4

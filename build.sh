@@ -20,16 +20,16 @@ test -x /usr/local/bin/uconv  && readonly uconv=$_  || exit
 test -x /usr/local/bin/make   && export MAKE=$_     || :
 test -x /usr/local/bin/gdb    && export GDB=$_      || :
 
-### Git, Python
+### Git and Python
 test -x /usr/local/git/bin/git  && readonly git_dir=$(dirname $_) || exit
 test -x /Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7 && readonly python_dir=$(dirname $_) || exit
 
 ### Xcode
 readonly arch=i386
 readonly osx_version=$(sw_vers -productVersion | cut -d. -f-2) &&
-readonly kernel_version=$(uname -r | cut -d. -f1)
-sdkroot=$(xcodebuild -version -sdk macosx${osx_version} | sed -n '/^Path/{;s/^Path: //;p;}') &&
-test -d ${sdkroot} && readonly sdkroot || exit
+readonly kernel_version=$(uname -r | cut -d. -f1) &&
+readonly sdkroot=$(xcodebuild -version -sdk macosx${osx_version} | sed -n '/^Path/{;s/^Path: //;p;}') &&
+test -d ${sdkroot} || exit
 
 PATH=/usr/bin:/bin:/usr/sbin:/sbin
 PATH=${git_dir}:${python_dir}:$PATH
@@ -64,12 +64,13 @@ function DocCopy_ {
 
 function Compress_ {
   test -n "$1" &&
-  # !!! compress with absolute path
+  # !!! to compress with absolute path
   tar -cP ${destroot} | bzip2 > $1 || exit
 } # end Compress_
 
 function Extract_ {
   test -n "$1" &&
+  # !!! to extract with absolute path
   tar -xvPf $1 || exit
 } # end Extract_
 
@@ -288,18 +289,20 @@ __EOF__
 } # end BuildWine_
 
 function BuildBundle_ {
-  local tmpdir=/tmp/$(uuidgen)
   local App=NXWine.app
   local Resources=${App}/Contents/Resources
   
-  install -d ${tmpdir} &&
+  test ! -d ${destroot} || rm -rf ${destroot}
+  install -d ${destroot} &&
   cd $_ &&
   sed "s|@DATE@|$(date +%F)|g" ${srcroot}/NXWine.applescript | osacompile -o ${App} &&
   rm ${Resources}/droplet.icns &&
   install -m 0644 {${srcroot},${Resources}}/nxwine.icns || exit
   
-  tar -xf ${wine_tar} &&
-  local wine_version=$(${Resources}/bin/wine --version) || exit
+  # !!! to extract with absolute path
+  tar -xvPf ${wine_tar} &&
+  local wine_version=$(${Resources}/bin/wine.bin --version) &&
+  test -n "${wine_version}" || exit
   
   while read
   do
@@ -326,45 +329,43 @@ __CMD__
   local dmg=${srcroot}/NXWine_${build_version}_${wine_version/wine-}.dmg
   test ! -f ${dmg} || rm ${dmg}
   ln -s /Applications &&
-  hdiutil create -format UDBZ -srcdir ${tmpdir} -volname NXWine ${dmg} || exit
+  hdiutil create -format UDBZ -srcdir ${destroot} -volname NXWine ${dmg} &&
+  rm -rf ${destroot} || exit
 } # end BuildBundle_
 
 # -------------------------------------- begin processing section
 
-rm -rf ${destroot} ${workroot} &&
-install -d  ${deps_destdir}/{bin,include,share/man} \
-            ${wine_destdir}/lib \
-            ${workroot} \
-&& (
-  cd ${deps_destdir} &&
-  ln -s ../Resources/lib lib &&
-  ln -s share/man man
-) || exit
-
-### bootstrap
-if test -f ${bootstrap_tar}; then
-  Extract_ ${bootstrap_tar}
+if test -f ${wine_tar}; then :
 else
-  BuildBootstrap_
-  Compress_ ${bootstrap_tar}
-fi
-
-### dependencies
-if test -f ${deps_tar}; then
-  Extract_ ${deps_tar}
-else
-  BuildStage1_
-  BuildStage2_
-  BuildStage3_
-  BuildStage4_
-  BuildStage5_
-  Compress_ ${deps_tar}
-fi
-
-### wine
-if test -f ${wine_tar}; then
-  Extract_ ${wine_tar}
-else
+  # initialize
+  rm -rf ${destroot} ${workroot} &&
+  install -d  ${deps_destdir}/{bin,include,share/man} \
+              ${wine_destdir}/lib \
+              ${workroot} \
+  && (
+    cd ${deps_destdir} &&
+    ln -s ../Resources/lib lib &&
+    ln -s share/man man
+  ) || exit
+  
+  # dependencies
+  if test -f ${deps_tar}; then Extract_ ${deps_tar}
+  else
+    # bootstrap
+    if test -f ${bootstrap_tar}; then Extract_ ${bootstrap_tar}
+    else
+      BuildBootstrap_
+      Compress_ ${bootstrap_tar}
+    fi
+    
+    BuildStage1_
+    BuildStage2_
+    BuildStage3_
+    BuildStage4_
+    BuildStage5_
+    Compress_ ${deps_tar}
+  fi
+  
   BuildWine_
   Compress_ ${wine_tar}
 fi

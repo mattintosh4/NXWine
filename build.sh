@@ -5,10 +5,14 @@ readonly build_version=$(date +%Y%m%d)
 readonly domain=com.github.mattintosh4
 
 readonly destroot=/tmp/${domain}
-readonly buildroot=/tmp/9C727687-28A1-47CE-9C4A-97128FADE79A
+readonly workroot=/tmp/9C727687-28A1-47CE-9C4A-97128FADE79A
 readonly bundle=${destroot}/NXWine.app
 readonly deps_destdir=${bundle}/Contents/SharedSupport
 readonly wine_destdir=${bundle}/Contents/Resources
+
+readonly bootstrap_tar=${srcroot}/bootstrap.tbz2
+readonly deps_tar=${srcroot}/deps.tbz2
+readonly wine_tar=${srcroot}/wine.tbz2
 
 test -x /usr/local/bin/ccache && readonly ccache=$_ || exit
 test -x /usr/local/bin/clang  && readonly clang=$_  || exit
@@ -16,11 +20,11 @@ test -x /usr/local/bin/uconv  && readonly uconv=$_  || exit
 test -x /usr/local/bin/make   && export MAKE=$_     || :
 test -x /usr/local/bin/gdb    && export GDB=$_      || :
 
-## Git & Python
+### Git, Python
 test -x /usr/local/git/bin/git  && readonly git_dir=$(dirname $_) || exit
 test -x /Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7 && readonly python_dir=$(dirname $_) || exit
 
-## Xcode
+### Xcode
 readonly arch=i386
 readonly osx_version=$(sw_vers -productVersion | cut -d. -f-2) &&
 readonly kernel_version=$(uname -r | cut -d. -f1)
@@ -31,8 +35,8 @@ PATH=/usr/bin:/bin:/usr/sbin:/sbin
 PATH=${git_dir}:${python_dir}:$PATH
 PATH=${deps_destdir}/bin:${deps_destdir}/sbin:$PATH
 export PATH
-export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
-export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
+export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)" || exit
+export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)" || exit
 export CFLAGS="-m32 -pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${osx_version}"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-isysroot ${sdkroot} -I${deps_destdir}/include"
@@ -46,42 +50,56 @@ configure_args="\
 --disable-dependency-tracking"
 make_args="-j $(($(sysctl -n hw.ncpu) + 2))"
 
-function BuildDeps_ {
+# -------------------------------------- begin utilities functions
+
+function DocCopy_ {
   test -n "$1" || exit
-  local f=${srcroot}/source/$1
-  local n=$(echo $1 | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##') || exit
-  shift
+  local d=${deps_destdir}/share/doc/$1
+  install -d ${d} &&
+  find -E ${workroot}/$1 -depth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)' | while read
+  do
+    cp "${REPLY}" ${d}
+  done || exit
+} # end DocCopy_
+
+function Compress_ {
+  test -n "$1" &&
+  ditto -cj ${destroot} $1 || exit
+} # end Compress_
+
+function Extract_ {
+  test -n "$1" &&
+  tar -xf $1 -C ${destroot} || exit
+} # end Extract_
+
+# -------------------------------------- begin build processing functions
+
+function BuildDeps_ {
+  test -n "$1" &&
+  test -f ${srcroot}/source/$1 &&
+  local f=$_ &&
+  local n=$(basename ${f} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##') &&
+  shift || exit
   
-  cd ${buildroot} &&
+  cd ${workroot} &&
   case ${f} in
     *.xz)
-      if which xzcat; then
-        xzcat ${f} | tar -x - || exit
-      else
-        /usr/local/bin/xzcat ${f} | tar -x - || exit
-      fi
+      xzcat ${f} | tar -x -
     ;;
     *)
-      tar -xf ${f} || exit
+      tar -xf ${f}
     ;;
-  esac
-  cd ${n}
+  esac &&
+  cd ${n} &&
   ./configure ${configure_args} "$@" &&
   make ${make_args} &&
   make install || exit
 } # end BuildDeps_
 
-function DocCopy_ {
-  test -n "$1" || exit
-  local dest=${deps_destdir}/share/doc/$1
-  install -d ${dest} &&
-  cp $(find -E ${buildroot}/$1 -depth 1 -regex '.*(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING|COPYING.LIB|LICENSE|NEWS|README|RELEASE|TODO|VERSION)') ${dest} || exit
-} # end DocCopy_
-
 function BuildDevel_ {
   test -n "$1" || exit
   
-  cd ${buildroot} &&
+  cd ${workroot} &&
   ditto ${srcroot}/source/$1 $1 &&
   cd $1
   
@@ -139,7 +157,7 @@ function BuildStage1_ {
   # valgrind add '-arch' flag, i686-apple-darwin10-gcc-4.2.1 will not work
   BuildDeps_ valgrind-3.8.1.tar.bz2 --enable-only32bit --without-mpicc CC=$(xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2)
   
-  cd ${buildroot} &&
+  cd ${workroot} &&
   tar -xf ${srcroot}/source/gmp-5.1.1.tar.bz2 &&
   pushd gmp-5.1.1 &&
     sh configure ${configure_args} ABI=32 --enable-cxx &&
@@ -158,7 +176,7 @@ function BuildStage1_ {
 function BuildStage2_ {
   BuildDevel_ libffi
   BuildDevel_ glib
-  BuildDevel_ freetype
+  BuildDevel_ freetype && test -f ${deps_destdir}/lib/libfreetype.6.dylib || { echo "$_ is missing."; exit 1; }
 } # end BuildStage2_
 
 function BuildStage3_ {
@@ -198,15 +216,15 @@ function BuildStage4_ {
 
 function BuildStage5_ {
   ### cabextract
-  cd ${buildroot} &&
-  tar -xf ${srcroot}/source/cabextract-1.4.tar.gz &&
-  pushd cabextract-1.4 &&
+  cd ${workroot} &&
+  tar -xf ${srcroot}/source/cabextract-1.4.tar.gz && (
+    cd cabextract-1.4 &&
     sh configure ${configure_args/${deps_destdir}/${wine_destdir}} &&
     make ${make_args} &&
     make install &&
     install -d ${wine_destdir}/share/doc/cabextract-1.4 &&
-    cp AUTHORS ChangeLog COPYING NEWS README TODO $_ &&
-  popd || exit
+    cp AUTHORS ChangeLog COPYING NEWS README TODO $_
+  ) || exit
   
   ### winetricks
   install -d ${wine_destdir}/share/doc/winetricks &&
@@ -221,13 +239,13 @@ __EOF__
 } # end BuildStage5_
 
 function BuildWine_ {
-  local srcdir=${srcroot}/share/wine && test -d ${srcdir} || exit
+  local srcdir=${srcroot}/source/wine && test -d ${srcdir} || exit
   local bindir=${wine_destdir}/bin
   local libdir=${wine_destdir}/lib
   local docdir=${wine_destdir}/share/doc/wine
   local inf=${wine_destdir}/share/wine/wine.inf
   
-  cd ${buildroot} &&
+  cd ${workroot} &&
   ditto ${srcdir} wine &&
   cd wine &&
   git checkout -f master &&
@@ -244,8 +262,7 @@ function BuildWine_ {
   &&
   make ${make_args} depend &&
   make ${make_args} &&
-  make install &&
-  wine_version=$(${bindir}/bin/wine --version) || exit
+  make install || exit
 
   ### add rpath to /usr/lib
   install_name_tool -add_rpath /usr/lib ${bindir}/wine &&
@@ -311,31 +328,19 @@ __CMD__
   hdiutil create -format UDBZ -srcdir ${tmpdir} -volname NXWine ${dmg} || exit
 } # end BuildBundle_
 
-function Compress_ {
-  test -n "$1" &&
-  ditto -cj ${destroot} $1 || exit
-}
-function Extract_ {
-  test -n "$1" &&
-  tar -xf $1 -C ${destroot} || exit
-}
+# -------------------------------------- begin processing section
 
-### bundle container initialize
-rm -rf ${destroot} ${buildroot}
-install -d \
-  ${deps_destdir}/{bin,include,share/man} \
-  ${wine_destdir}/lib \  
-  ${buildroot} \
+rm -rf ${destroot} ${workroot} &&
+install -d  ${deps_destdir}/{bin,include,share/man} \
+            ${wine_destdir}/lib \
+            ${workroot} \
 && (
   cd ${deps_destdir} &&
   ln -s ../Resources/lib lib &&
   ln -s share/man man
 ) || exit
 
-readonly bootstrap_tar=${srcroot}/bootstrap.tbz2
-readonly deps_tar=${srcroot}/deps.tbz2
-readonly wine_tar=${srcroot}/wine.tbz2
-
+### bootstrap
 if test -f ${bootstrap_tar}; then
   Extract_ ${bootstrap_tar}
 else
@@ -343,6 +348,7 @@ else
   Compress_ ${bootstrap_tar}
 fi
 
+### dependencies
 if test -f ${deps_tar}; then
   Extract_ ${deps_tar}
 else
@@ -354,6 +360,7 @@ else
   Compress_ ${deps_tar}
 fi
 
+### wine
 if test -f ${wine_tar}; then
   Extract_ ${wine_tar}
 else
@@ -361,7 +368,10 @@ else
   Compress_ ${wine_tar}
 fi
 
+### bundle
 BuildBundle_
+
+# -------------------------------------- end processing section
 
 :
 afplay /System/Library/Sounds/Hero.aiff

@@ -43,7 +43,8 @@ export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)" || exit
 export CFLAGS="-m32 -pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${osx_version}"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-isysroot ${sdkroot} -I${deps_destdir}/include"
-export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${deps_destdir}/lib"
+export LDFLAGS="-Wl,-headerpad_max_install_names -Wl,-syslibroot,${sdkroot} -L${deps_destdir}/lib"
+export MACOSX_DEPLOYMENT_TARGET=${osx_version}
 
 configure_args="\
 --prefix=${deps_destdir} \

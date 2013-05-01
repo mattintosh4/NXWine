@@ -10,9 +10,9 @@ readonly bundle=${destroot}/NXWine.app
 readonly deps_destdir=${bundle}/Contents/SharedSupport
 readonly wine_destdir=${bundle}/Contents/Resources
 
-readonly bootstrap_tar=${srcroot}/bootstrap.tbz2
-readonly deps_tar=${srcroot}/deps.tbz2
-readonly wine_tar=${srcroot}/wine.tbz2
+readonly bootstrap_tar=${srcroot}/bootstrap.tar.bz2
+readonly deps_tar=${srcroot}/deps.tar.bz2
+readonly wine_tar=${srcroot}/wine.tar.bz2
 
 test -x /usr/local/bin/ccache && readonly ccache=$_ || exit
 test -x /usr/local/bin/clang  && readonly clang=$_  || exit
@@ -64,12 +64,13 @@ function DocCopy_ {
 
 function Compress_ {
   test -n "$1" &&
-  ditto -cj ${destroot} $1 || exit
+  # !!! compress with absolute path
+  tar -cP ${destroot} | bzip2 > $1 || exit
 } # end Compress_
 
 function Extract_ {
   test -n "$1" &&
-  tar -xf $1 -C ${destroot} || exit
+  tar -xvPf $1 || exit
 } # end Extract_
 
 # -------------------------------------- begin build processing functions

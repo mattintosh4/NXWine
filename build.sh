@@ -299,7 +299,7 @@ function BuildBundle_ {
   install -m 0644 {${srcroot},${Resources}}/nxwine.icns || exit
   
   # !!! to extract with absolute path
-  tar -xvPf ${wine_tar} &&
+  Extract_ ${wine_tar} &&
   local wine_version=$(${Resources}/bin/wine.bin --version) &&
   test -n "${wine_version}" || exit
   

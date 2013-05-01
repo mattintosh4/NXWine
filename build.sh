@@ -160,13 +160,13 @@ function BuildStage1_ {
   BuildDeps_ valgrind-3.8.1.tar.bz2 --enable-only32bit --without-mpicc CC=$(xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2)
   
   cd ${workroot} &&
-  tar -xf ${srcroot}/source/gmp-5.1.1.tar.bz2 &&
-  pushd gmp-5.1.1 &&
+  tar -xf ${srcroot}/source/gmp-5.1.1.tar.bz2 && (
+    cd gmp-5.1.1 &&
     sh configure ${configure_args} ABI=32 --enable-cxx &&
     make ${make_args} &&
     make check &&
-    make install &&
-  popd || exit
+    make install
+  ) || exit
   BuildDeps_ libtasn1-3.3.tar.gz # libtasn1 required valgrind
   BuildDeps_ nettle-2.7.tar.gz
   BuildDeps_ gnutls-3.1.8.tar.xz \

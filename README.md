@@ -26,11 +26,11 @@ $ /Applications/NXWine.app/Contents/Resources/bin/wine [args]
 
 ### How to customize AppleScript
 
-note: Do not open NXWine.app by AppleScript Editor.
-
 ```sh
 $ open /Applications/NXWine.app/Contents/Resources/Scripts/main.scpt
 ```
+
+_Do not open NXWine.app by AppleScript Editor._
 
 ### How to use Winetricks
 

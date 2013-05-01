@@ -267,7 +267,7 @@ function BuildWine_ {
   ### add rpath to /usr/lib
   install_name_tool -add_rpath /usr/lib ${bindir}/wine &&
   install_name_tool -add_rpath /usr/lib ${bindir}/wineserver &&
-  install_name_tool -add_rpath /usr/lib ${libdir}/libwine.1.0.0.dylib || exit
+  install_name_tool -add_rpath /usr/lib ${libdir}/libwine.1.0.dylib || exit
   
   install -d ${docdir} &&
   cp ${srcdir}/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} ${docdir} || exit

@@ -21,7 +21,6 @@ test -x /usr/local/bin/ccache && readonly ccache=$_ || exit
 test -x /usr/local/bin/clang  && readonly clang=$_  || exit
 test -x /usr/local/bin/uconv  && readonly uconv=$_  || exit
 test -x /usr/local/bin/make   && export MAKE=$_     || :
-test -x /usr/local/bin/gdb    && export GDB=$_      || :
 
 ### Git and Python
 test -x /usr/local/git/bin/git  && readonly git_dir=$(dirname $_) || exit
@@ -50,9 +49,12 @@ configure_args="\
 --prefix=${deps_destdir} \
 --build=${arch}-apple-darwin${kernel_version} \
 --enable-shared \
+--disable-static \
 --disable-maintainer-mode \
---disable-dependency-tracking"
-make_args="-j $(($(sysctl -n hw.ncpu) + 2))"
+--disable-dependency-tracking \
+--without-x"
+#make_args="-j $(($(sysctl -n hw.ncpu) + 2))"
+make_args="--jobs"
 
 # -------------------------------------- begin utilities functions
 
@@ -160,13 +162,11 @@ function BuildBootstrap_ {
 function BuildStage1_ {
   BuildDeps_ libusb-1.0.9.tar.bz2
   BuildDeps_ libusb-compat-0.1.4.tar.bz2
-  # valgrind add '-arch' flag, i686-apple-darwin10-gcc-4.2.1 will not work
-  BuildDeps_ valgrind-3.8.1.tar.bz2 --enable-only32bit --without-mpicc CC=$(xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2)
   
   cd ${workroot} &&
   tar -xf ${srcroot}/source/gmp-5.1.1.tar.bz2 && (
     cd gmp-5.1.1 &&
-    sh configure ${configure_args} ABI=32 --enable-cxx &&
+    sh configure ${configure_args} ABI=32 &&
     make ${make_args} &&
     make check &&
     make install
@@ -186,14 +186,13 @@ function BuildStage2_ {
 } # end BuildStage2_
 
 function BuildStage3_ {
-  ### orc required valgrind; to build with gcc failed
   BuildDeps_ orc-0.4.17.tar.gz \
     CC="${ccache} ${clang}" \
     CXX="${ccache} ${clang}++" \
     CFLAGS="-arch ${arch} ${CFLAGS}" \
     CXXFLAGS="-arch ${arch} ${CFLAGS}"
-
   BuildDeps_ unixODBC-2.3.1.tar.gz && DocCopy_ unixODBC-2.3.1
+  
   BuildDevel_ libpng
   ### nasm is required from libjpeg-turbo
   BuildDeps_ nasm-2.10.07.tar.xz && DocCopy_ nasm-2.10.07
@@ -207,6 +206,7 @@ function BuildStage3_ {
 } # end BuildStage3_
 
 function BuildStage4_ {
+  BuildDeps_ mpg123-1.15.3.tar.bz2 && DocCopy_ mpg123
   BuildDeps_ libogg-1.3.0.tar.gz
   BuildDeps_ libvorbis-1.3.3.tar.gz
   BuildDeps_ flac-1.2.1.tar.gz --disable-asm-optimizations --disable-xmms-plugin

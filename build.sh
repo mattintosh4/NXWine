@@ -53,8 +53,7 @@ configure_args="\
 --disable-maintainer-mode \
 --disable-dependency-tracking \
 --without-x"
-#make_args="-j $(($(sysctl -n hw.ncpu) + 2))"
-make_args="--jobs"
+make_args="-j $(($(sysctl -n hw.ncpu) + 2))"
 
 # -------------------------------------- begin utilities functions
 

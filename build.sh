@@ -8,7 +8,7 @@ readonly srcroot="$(cd "$(dirname "$0")"; pwd)"
 readonly build_version=$(date +%Y%m%d)
 readonly domain=com.github.mattintosh4
 
-readonly workroot=/tmp/9C727687-28A1-47CE-9C4A-97128FADE79A
+readonly workroot=/tmp/${domain}_build
 readonly destroot=/tmp/${domain}
 readonly wine_destdir=${destroot}/NXWine.app/Contents/Resources
 readonly deps_destdir=${destroot}/NXWine.app/Contents/SharedSupport
@@ -117,7 +117,7 @@ function BuildDevel_ {
       sh configure ${configure_args}
     ;;
     glib)
-      git checkout -f 2.36.1 &&
+      git checkout -f 2.37.0 &&
       sh autogen.sh ${configure_args} --disable-gtk-doc
     ;;
     freetype)
@@ -143,7 +143,21 @@ function BuildBootstrap_ {
     cd ${deps_destdir}/bin &&
     ln -sf {g,}m4 && ./$_ --version >/dev/null
   ) || exit
-  BuildDeps_ autoconf-2.69.tar.gz
+  BuildDeps_ autoconf-2.69.tar.gz --program-suffix=-2.69 && (
+    cd ${deps_destdir}/bin &&
+    for x in \
+      autoconf \
+      autoheader \
+      autom4te \
+      autoreconf \
+      autoscan \
+      autoupdate \
+      ifnames \
+    
+    do
+      ln -sf ${x}-2.69 ${x}
+    done
+  )
   BuildDeps_ automake-1.13.1.tar.gz
   BuildDeps_ libtool-2.4.2.tar.gz --program-prefix=g && (
     cd ${deps_destdir}/bin &&

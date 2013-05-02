@@ -1,4 +1,4 @@
-#!/usr/bin/env - LC_ALL=C SHELL=/bin/bash bash -x
+#!/usr/bin/env - LC_ALL=C SHELL=/bin/bash PATH=/usr/bin:/bin:/usr/sbin:/sbin bash -x
 
 ## bash info
 # GNU bash, version 3.2.48(1)-release (x86_64-apple-darwin10.0)
@@ -33,7 +33,6 @@ readonly kernel_version=$(uname -r | cut -d. -f1) &&
 readonly sdkroot=$(xcodebuild -version -sdk macosx${osx_version} | sed -n '/^Path/{;s/^Path: //;p;}') &&
 test -d ${sdkroot} || exit
 
-PATH=/usr/bin:/bin:/usr/sbin:/sbin
 PATH=${git_dir}:${python_dir}:$PATH
 PATH=${deps_destdir}/bin:${deps_destdir}/sbin:$PATH
 export PATH
@@ -42,14 +41,13 @@ export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)" || exit
 export CFLAGS="-m32 -pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${osx_version}"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-isysroot ${sdkroot} -I${deps_destdir}/include"
-export LDFLAGS="-Wl,-headerpad_max_install_names -Wl,-syslibroot,${sdkroot} -L${deps_destdir}/lib"
+export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${deps_destdir}/lib"
 export MACOSX_DEPLOYMENT_TARGET=${osx_version}
 
 configure_args="\
 --prefix=${deps_destdir} \
 --build=${arch}-apple-darwin${kernel_version} \
 --enable-shared \
---disable-static \
 --disable-maintainer-mode \
 --disable-dependency-tracking \
 --without-x"
@@ -136,13 +134,18 @@ function BuildDevel_ {
 } # end BuildDevel_
 
 function BuildBootstrap_ {
+  BuildDeps_ pkg-config-0.28.tar.gz \
+    --disable-debug \
+    --disable-host-tool \
+    --with-internal-glib \
+    --with-pc-path=${deps_destdir}/lib/pkgconfig:${deps_destdir}/share/pkgconfig:/usr/lib/pkgconfig
   ### readline is required from unixODBC
   BuildDeps_ readline-6.2.tar.gz --with-curses && DocCopy_ readline-6.2
   BuildDeps_ m4-1.4.16.tar.bz2 --program-prefix=g && (
     cd ${deps_destdir}/bin &&
     ln -sf {g,}m4 && ./$_ --version >/dev/null
   ) || exit
-  BuildDeps_ autoconf-2.69.tar.gz --program-suffix=-2.69 && (
+  BuildDeps_ autoconf-2.69.tar.gz && (
     cd ${deps_destdir}/bin &&
     for x in \
       autoconf \
@@ -154,7 +157,7 @@ function BuildBootstrap_ {
       ifnames \
     
     do
-      ln -sf ${x}-2.69 ${x}
+      ln -sf ${x} ${x}-2.69
     done
   )
   BuildDeps_ automake-1.13.1.tar.gz
@@ -163,19 +166,11 @@ function BuildBootstrap_ {
     ln -sf {g,}libtool    && ./$_ --version >/dev/null &&
     ln -sf {g,}libtoolize && ./$_ --version >/dev/null
   ) || exit
-  BuildDeps_ pkg-config-0.28.tar.gz \
-    --disable-debug \
-    --disable-host-tool \
-    --with-internal-glib \
-    --with-pc-path=${deps_destdir}/lib/pkgconfig:${deps_destdir}/share/pkgconfig:/usr/lib/pkgconfig
   BuildDeps_ gettext-0.18.2.tar.gz
   BuildDeps_ xz-5.0.4.tar.bz2
 } # end Bootstrap_
 
 function BuildStage1_ {
-  BuildDeps_ libusb-1.0.9.tar.bz2
-  BuildDeps_ libusb-compat-0.1.4.tar.bz2
-  
   cd ${workroot} &&
   tar -xf ${srcroot}/source/gmp-5.1.1.tar.bz2 && (
     cd gmp-5.1.1 &&
@@ -186,10 +181,9 @@ function BuildStage1_ {
   ) || exit
   BuildDeps_ libtasn1-3.3.tar.gz # libtasn1 required valgrind
   BuildDeps_ nettle-2.7.tar.gz
-  BuildDeps_ gnutls-3.1.8.tar.xz \
-    --with-libnettle-prefix=${deps_destdir} \
-    LIBTASN1_CFLAGS="$(pkg-config --cflags libtasn1)" \
-    LIBTASN1_LIBS="$(pkg-config --libs libtasn1)"
+  BuildDeps_ gnutls-3.1.8.tar.xz
+  BuildDeps_ libusb-1.0.9.tar.bz2
+  BuildDeps_ libusb-compat-0.1.4.tar.bz2
 } # end BuildStage1_
 
 function BuildStage2_ {
@@ -219,7 +213,6 @@ function BuildStage3_ {
 } # end BuildStage3_
 
 function BuildStage4_ {
-  BuildDeps_ mpg123-1.15.3.tar.bz2 && DocCopy_ mpg123
   BuildDeps_ libogg-1.3.0.tar.gz
   BuildDeps_ libvorbis-1.3.3.tar.gz
   BuildDeps_ flac-1.2.1.tar.gz --disable-asm-optimizations --disable-xmms-plugin

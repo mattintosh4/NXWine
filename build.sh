@@ -36,9 +36,9 @@ test -d ${sdkroot} || exit
 PATH=${git_dir}:${python_dir}:$PATH
 PATH=${deps_destdir}/bin:${deps_destdir}/sbin:$PATH
 export PATH
-export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)" || exit
-export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)" || exit
-export CFLAGS="-m32 -pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${osx_version}"
+export CC="${ccache} $( xcrun -find gcc-4.2)" || exit
+export CXX="${ccache} $(xcrun -find g++-4.2)" || exit
+export CFLAGS="-pipe -m32 -arch i386 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${osx_version}"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-isysroot ${sdkroot} -I${deps_destdir}/include"
 export LDFLAGS="-Wl,-syslibroot,${sdkroot} -L${deps_destdir}/lib"
@@ -123,7 +123,7 @@ function BuildDevel_ {
       sh configure ${configure_args}
     ;;
     libpng)
-      git checkout -f libpng16 &&
+      git checkout -f master &&
       autoreconf -i &&
       sh configure ${configure_args}
     ;;
@@ -201,15 +201,10 @@ function BuildStage3_ {
   BuildDeps_ unixODBC-2.3.1.tar.gz && DocCopy_ unixODBC-2.3.1
   
   BuildDevel_ libpng
-  ### nasm is required from libjpeg-turbo
-  BuildDeps_ nasm-2.10.07.tar.xz && DocCopy_ nasm-2.10.07
-  BuildDeps_ libjpeg-turbo-1.2.1.tar.gz --with-jpeg8 && {
-    install -d ${deps_destdir}/share/doc/libjpeg-turbo-1.2.1
-    mv ${deps_destdir}/share/doc/{example.c,libjpeg.txt,README,README-turbo.txt,structure.txt,usage.txt,wizard.txt} $_
-  }
-  BuildDeps_ tiff-4.0.3.tar.gz
-  BuildDeps_ jasper-1.900.1.zip --disable-opengl --without-x
-  BuildDeps_ libicns-0.8.1.tar.gz
+  BuildDeps_  jpeg-8.tar.bz2
+  BuildDeps_  tiff-4.0.3.tar.gz
+  BuildDeps_  jasper-1.900.1.zip --disable-opengl --without-x
+  BuildDeps_  libicns-0.8.1.tar.gz
 } # end BuildStage3_
 
 function BuildStage4_ {

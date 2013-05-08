@@ -10,8 +10,6 @@ readonly destroot=/tmp/${domain}/
 readonly wine_destroot=${destroot}NXWine.app/Contents/Resources/
 readonly deps_destroot=${destroot}NXWine.app/Contents/SharedSupport/
 
-readonly wine_tar=${origin}wine.tar.bz2
-
 # -------------------------------------- local tools
 readonly ccache=/usr/local/bin/ccache
 readonly clang=/usr/local/bin/clang
@@ -295,7 +293,7 @@ BuildWine_ ()
     make install || exit
     
     ### install name ###
-    for x in bin/wine{,server} lib/libwine.1.0.dylib
+    for x in bin/{wine,wineserver} lib/libwine.1.0.dylib
     do
         install_name_tool -add_rpath /usr/lib ${wine_destroot}${x} || exit
     done

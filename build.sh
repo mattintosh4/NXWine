@@ -6,8 +6,8 @@ readonly domain=com.github.mattintosh4
 
 readonly workroot=/tmp/E43FF9C9-669C-4319-8351-FF99AFF3230C/
 readonly destroot=/tmp/${domain}/
-readonly wine_destroot=${destroot}/NXWine.app/Contents/Resources/
-readonly SharedSupport=${destroot}/NXWine.app/Contents/SharedSupport/
+readonly wine_destroot=${destroot}NXWine.app/Contents/Resources/
+readonly deps_destroot=${destroot}NXWine.app/Contents/SharedSupport/
 
 readonly bootstrap_tar=${srcroot}/bootstrap.tar.bz2
 readonly deps_tar=${srcroot}/deps.tar.bz2
@@ -32,17 +32,17 @@ export SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | se
 
 PATH=/usr/bin:/bin:/usr/sbin:/sbin:${DEVELOPER_DIR}/bin:${DEVELOPER_DIR}/sbin
 PATH=${git_dir}:${python_dir}:$PATH
-PATH=${SharedSupport}/bin:$PATH
+PATH=${deps_destroot}bin:$PATH
 export PATH
 export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)" || exit
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)" || exit
 export CFLAGS="-pipe -m32 -mtune=generic -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
 export CXXFLAGS="${CFLAGS}"
-export CPPFLAGS="-isysroot ${SDKROOT} -I${SharedSupport}/include"
-export LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${SharedSupport}/lib"
+export CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}include"
+export LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${deps_destroot}lib"
 
 configure_args="\
---prefix=${SharedSupport} \
+--prefix=${deps_destroot} \
 --build=i386-apple-darwin$(uname -r) \
 --enable-shared \
 --disable-debug \
@@ -88,9 +88,9 @@ pkgsrc_vorbis=libvorbis-1.3.3.tar.gz
 
 function DocCopy_ {
   test -n "$1" || exit
-  local d=${SharedSupport}/share/doc/$1
+  local d=${deps_destroot}share/doc/$1
   install -d ${d} &&
-  find -E ${workroot}/$1 -depth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)' | while read
+  find -E ${workroot}$1 -depth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)' | while read
   do
     cp "${REPLY}" ${d}
   done || exit
@@ -112,7 +112,7 @@ function Extract_ {
 
 function BuildDeps_ {
   [ "$1" ] &&
-  local f=${srcroot}/source/$1 &&
+  local f=${srcroot}source/$1 &&
   local n=$(basename ${f} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##') &&
   shift || exit
   
@@ -134,7 +134,7 @@ function BuildDeps_ {
 BuildDevel_ ()
 {
     [ "$1" ] &&
-    ditto {${srcroot}/source,${workroot}}/$1 &&
+    ditto {${srcroot}source,${workroot}}$1 &&
     cd $_ || exit
     
     case $1 in
@@ -164,36 +164,40 @@ BuildDevel_ ()
 
 Bootstrap_ ()
 {
+    ### source check ###
     for x in ${!pkgsrc_*}
     do
         echo -n "checking ${!x} ... "
-        [ -f ${srcroot}/source/${!x} ] && echo "yes" || { echo "no"; exit 1; }
+        [ -f ${srcroot}source/${!x} ] && echo "yes" || { echo "no"; exit 1; }
     done
     
-    #rm -rf ${destroot} ${workroot}
-    install -d  ${SharedSupport}/{bin,include,share/man} \
-                ${wine_destroot}/lib \
+    ### clean up ###
+    rm -rf ${workroot} ${destroot}
+    
+    
+    install -d  ${deps_destroot}{bin,include,share/man} \
+                ${wine_destroot}lib \
                 ${workroot} &&
-    (cd ${SharedSupport} && ln -s ../Resources/lib lib && ln -s share/man man) || exit
+    (cd ${deps_destroot} && ln -s ../Resources/lib lib && ln -s share/man man) || exit
     
     BuildDeps_ ${pkgsrc_pkgconfig}  --disable-host-tool \
                                     --with-internal-glib \
-                                    --with-pc-path=${SharedSupport}/lib/pkgconfig:${SharedSupport}/share/pkgconfig:/usr/lib/pkgconfig
+                                    --with-pc-path=${deps_destroot}lib/pkgconfig:${deps_destroot}share/pkgconfig:/usr/lib/pkgconfig
     BuildDeps_ ${pkgsrc_readline}   --with-curses --enable-multibyte
     BuildDeps_ ${pkgsrc_m4}         --program-prefix=g && {
-        ln ${SharedSupport}/bin/{g,}m4 &&
+        ln ${deps_destroot}bin/{g,}m4 &&
         $_ --version >/dev/null || exit
     }
     BuildDeps_ ${pkgsrc_autoconf} && {
         for x in auto{conf,header,m4te,reconf,scan,update} ifnames
         do
-            ln ${SharedSupport}/bin/${x}{,-2.69} || exit
+            ln ${deps_destroot}bin/${x}{,-2.69} || exit
         done
     }
     BuildDeps_ ${pkgsrc_automake}
     BuildDeps_ ${pkgsrc_libtool} --program-prefix=g && {
-        ln ${SharedSupport}/bin/{g,}libtool     && $_ --version >/dev/null &&
-        ln ${SharedSupport}/bin/{g,}libtoolize  && $_ --version >/dev/null || exit
+        ln ${deps_destroot}bin/{g,}libtool     && $_ --version >/dev/null &&
+        ln ${deps_destroot}bin/{g,}libtoolize  && $_ --version >/dev/null || exit
     }
     BuildDeps_ ${pkgsrc_gettext}
     BuildDeps_ ${pkgsrc_xz}
@@ -201,8 +205,8 @@ Bootstrap_ ()
 
 BuildStage1_ ()
 {
-    tar -xf ${srcroot}/source/${pkgsrc_gmp} -C ${workroot} && (
-        cd ${workroot}/gmp-5.1.1 &&
+    tar -xf ${srcroot}source/${pkgsrc_gmp} -C ${workroot} && (
+        cd ${workroot}gmp-5.1.1 &&
         ./configure ${configure_args} ABI=32 CC=$(xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2) &&
         make ${make_args} &&
         make check &&
@@ -220,7 +224,7 @@ BuildStage2_ ()
     BuildDevel_ libffi
     BuildDevel_ glib
     BuildDevel_ freetype
-    [ -f ${SharedSupport}/lib/libfreetype.6.dylib ] || exit
+    [ -f ${deps_destroot}lib/libfreetype.6.dylib ] || exit
 } # end BuildStage2_
 
 BuildStage3_ ()
@@ -254,19 +258,19 @@ BuildStage4_ ()
 BuildStage5_ ()
 {
     ### cabextract ###
-    tar -xf ${srcroot}/source/cabextract-1.4.tar.gz -C ${workroot} && (
-        cd ${workroot}/cabextract-1.4 &&
-        ./configure ${configure_args/${SharedSupport}/${wine_destroot}} &&
+    tar -xf ${srcroot}source/cabextract-1.4.tar.gz -C ${workroot} && (
+        cd ${workroot}cabextract-1.4 &&
+        ./configure ${configure_args/${deps_destroot}/${wine_destroot}} &&
         make ${make_args} &&
         make install &&
-        install -d ${wine_destroot}/share/doc/cabextract-1.4 &&
+        install -d ${wine_destroot}share/doc/cabextract-1.4 &&
         cp AUTHORS ChangeLog COPYING NEWS README TODO $_
     ) || exit
     
     ### winetricks ###
-    ditto {${srcroot}/source/winetricks/src,${wine_destroot}/share/doc/winetricks}/COPYING &&
-    install -m 0755 ${srcroot}/source/winetricks/src/winetricks ${wine_destroot}/bin/winetricks.bin &&
-    cat <<'__EOF__' > ${wine_destroot}/bin/winetricks && chmod +x ${wine_destroot}/bin/winetricks || exit
+    ditto {${srcroot}source/winetricks/src,${wine_destroot}share/doc/winetricks}/COPYING &&
+    install -m 0755 ${srcroot}/source/winetricks/src/winetricks ${wine_destroot}bin/winetricks.bin &&
+    cat <<'__EOF__' > ${wine_destroot}/bin/winetricks && chmod +x ${wine_destroot}bin/winetricks || exit
 #!/bin/bash
 export PATH="$(cd "$(dirname "$0")"; pwd)":/usr/bin:/bin:/usr/sbin:/sbin
 which wine || { echo "wine not found."; exit 1; }
@@ -276,7 +280,7 @@ __EOF__
 
 BuildWine_ ()
 {
-    install -d ${workroot}/_wine && (
+    install -d ${workroot}_wine && (
         cd $_ &&
         ${srcroot}/source/wine/configure    --prefix=${wine_destroot} \
                                             --without-sane \
@@ -295,23 +299,23 @@ BuildWine_ ()
     ### install name ###
     for x in bin/wine{,server} lib/libwine.1.0.dylib
     do
-        install_name_tool -add_rpath /usr/lib ${wine_destroot}/${x} || exit
+        install_name_tool -add_rpath /usr/lib ${wine_destroot}${x} || exit
     done
     
     ### docs ###
-    install -d ${wine_destroot}/share/doc/wine &&
-    cp ${srcroot}/source/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $_ || exit
+    install -d ${wine_destroot}share/doc/wine &&
+    cp ${srcroot}source/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $_ || exit
     
     ### custom inf ###
-    local inf=${wine_destroot}/share/wine/wine.inf
+    local inf=${wine_destroot}share/wine/wine.inf
     mv ${inf}{,.orig} &&
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf} ${inf}.orig &&
-    patch ${inf} ${srcroot}/patch/nxwine.patch || exit
+    patch ${inf} ${srcroot}patch/nxwine.patch || exit
     
     ### WINELOADER ###
-    install -d ${wine_destroot}/libexec &&
-    mv ${wine_destroot}/{bin,libexec}/wine &&
-    cat <<__EOF__ > ${wine_destroot}/bin/wine && chmod +x ${wine_destroot}/bin/wine || exit
+    install -d ${wine_destroot}libexec &&
+    mv ${wine_destroot}{bin,libexec}/wine &&
+    cat <<__EOF__ > ${wine_destroot}bin/wine && chmod +x ${wine_destroot}bin/wine || exit
 #!/bin/bash
 install -d ${destroot}
 ln -sf "\$(cd "\$(dirname "\$0")/../../.." && pwd)" ${destroot} || exit
@@ -319,7 +323,7 @@ exec ${wine_destroot}/libexec/wine "\$@"
 __EOF__
 
     ### archive ###
-    tar cP ${destroot} | bzip2 > ${srcroot}/wine.tar.bz2
+    tar cP ${destroot} | bzip2 > ${srcroot}wine.tar.bz2
 } # end BuildWine_
 
 CreateBundle_ ()

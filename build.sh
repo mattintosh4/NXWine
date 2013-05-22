@@ -302,9 +302,30 @@ BuildWine_ ()
     
     ### custom inf ###
     local inf=${wine_destroot}share/wine/wine.inf
+    local inftmp=$(mktemp -t XXXXXX)
     mv ${inf}{,.orig} &&
-    ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf} ${inf}.orig &&
-    patch ${inf} ${origin}patch/nxwine.patch || exit
+    cat <<__EOS__ | cat ${inf}.orig /dev/fd/3 3<&0 > ${inftmp} &&
+[DefaultInstall]
+AddReg=Fonts
+
+[Fonts]
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Microsoft Sans Serif",,"ipag-mona.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Sans Serif",,"ipag-mona.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Gothic",,"ipag-mona.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PGothic",,"ipagp-mona.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Serif",,"ipam-mona.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Mincho",,"ipam-mona.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PMincho",,"ipamp-mona.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Tahoma",,"ipagp-mona.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Verdana",,"ipagp-mona.ttf"
+
+HKCU,Software\Wine\Fonts\Replacements,"MS UI Gothic",,"IPAMonaUIGothic"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ ゴシック",,"IPAMonaGothic"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐゴシック",,"IPAMonaPGothic"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"IPAMonaMincho"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"IPAMonaPMincho"
+__EOS__
+    ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf} ${inftmp} &&
     
     ### WINELOADER ###
     install -d ${wine_destroot}libexec &&

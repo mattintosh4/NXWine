@@ -208,7 +208,7 @@ BuildStage1_ ()
     ) || exit
     BuildDeps_  ${pkgsrc_libtasn1}
     BuildDeps_  ${pkgsrc_nettle}
-    BuildDeps_  ${pkgsrc_gnutls}
+    BuildDeps_  ${pkgsrc_gnutls} --disable-guile --without-p11-kit
     BuildDeps_  ${pkgsrc_usb}
     BuildDeps_  ${pkgsrc_usbcompat} 
 } # end BuildStage1_

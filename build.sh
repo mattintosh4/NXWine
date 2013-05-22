@@ -147,7 +147,7 @@ BuildDevel_ ()
             ./configure ${configure_args}
         ;;
         glib)
-            git checkout -f 2.37.0 &&
+            git checkout -f glib-2-36 &&
             ./autogen.sh ${configure_args} --disable-gtk-doc
         ;;
         libffi)
@@ -216,7 +216,8 @@ BuildStage1_ ()
 BuildStage2_ ()
 {
     BuildDevel_ libffi
-    BuildDevel_ glib
+#    BuildDevel_ glib
+    BuildDeps_  glib-2.36.2.tar.xz
     BuildDevel_ freetype
     [ -f ${deps_destroot}lib/libfreetype.6.dylib ] || exit
 } # end BuildStage2_

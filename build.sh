@@ -368,24 +368,26 @@ CreateBundle_ ()
     while read
     do
         /usr/libexec/PlistBuddy -c "${REPLY}" ${app}/Contents/Info.plist || exit
-    done <<__CMD__
-Set :CFBundleIconFile nxwine
+    done <<__EOS__
+Set :CFBundleIconFile ${iconfile}
 Add :NSHumanReadableCopyright string ${wine_version}, Copyright © 2013 mattintosh4, https://github.com/mattintosh4/NXWine
 Add :CFBundleVersion string ${build_version}
 Add :CFBundleIdentifier string ${domain}.NXWine
 Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions array
 Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions:0 string exe
+Add :CFBundleDocumentTypes:1:CFBundleTypeIconFile string ${iconfile}
 Add :CFBundleDocumentTypes:1:CFBundleTypeName string Windows Executable File
 Add :CFBundleDocumentTypes:1:CFBundleTypeRole string Viewer
 Add :CFBundleDocumentTypes:2:CFBundleTypeExtensions array
 Add :CFBundleDocumentTypes:2:CFBundleTypeExtensions:0 string msi
+Add :CFBundleDocumentTypes:2:CFBundleTypeIconFile string ${iconfile}
 Add :CFBundleDocumentTypes:2:CFBundleTypeName string Microsoft Windows Installer
 Add :CFBundleDocumentTypes:2:CFBundleTypeRole string Viewer
 Add :CFBundleDocumentTypes:3:CFBundleTypeExtensions array
 Add :CFBundleDocumentTypes:3:CFBundleTypeExtensions:0 string lnk
 Add :CFBundleDocumentTypes:3:CFBundleTypeName string Windows Shortcut File
 Add :CFBundleDocumentTypes:3:CFBundleTypeRole string Viewer
-__CMD__
+__EOS__
 
     CreateDmg_
 } # end BuildBundle_

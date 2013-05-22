@@ -15,10 +15,13 @@ readonly ccache=/usr/local/bin/ccache
 readonly uconv=/usr/local/bin/uconv
 readonly git_dir=/usr/local/git/bin
 readonly py_dir=/Library/Frameworks/Python.framework/Versions/2.7/bin
+export PKG_CONFIG=/usr/local/bin/pkg-config
+export PKG_CONFIG_LIBDIR=${deps_destroot}lib/pkgconfig:${deps_destroot}share/pkgconfig:/usr/lib/pkgconfig
 [ -x ${ccache} ] &&
 [ -x ${uconv} ] &&
 [ -d ${git_dir} ] &&
 [ -d ${py_dir} ] &&
+[ -x ${PKG_CONFIG} ] &&
 : || exit
 
 # -------------------------------------- Xcode
@@ -58,7 +61,6 @@ pkgsrc_automake=automake-1.13.1.tar.gz
 pkgsrc_gettext=gettext-0.18.2.tar.gz
 pkgsrc_libtool=libtool-2.4.2.tar.gz
 pkgsrc_m4=m4-1.4.16.tar.bz2
-pkgsrc_pkgconfig=pkg-config-0.28.tar.gz
 pkgsrc_readline=readline-master.tar.gz
 pkgsrc_xz=xz-5.0.4.tar.bz2
 ## stage 1
@@ -182,9 +184,6 @@ Bootstrap_ ()
     (cd ${deps_destroot} && ln -s ../Resources/lib lib && ln -s share/man man) || exit
     
     # -------------------------------------- begin build
-    BuildDeps_ ${pkgsrc_pkgconfig}  --disable-host-tool \
-                                    --with-internal-glib \
-                                    --with-pc-path=${deps_destroot}lib/pkgconfig:${deps_destroot}share/pkgconfig:/usr/lib/pkgconfig
     BuildDeps_ ${pkgsrc_readline}   --with-curses --enable-multibyte
     BuildDeps_ ${pkgsrc_m4}         --program-prefix=g
     ln ${deps_destroot}bin/{g,}m4 && $_ --version >/dev/null || exit

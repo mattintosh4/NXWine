@@ -33,9 +33,10 @@ export SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | se
 [ -d "${SDKROOT}" ] &&
 : || exit
 
-PATH=/usr/bin:/bin:/usr/sbin:/sbin:${DEVELOPER_DIR}/bin:${DEVELOPER_DIR}/sbin
+# -------------------------------------- envs
+PATH=$(/usr/sbin/sysctl -n user.cs_path):${DEVELOPER_DIR}/bin:${DEVELOPER_DIR}/sbin
 PATH=${git_dir}:${py_dir}:$PATH
-PATH=${deps_destroot}bin:$PATH
+PATH=${workroot}bin:${deps_destroot}bin:$PATH
 export PATH
 export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
@@ -125,7 +126,14 @@ function BuildDeps_ {
         ;;
     esac &&
     cd ${workroot}$(echo ${n} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##') &&
-    ./configure ${configure_args} "$@" &&
+    case ${n} in
+        coreutils*|m4*|autoconf*|automake*|libtool*)
+            ./configure ${configure_args/${deps_destroot}/${workroot}} "$@"
+        ;;
+        *)
+            ./configure ${configure_args} "$@"
+        ;;
+    esac &&
     make ${make_args} &&
     make install &&
     : || exit
@@ -142,7 +150,7 @@ BuildDevel_ ()
     cd $_ &&
     case $1 in
         freetype)
-            git checkout -f master &&
+            git checkout -f VER-2-4-12 &&
             ./autogen.sh &&
             ./configure ${configure_args}
         ;;
@@ -184,17 +192,27 @@ Bootstrap_ ()
     (cd ${deps_destroot} && ln -s ../Resources/lib lib && ln -s share/man man) || exit
     
     # -------------------------------------- begin build
-    BuildDeps_ ${pkgsrc_readline}   --with-curses --enable-multibyte
-    BuildDeps_ ${pkgsrc_m4}         --program-prefix=g
-    ln ${deps_destroot}bin/{g,}m4 && $_ --version >/dev/null || exit
-    BuildDeps_ ${pkgsrc_autoconf}
-    for x in auto{conf,header,m4te,reconf,scan,update} ifnames ; do ln ${deps_destroot}bin/${x}{,-2.69} || exit ; done
-    BuildDeps_ ${pkgsrc_automake}
-    BuildDeps_ ${pkgsrc_libtool} --program-prefix=g
-    ln ${deps_destroot}bin/{g,}libtool     && $_ --version >/dev/null &&
-    ln ${deps_destroot}bin/{g,}libtoolize  && $_ --version >/dev/null || exit
-    BuildDeps_ ${pkgsrc_gettext}
-    BuildDeps_ ${pkgsrc_xz}
+    BuildDeps_ coreutils-8.21.tar.bz2 --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
+    BuildDeps_  ${pkgsrc_readline}   --with-curses --enable-multibyte
+    
+    BuildDeps_  ${pkgsrc_m4} --program-prefix=g && (
+        cd ${workroot}bin &&
+            ln {g,}m4 && $_ --version >/dev/null
+    ) || exit
+    BuildDeps_  ${pkgsrc_autoconf} && (
+        cd ${workroot}bin &&
+        for x in auto{conf,header,m4te,reconf,scan,update} ifnames ; do ln ${x} ${x}-2.69 || exit ; done
+    ) || exit
+    BuildDeps_  ${pkgsrc_automake}
+    BuildDeps_  ${pkgsrc_libtool} --program-prefix=g && (
+        cd ${workroot}bin &&
+        ln {g,}libtool      && $_ --version >/dev/null &&
+        ln {g,}libtoolize   && $_ --version >/dev/null &&
+        :
+    ) || exit
+    
+    BuildDeps_  ${pkgsrc_gettext}
+    BuildDeps_  ${pkgsrc_xz}
 } # end Bootstrap_
 
 BuildStage1_ ()
@@ -210,7 +228,7 @@ BuildStage1_ ()
     BuildDeps_  ${pkgsrc_nettle}
     BuildDeps_  ${pkgsrc_gnutls} --disable-guile --without-p11-kit
     BuildDeps_  ${pkgsrc_usb}
-    BuildDeps_  ${pkgsrc_usbcompat} 
+    BuildDeps_  ${pkgsrc_usbcompat}
 } # end BuildStage1_
 
 BuildStage2_ ()
@@ -237,14 +255,11 @@ BuildStage4_ ()
 {
     BuildDeps_  ${pkgsrc_ogg}
     BuildDeps_  ${pkgsrc_vorbis}
-    BuildDeps_  ${pkgsrc_flac}      --disable-asm-optimizations --disable-xmms-plugin
+    BuildDeps_  ${pkgsrc_flac}      --disable-{asm-optimizations,xmms-plugin}
     BuildDeps_  ${pkgsrc_sdl}
     BuildDeps_  ${pkgsrc_sdlsound}
     ## libtheora required SDL
-    BuildDeps_  ${pkgsrc_theora}    --disable-oggtest \
-                                    --disable-vorbistest \
-                                    --disable-examples \
-                                    --disable-asm
+    BuildDeps_  ${pkgsrc_theora}    --disable-{oggtest,vorbistest,examples,asm}
 } # end BuildStage4_
 
 BuildStage5_ ()
@@ -361,6 +376,7 @@ CreateBundle_ ()
     sed "s|@DATE@|$(date +%F)|g" ${origin}NXWine.applescript | osacompile -o ${app} &&
     rm ${app_resources}droplet.icns &&
     install -m 0644 ${origin}nxwine.icns ${app_resources} || exit
+    iconfile=nxwine
     
     tar xPf ${origin}wine.tar.bz2 &&
     wine_version=$(${app_resources}libexec/wine --version) &&
@@ -386,6 +402,7 @@ Add :CFBundleDocumentTypes:2:CFBundleTypeName string Microsoft Windows Installer
 Add :CFBundleDocumentTypes:2:CFBundleTypeRole string Viewer
 Add :CFBundleDocumentTypes:3:CFBundleTypeExtensions array
 Add :CFBundleDocumentTypes:3:CFBundleTypeExtensions:0 string lnk
+Add :CFBundleDocumentTypes:3:CFBundleTypeIconFile string ${iconfile}
 Add :CFBundleDocumentTypes:3:CFBundleTypeName string Windows Shortcut File
 Add :CFBundleDocumentTypes:3:CFBundleTypeRole string Viewer
 __EOS__

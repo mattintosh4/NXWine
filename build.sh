@@ -295,6 +295,10 @@ BuildWine_ ()
         install_name_tool -add_rpath /usr/lib ${wine_destroot}${x} || exit
     done
     
+    ### mono and gecko ###
+    ditto {${srcroot},${wine_destroot}/share/wine/mono}/wine-mono-0.0.8.msi
+    ditto {${srcroot},${wine_destroot}/share/wine/gecko}/wine_gecko-2.21-x86.msi
+    
     ### docs ###
     install -d ${wine_destroot}share/doc/wine &&
     cp ${srcroot}wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $_ || exit

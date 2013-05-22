@@ -1,4 +1,4 @@
-#!/usr/bin/env - LC_ALL=C SHELL=/bin/bash TERM=xterm HOME=/tmp bash -x
+#!/usr/bin/env - LC_ALL=C SHELL=/bin/bash TERM=xterm-color HOME=/tmp /bin/bash -x
 
 readonly build_version=$(date +%Y%m%d)
 readonly domain=com.github.mattintosh4

@@ -223,10 +223,7 @@ BuildStage2_ ()
 
 BuildStage3_ ()
 {
-    BuildDeps_  ${pkgsrc_orc}   CC="${ccache} ${clang}" \
-                                CXX="${ccache} ${clang}++" \
-                                CFLAGS="-arch i386 ${CFLAGS}" \
-                                CXXFLAGS="-arch i386 ${CFLAGS}"
+    BuildDeps_  ${pkgsrc_orc}
     BuildDeps_  ${pkgsrc_odbc}
     BuildDevel_ libpng
     BuildDeps_  ${pkgsrc_jpeg}

@@ -12,12 +12,10 @@ readonly deps_destroot=${destroot}NXWine.app/Contents/SharedSupport/
 
 # -------------------------------------- local tools
 readonly ccache=/usr/local/bin/ccache
-readonly clang=/usr/local/bin/clang
 readonly uconv=/usr/local/bin/uconv
 readonly git_dir=/usr/local/git/bin
 readonly py_dir=/Library/Frameworks/Python.framework/Versions/2.7/bin
 [ -x ${ccache} ] &&
-[ -x ${clang} ] &&
 [ -x ${uconv} ] &&
 [ -d ${git_dir} ] &&
 [ -d ${py_dir} ] &&

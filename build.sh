@@ -294,7 +294,7 @@ BuildStage5_ ()
 #!/bin/bash
 export PATH=${wine_destroot}/bin:$(sysctl -n user.cs_path)
 which wine || { echo "wine not found."; exit 1; }
-exec winetricks.bin "$@"
+exec winetricks.bin "\$@"
 __EOF__
 } # end BuildStage5_
 

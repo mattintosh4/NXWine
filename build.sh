@@ -300,7 +300,6 @@ __EOF__
 
 BuildWine_ ()
 {
-    export WINEDLLPATH=${origin}/nativedlls:$WINEDLLPATH
     install -d ${workroot}/wine
     cd $_
     ${srcroot}/wine/configure   --prefix=${wine_destroot} \
@@ -320,6 +319,10 @@ BuildWine_ ()
     ### docs ###
     install -d ${wine_destroot}/share/doc/wine
     cp ${srcroot}/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $_
+    
+    ### ipa mona font ###
+    tar xf ${srcroot}/opfc-ModuleHP-1.1.1_withIPAMonaFonts-1.0.8.tar.gz -C $(mktemp -dt XXXXXX)
+    cp $_/opfc-ModuleHP-1.1.1_withIPAMonaFonts-1.0.8/fonts/*.ttf ${wine_destroot}/share/wine/fonts
     
     ### inf ###
     local inf=${wine_destroot}/share/wine/wine.inf
@@ -404,6 +407,8 @@ CreateDmg_ ()
     test ! -f ${dmg} || rm ${dmg}
     mv ${destroot} ${srcdir}
     ln -s /Applications ${srcdir}
+    install -d ${srcdir}/sources
+    cp ${srcroot}/opfc-ModuleHP-1.1.1_withIPAMonaFonts-1.0.8.tar.gz ${srcdir}/sources
     hdiutil create -format UDBZ -srcdir ${srcdir} -volname NXWine ${dmg}
     rm -rf ${srcdir}
 } # end BuildBundle_

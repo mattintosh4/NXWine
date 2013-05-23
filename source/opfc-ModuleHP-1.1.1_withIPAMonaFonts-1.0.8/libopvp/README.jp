@@ -1,0 +1,62 @@
+● ベクタードライバAPI、RPCシステム
+
+ベクタドライバーをRPCを使って利用するためのシステムです。
+
+○ 作成方法
+
+(1) srcの下に移動する
+
+cd src
+
+(2) Makefileの編集
+
+DRVNAMEの値を利用したいベクタドライバの名前に変更する。
+
+また、必要に応じて以下を変更する。
+CLIBNAME  クライアント側のライブラリ名前
+SERVERNAME サーバ・プログラムの名前
+
+(3) makeを実行する
+
+すると、以下のファイルができる。
+
+opvp_rpc.so  : RPCのクライアント側のライブラリ 通常のベクタドライバ
+               のライブラリの代わりに指定する。
+
+opvp_rpc_server: RPCのサーバ側プログラム、ベクタドライバの
+            共有ライブラリをリンクして、クライアントの要求に応じて呼び出す。
+            opvp_rpc.soから起動される。
+ 
+
+以上の二つが実際の実行に必要なファイルだが、テストの為に次の
+ファイルが作成される。
+
+opvp_null.so: テスト用のベクタドライバ
+
+○テスト
+
+(1)srcの下に移動する
+
+(2)テスト用スクリプトを実行する。
+
+sh opvptest.sh
+
+実行している関数を順に表示し、最後にALL OKが表示されれば正常終了。
+
+○実行方法
+
+(1)設定
+・opvp_rpc.soの存在する場所を、LD_LIBRARY_PATHに含める。
+・opvp_rpc_serverの存在する場所をPATHに含める。
+・実行したいベクタドライバのライブラリの存在する場所を
+LD_LIBRARY_PATHに含める。
+(2) 通常のベクタドライバの共有ライブラリの代りにopvp_rpc.soを指定する。
+
+○実行例
+
+カレントディレクトリがsrcの下で、
+./../ghostscript-7.06/にglueコードが入ったghostscriptが有るとしたとき
+
+LD_LIBRARY_PATH=. PATH=.:$PATH ../../ghostscript-7.06/bin/gs -I../../ghostscript-7.06/lib -sDEVICE=opvp -sDriver=opvp_rpc -sOutputFile=- ../../ghostscript-7.06/examples/tiger.ps
+
+でtiger.psが処理される。

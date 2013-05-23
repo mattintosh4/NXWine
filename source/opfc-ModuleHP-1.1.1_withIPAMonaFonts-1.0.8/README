@@ -1,0 +1,12 @@
+OpenPrinting Japan API Reference Implementation
+
+This package provides the following programs/library.
+
+ - opvpDriver-HP-ColorLaserJet4600
+    Vector printer driver for HP-ColorLaserJet4600.
+ - opvpDriver-HP-ColorLaserJet5500
+    Vector printer driver for HP-ColorLaserJet5500.
+
+This package is the part of Reference Implementation 
+for the OpenPrinting Japan API Specification.
+Please see ProjectOverview.pdf for more information.

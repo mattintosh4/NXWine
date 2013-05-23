@@ -1,0 +1,160 @@
+
+                      HP Vector Driver 説明書
+
+                                Copyright (C) 2004 EPSON KOWA Corporation.
+                                                                2004-02-24
+
+--------------------------------------------------------------------------
+ 目次
+--------------------------------------------------------------------------
+
+    １ 使用許諾契約
+    ２ 製品説明
+    ３ サポートAPI
+    ４ サポートオプション
+    ５ 制限事項
+
+
+--------------------------------------------------------------------------
+ １ 使用許諾契約
+--------------------------------------------------------------------------
+
+    ライセンス情報については、パッケージに含まれているREADMEファイルを
+    参照ください。
+
+
+--------------------------------------------------------------------------
+ ２ 製品説明
+--------------------------------------------------------------------------
+
+    本ドライバは、OpenPrinting Vector Printer Driver Application
+    Interface Specification Ver 0.2 (以下、PDAPI-0.2) に準じ、HP
+    Color Laser Printerに対応したベクタードライバです。
+
+
+    対応PDL
+        PCL5C
+        GL/2
+
+    対応機種
+        Color LaserJet 4600
+        Color LaserJet 5500
+
+    ドライバ名称
+        HPPageColor (libHPPageColor.so)
+
+
+--------------------------------------------------------------------------
+ ３ サポートAPI
+--------------------------------------------------------------------------
+
+    本ドライバは、以下のPDAPI-0.2で規定する以下のAPIをサポートします。
+
+    ※ PDAPI-0.2仕様書記述順
+
+
+    [Creating and Managing Print Contexts]
+        OpenPrinter         ClosePrinter,
+
+    [Job Control Operations]
+        StartJob            EndJob              StartDoc
+        EndDoc              StartPage           EndPage
+
+    [Graphics State Object Operations]
+        ResetCTM            SetCTM              GetCTM
+        InitGS              SaveGS              RestoreGS
+        QueryColorSpace     SetColorSpace       GetColorSpace
+        QueryROP            SetROP              GetROP
+        SetFillMode         GetFillMode         SetLineWidth
+        GetLineWidth        SetLineCap          GetLineCap
+        SetLineJoin         GetLineJoin         SetMiterLimit
+        GetMiterLimit       SetPaintMode        GetPaintMode
+        SetStrokeColor      SetFillColor        SetBgColor
+
+        ※ Color Spaceは、cspaceStandardRGBをサポートします。
+
+    [Path Operations]
+        NewPath             EndPath             StrokePath
+        FillPath            StrokeFillPath      SetCurrentPoint
+        LinePath            PolygonPath         RectanglePath
+        RoundRectanglePath  BezierPath
+
+    [Text Operations]
+        無し
+
+    [Bitmap Image Operations]
+        StartDrawImage      TransferDrawImage   EndDrawImage
+
+        ※ Image formatは、iformatRawをサポートします。
+        ※ Image formatがiformatRawの場合、色深度は、1と24をサポートし
+           ます。
+
+    [Scan Line Operations]
+        無し
+
+    [Raster Image Operations]
+        StartRaster         TransferRasterData  SkipRaster
+        EndRaster
+
+        ※ Color Spaceは、cspaceStandardRGBをサポートします。
+
+    [Stream Data Operations]
+        無し
+
+
+--------------------------------------------------------------------------
+ ４ サポートオプション
+--------------------------------------------------------------------------
+
+    本ドライバでサポートする属性情報は以下の通りです。
+
+     適用範囲   | 説明
+    ------------+-----------------------------------------------
+        JobInfo | MediaSize, Resolutionをサポートします (*1)
+        DocInfo | サポートする属性情報はありません
+        PageInfo| サポートする属性情報はありません
+                |
+
+    *1 指定フォーマットについて
+        本ドライバでは、*Infoで渡される属性情報のフォーマットは、実装
+        上の理由によりPDAPI-0.2に準拠せず、独自の仕様となっています。
+        属性の設定は、以下のフォーマットで行って下さい。
+        
+        <Resolution>?;<MediaSize>?
+
+        Resolution、MediaSizeともに省略可能です。
+
+
+    属性の指定範囲は以下の通りです。
+
+     属性       | 範囲          | 説明
+    ------------+---------------+-------------------------------
+     Resolution | '600x600'     | 600 dpi
+                | '300x300'     | 300 dpi
+                |               |
+    ------------+---------------+-------------------------------
+      MediaSize | 'A4'          | A4 210 x 297 mm
+                | 'A3'          | A3 297 x 420 mm
+                | 'Letter'      | Letter 8.5 x 11.0 inch
+                | 'Legal'       | Legal 8.5 x 14.0 inch
+                |               | 
+      注)'A3'はColor LaserJet 5500でのみ設定可能です。
+
+
+--------------------------------------------------------------------------
+ ５ 制限事項
+--------------------------------------------------------------------------
+
+    本ドライバには、以下の制限があります。
+
+    ・ StartJob, StartDoc, StartPage
+        *Infoの文字列は、PDAPI-0.2に準拠していません。これは、
+        PDAPI-0.2にてまだ仕様が固まっていないためです。そのため、本ド
+        ライバでは独自の仕様となっています。詳細については、"４ サポー
+        トオプション"を参照下さい。
+
+    ・ StartDrawImage
+        イメージ描画において、CTMは開始点と拡縮に影響するが回転等には
+        影響しません。仕様の検討が必要とされます。
+
+--------------------------------------------------------------------------

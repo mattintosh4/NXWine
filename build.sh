@@ -320,9 +320,10 @@ BuildWine_ ()
     install -d ${wine_destroot}/share/doc/wine
     cp ${srcroot}/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $_
     
-    ### ipa mona font ###
-    tar xf ${srcroot}/opfc-ModuleHP-1.1.1_withIPAMonaFonts-1.0.8.tar.gz -C $(mktemp -dt XXXXXX)
-    cp $_/opfc-ModuleHP-1.1.1_withIPAMonaFonts-1.0.8/fonts/*.ttf ${wine_destroot}/share/wine/fonts
+    ### fonts ###
+    cp  ${srcroot}/Konatu_ver_20121218/*.ttf \
+        ${srcroot}/opfc-ModuleHP-1.1.1_withIPAMonaFonts-1.0.8/fonts/*.ttf \
+        ${wine_destroot}/share/wine/fonts
     
     ### inf ###
     local inf=${wine_destroot}/share/wine/wine.inf
@@ -334,21 +335,21 @@ BuildWine_ ()
 AddReg=Fonts
 
 [Fonts]
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Microsoft Sans Serif",,"ipag-mona.ttf"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Sans Serif",,"ipag-mona.ttf"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Gothic",,"ipag-mona.ttf"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PGothic",,"ipagp-mona.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Microsoft Sans Serif",,"KonatuTohaba.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Sans Serif",,"KonatuTohaba.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Gothic",,"KonatuTohaba.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PGothic",,"Konatu.ttf"
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Serif",,"ipam-mona.ttf"
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Mincho",,"ipam-mona.ttf"
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PMincho",,"ipamp-mona.ttf"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Tahoma",,"ipagp-mona.ttf"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Verdana",,"ipagp-mona.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Tahoma",,"Konatu.ttf"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Verdana",,"Konatu.ttf"
 
-HKCU,Software\Wine\Fonts\Replacements,"MS UI Gothic",,"IPAMonaUIGothic"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ ゴシック",,"IPAMonaGothic"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐゴシック",,"IPAMonaPGothic"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"IPAMonaMincho"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"IPAMonaPMincho"
+HKCU,Software\Wine\Fonts\Replacements,"MS UI Gothic",,"小夏"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ ゴシック",,"小夏 等幅"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐゴシック",,"小夏"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"IPA モナー 明朝"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"IPA モナー P明朝"
 __EOS__
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf} ${inftmp}
     

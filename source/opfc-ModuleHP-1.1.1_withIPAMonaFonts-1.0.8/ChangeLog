@@ -1,0 +1,5 @@
+* Thu Mar 24 2005 Toshihiro Yamagishi <toshihiro@turbolinux.co.jp> - 1.1.1
+- fixed memory leak [opfc:1155]
+
+* Wed Mar 31 2004 Toshihiro Yamagishi<toshihiro@turbolinux.co.jp>
+- repackage for Turbolinux

@@ -55,6 +55,7 @@ make_args="-j $(($(sysctl -n hw.ncpu) + 2))"
 ## bootstrap
 pkgsrc_autoconf=autoconf-2.69.tar.gz
 pkgsrc_automake=automake-1.13.1.tar.gz
+pkgsrc_coreutils=coreutils-8.21.tar.bz2
 pkgsrc_gettext=gettext-0.18.2.tar.gz
 pkgsrc_libtool=libtool-2.4.2.tar.gz
 pkgsrc_m4=m4-1.4.16.tar.bz2
@@ -121,8 +122,8 @@ function BuildDeps_ {
         *)
             tar xf ${srcroot}/${n} -C ${workroot}
         ;;
-    esac &&
-    cd ${workroot}/$(echo ${n} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##') &&
+    esac
+    cd ${workroot}/$(echo ${n} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##')
     case ${n} in
         coreutils*|m4*|autoconf*|automake*|libtool*)
             ./configure ${configure_args/${deps_destroot}/${workroot}} "$@"
@@ -130,9 +131,9 @@ function BuildDeps_ {
         *)
             ./configure ${configure_args} "$@"
         ;;
-    esac &&
-    make ${make_args} &&
-    make install &&
+    esac
+    make ${make_args}
+    make install
     : || exit
 } # end BuildDeps_
 
@@ -143,32 +144,31 @@ BuildDevel_ ()
         echo "${srcroot}/$1 is not found, or Invalid argment."
         exit 1
     fi
-    ditto {${srcroot},${workroot}}/$1 &&
-    cd $_ &&
+    ditto {${srcroot},${workroot}}/$1
+    cd $_
     case $1 in
         freetype)
-            git checkout -f VER-2-4-12 &&
-            ./autogen.sh &&
+            git checkout -f VER-2-4-12
+            ./autogen.sh
             ./configure ${configure_args}
         ;;
         glib)
-            git checkout -f glib-2-36 &&
+            git checkout -f glib-2-36
             ./autogen.sh ${configure_args} --disable-gtk-doc
         ;;
         libffi)
-            git checkout -f master &&
+            git checkout -f master
             ./configure ${configure_args}
         ;;
         libpng)
-            git checkout -f libpng15 &&
-            autoreconf -i &&
+            git checkout -f libpng15
+            autoreconf -i
             ./configure ${configure_args}
         ;;
-    esac &&
-    make ${make_args} &&
-    make install &&
-    DocCopy_ $1 &&
-    : || exit
+    esac
+    make ${make_args}
+    make install
+    DocCopy_ $1
 } # end BuildDevel_
 
 Bootstrap_ ()
@@ -198,7 +198,7 @@ Bootstrap_ ()
     )
     
     # -------------------------------------- begin build
-    BuildDeps_  coreutils-8.21.tar.bz2 --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
+    BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
     BuildDeps_  ${pkgsrc_readline} --with-curses --enable-multibyte
     BuildDeps_  ${pkgsrc_m4} --program-prefix=g
     (

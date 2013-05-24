@@ -331,8 +331,7 @@ BuildWine_ ()
     mv ${inf}{,.orig}
     cat <<'__EOS__' | cat ${inf}.orig /dev/fd/3 3<&0 > ${inftmp}
 
-[DefaultInstall]
-AddReg=Fonts
+;; added by NXWine ;;
 
 [Fonts]
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Microsoft Sans Serif",,"KonatuTohaba.ttf"
@@ -350,6 +349,10 @@ HKCU,Software\Wine\Fonts\Replacements,"ＭＳ ゴシック",,"小夏 等幅"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐゴシック",,"小夏"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"IPA モナー 明朝"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"IPA モナー P明朝"
+
+;; Mouse ;;
+HKCU,Control Panel\Mouse,"DoubleClickHeight",,"8"
+HKCU,Control Panel\Mouse,"DoubleClickWidth",,"8"
 __EOS__
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf} ${inftmp}
     
@@ -360,6 +363,7 @@ __EOS__
 #!/bin/bash -x
 prefix=${wine_destroot}
 export PATH=\${prefix}/bin:$(sysctl -n user.cs_path)
+export WINEDEBUG=+loaddll
 exec \${prefix}/libexec/wine "\$@"
 __EOF__
     chmod +x ${wine_destroot}/bin/wine

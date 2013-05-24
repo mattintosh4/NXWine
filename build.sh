@@ -77,7 +77,6 @@ pkgsrc_icns=libicns-0.8.1.tar.gz
 pkgsrc_jasper=jasper-1.900.1.zip
 pkgsrc_jpeg=jpeg-8d.tar.bz2
 pkgsrc_odbc=unixODBC-2.3.1.tar.gz
-pkgsrc_orc=orc-0.4.17.tar.gz
 pkgsrc_tiff=tiff-4.0.3.tar.gz
 ## stage 4
 pkgsrc_flac=flac-1.2.1.tar.gz
@@ -114,7 +113,7 @@ function BuildDeps_ {
     esac
     cd ${workroot}/$(echo ${n} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##')
     case ${n} in
-        coreutils*|m4*|autoconf*|automake*|libtool*)
+        coreutils-*|m4-*|autoconf-*|automake-*|libtool-*)
             ./configure --prefix=${workroot} CFLAGS= CXXFLAGS= "$@"
         ;;
         *)
@@ -132,14 +131,14 @@ BuildDevel_ ()
         test -d ${srcroot}/$1
     then :
     else
-        echo "${srcroot}/$1 is not found, or Invalid argment."
+        echo "Invalid argment or directory does not exist."
         exit 1
     fi
     ditto {${srcroot},${workroot}}/$1
     cd $_
     case $1 in
         freetype)
-            git checkout -f VER-2-4-12
+            git checkout -f master
             ./autogen.sh
             ./configure ${configure_args}
         ;;
@@ -155,6 +154,10 @@ BuildDevel_ ()
             git checkout -f libpng15
             autoreconf -i
             ./configure ${configure_args}
+        ;;
+        orc)
+            git checkout -f master
+            ./autogen.sh ${configure_args} --disable-gtk-doc{,-html,-pdf} --without-html-dir
         ;;
     esac
     make ${make_args}
@@ -239,14 +242,14 @@ BuildStage1_ ()
 BuildStage2_ ()
 {
     BuildDevel_ libffi
-    BuildDeps_  ${pkgsrc_glib}
+    BuildDeps_  ${pkgsrc_glib} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr,libelf} --with-threads=posix --without-{html-dir,xml-catalog}
     BuildDevel_ freetype
     [ -f ${deps_destroot}/lib/libfreetype.6.dylib ]
 } # end BuildStage2_
 
 BuildStage3_ ()
 {
-    BuildDeps_  ${pkgsrc_orc}
+    BuildDevel_ orc
     BuildDeps_  ${pkgsrc_odbc}
     BuildDevel_ libpng
     BuildDeps_  ${pkgsrc_jpeg}
@@ -416,9 +419,9 @@ BuildDmg_ ()
 } # end BuildDmg_
 
 # -------------------------------------- begin processing section
-Bootstrap_
-BuildStage1_
-BuildStage2_
+#Bootstrap_
+#BuildStage1_
+#BuildStage2_
 BuildStage3_
 BuildStage4_
 BuildStage5_

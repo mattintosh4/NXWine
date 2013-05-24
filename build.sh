@@ -64,7 +64,7 @@ pkgsrc_m4=m4-1.4.16.tar.bz2
 pkgsrc_readline=readline-master.tar.gz
 pkgsrc_xz=xz-5.0.4.tar.bz2
 ## stage 1
-pkgsrc_gmp=gmp-5.1.1.tar.bz2
+pkgsrc_gmp=gmp-5.1.2.tar.xz
 pkgsrc_gnutls=gnutls-3.1.8.tar.xz
 pkgsrc_libtasn1=libtasn1-3.3.tar.gz
 pkgsrc_nettle=nettle-2.7.tar.gz
@@ -143,16 +143,26 @@ BuildDevel_ ()
             ./configure ${configure_args}
         ;;
         glib)
-            git checkout -f glib-2-36
-            ./autogen.sh ${configure_args} --disable-gtk-doc
+            git checkout -f master
+            ./autogen.sh ${configure_args} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr,libelf} --with-threads=posix --without-{html-dir,xml-catalog}
         ;;
         libffi)
             git checkout -f master
             ./configure ${configure_args}
         ;;
+        libjpeg-turbo)
+            git checkout -f master
+            autoreconf -i
+            ./configure ${configure_args} --with-jpeg8
+        ;;
         libpng)
             git checkout -f libpng15
             autoreconf -i
+            ./configure ${configure_args}
+        ;;
+        nasm)
+            git checkout -f master
+            ./autogen.sh
             ./configure ${configure_args}
         ;;
         orc)
@@ -177,6 +187,7 @@ Bootstrap_ ()
     
     ### clean up ###
     rm -rf ${workroot} ${destroot}
+    sleep 1
     
     sed "s|@DATE@|$(date +%F)|g" ${origin}/NXWine.applescript | osacompile -o ${destroot}
     install -m 0644 ${origin}/nxwine.icns ${destroot}/Contents/Resources/droplet.icns
@@ -224,7 +235,7 @@ Bootstrap_ ()
 
 BuildStage1_ ()
 {
-    tar -xf ${srcroot}/${pkgsrc_gmp} -C ${workroot}
+    xzcat ${srcroot}/${pkgsrc_gmp} | tar x - -C ${workroot}
     (
         cd ${workroot}/${pkgsrc_gmp%.tar.*}
         ./configure ${configure_args} ABI=32 CC=$(xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2)
@@ -242,7 +253,8 @@ BuildStage1_ ()
 BuildStage2_ ()
 {
     BuildDevel_ libffi
-    BuildDeps_  ${pkgsrc_glib} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr,libelf} --with-threads=posix --without-{html-dir,xml-catalog}
+    BuildDevel_ glib
+#    BuildDeps_  ${pkgsrc_glib} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr,libelf} --with-threads=posix --without-{html-dir,xml-catalog}
     BuildDevel_ freetype
     [ -f ${deps_destroot}/lib/libfreetype.6.dylib ]
 } # end BuildStage2_
@@ -252,7 +264,8 @@ BuildStage3_ ()
     BuildDevel_ orc
     BuildDeps_  ${pkgsrc_odbc}
     BuildDevel_ libpng
-    BuildDeps_  ${pkgsrc_jpeg}
+    BuildDevel_ nasm
+    BuildDevel_ libjpeg-turbo
     BuildDeps_  ${pkgsrc_tiff}
     BuildDeps_  ${pkgsrc_jasper} --disable-opengl --without-x
     BuildDeps_  ${pkgsrc_icns}
@@ -419,9 +432,9 @@ BuildDmg_ ()
 } # end BuildDmg_
 
 # -------------------------------------- begin processing section
-#Bootstrap_
-#BuildStage1_
-#BuildStage2_
+Bootstrap_
+BuildStage1_
+BuildStage2_
 BuildStage3_
 BuildStage4_
 BuildStage5_

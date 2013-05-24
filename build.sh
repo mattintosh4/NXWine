@@ -32,18 +32,18 @@ test -d "${SDKROOT}"
 # -------------------------------------- envs
 PATH=$(/usr/sbin/sysctl -n user.cs_path):${DEVELOPER_DIR}/bin:${DEVELOPER_DIR}/sbin
 PATH=$(dirname ${git}):$PATH
-PATH=${workroot}/bin:${deps_destroot}/bin:$PATH
+PATH=${deps_destroot}/bin:${workroot}/bin:$PATH
 export PATH
 export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
-export CFLAGS="-pipe -m32 -mtune=generic -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
+export CFLAGS="-pipe -m32 -O3 -march=i686 -mtune=generic -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
 export LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
 
 configure_args="\
 --prefix=${deps_destroot} \
---build=i386-apple-darwin$(uname -r) \
+--build=i686-apple-darwin$(uname -r) \
 --enable-shared \
 --disable-debug \
 --disable-maintainer-mode \
@@ -126,7 +126,7 @@ function BuildDeps_ {
     cd ${workroot}/$(echo ${n} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##')
     case ${n} in
         coreutils*|m4*|autoconf*|automake*|libtool*)
-            ./configure ${configure_args/${deps_destroot}/${workroot}} "$@"
+            ./configure --prefix=${workroot} CFLAGS= CXXFLAGS= "$@"
         ;;
         *)
             ./configure ${configure_args} "$@"
@@ -220,6 +220,7 @@ Bootstrap_ ()
         libtool    --version &>/dev/null
         libtoolize --version &>/dev/null
     )
+    export LDFLAGS="${LDFLAGS} -L${workroot}/lib"
     BuildDeps_  ${pkgsrc_gettext}
     BuildDeps_  ${pkgsrc_xz}
 } # end Bootstrap_

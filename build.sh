@@ -245,13 +245,15 @@ Bootstrap_ ()
 
 BuildStage1_ ()
 {
-    $(which tar) xf ${srcroot}/${pkgsrc_gmp} -C ${workroot}
-    popd ${workroot}/${pkgsrc_gmp%.tar.*}
+    {
+        $(which tar) xf ${srcroot}/${pkgsrc_gmp} -C ${workroot}
+        cd ${workroot}/${pkgsrc_gmp%.tar.*}
         ./configure ${configure_args} ABI=32 CC=$(xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2)
         make ${make_args}
         make check
         make install
-    pushd
+        cd -
+    }
     BuildDeps_  ${pkgsrc_libtasn1}
     BuildDeps_  ${pkgsrc_nettle}
     BuildDeps_  ${pkgsrc_gnutls} --disable-guile --without-p11-kit

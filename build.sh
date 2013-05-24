@@ -36,7 +36,7 @@ PATH=${deps_destroot}/bin:${workroot}/bin:$PATH
 export PATH
 export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
-export CFLAGS="-pipe -m32 -O3 -march=i686 -mtune=generic -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
+export CFLAGS="-pipe -m32 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
 export LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
@@ -86,31 +86,18 @@ pkgsrc_theora=libtheora-1.1.1.tar.bz2
 pkgsrc_vorbis=libvorbis-1.3.3.tar.gz
 
 # -------------------------------------- begin utilities functions
-
-function DocCopy_ {
-  test -n "$1" || exit
-  local d=${deps_destroot}/share/doc/$1
-  install -d ${d} &&
-  find -E ${workroot}/$1 -depth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)' | while read
-  do
-    cp "${REPLY}" ${d}
-  done || exit
+DocCopy_ ()
+{
+    test -n "$1"
+    local d=${deps_destroot}/share/doc/$1
+    install -d ${d}
+    find -E ${workroot}/$1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)' | while read
+    do
+        cp "${REPLY}" ${d}
+    done
 } # end DocCopy_
 
-function Compress_ {
-  test -n "$1" &&
-  # !!! to compress with absolute path
-  tar -cP ${destroot} | bzip2 > $1 || exit
-} # end Compress_
-
-function Extract_ {
-  test -n "$1" &&
-  # !!! to extract with absolute path
-  tar -xvPf $1 || exit
-} # end Extract_
-
 # -------------------------------------- begin build processing functions
-
 function BuildDeps_ {
     (($# != 0)) || { echo "Invalid argment."; exit 1; }
     local n=$1
@@ -199,6 +186,10 @@ Bootstrap_ ()
     
     # -------------------------------------- begin build
     BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
+    (
+        cd ${workroot}/bin
+        ln {g,}readlink
+    )
     BuildDeps_  ${pkgsrc_readline} --with-curses --enable-multibyte
     BuildDeps_  ${pkgsrc_m4} --program-prefix=g
     (
@@ -220,7 +211,8 @@ Bootstrap_ ()
         libtool    --version &>/dev/null
         libtoolize --version &>/dev/null
     )
-    export LDFLAGS="${LDFLAGS} -L${workroot}/lib"
+    export CPATH=${workroot}/include
+    export LIBRARY_PATH=${workroot}/lib
     BuildDeps_  ${pkgsrc_gettext}
     BuildDeps_  ${pkgsrc_xz}
 } # end Bootstrap_
@@ -274,7 +266,7 @@ BuildStage4_ ()
 
 BuildStage5_ ()
 {
-    ### cabextract ###
+    # -------------------------------------- begin cabextract
     tar -xf ${srcroot}/cabextract-1.4.tar.gz -C ${workroot}
     (
         cd ${workroot}/cabextract-1.4
@@ -285,7 +277,7 @@ BuildStage5_ ()
         cp AUTHORS ChangeLog COPYING NEWS README TODO $_
     )
     
-    ### winetricks ###
+    # -------------------------------------- begin winetricks
     ditto {${srcroot}/winetricks/src,${wine_destroot}/share/doc/winetricks}/COPYING
     install -m 0755 ${srcroot}/winetricks/src/winetricks ${wine_destroot}/bin/winetricks.bin
     winetricks=${wine_destroot}/bin/winetricks
@@ -405,7 +397,7 @@ __EOS__
 
 } # end BuildWine_
 
-CreateDmg_ ()
+BuildDmg_ ()
 {
     local dmg=${origin}/NXWine_${build_version}_${wine_version/wine-}.dmg
     local srcdir=$(mktemp -dt XXXXXX)
@@ -413,11 +405,13 @@ CreateDmg_ ()
     test ! -f ${dmg} || rm ${dmg}
     mv ${destroot} ${srcdir}
     ln -s /Applications ${srcdir}
+    
     install -d ${srcdir}/sources
     cp ${srcroot}/opfc-ModuleHP-1.1.1_withIPAMonaFonts-1.0.8.tar.gz ${srcdir}/sources
+    
     hdiutil create -format UDBZ -srcdir ${srcdir} -volname NXWine ${dmg}
     rm -rf ${srcdir}
-} # end BuildBundle_
+} # end BuildDmg_
 
 # -------------------------------------- begin processing section
 Bootstrap_
@@ -427,7 +421,7 @@ BuildStage3_
 BuildStage4_
 BuildStage5_
 BuildWine_
-CreateDmg_
+Builddmg_
 
 # -------------------------------------- end processing section
 

@@ -40,6 +40,8 @@ export CFLAGS="-pipe -m32 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${M
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
 export LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
+export CPATH=${workroot}/include
+export LIBRARY_PATH=${workroot}/lib
 
 configure_args="\
 --prefix=${deps_destroot} \
@@ -211,9 +213,7 @@ Bootstrap_ ()
         libtool    --version &>/dev/null
         libtoolize --version &>/dev/null
     )
-    export CPATH=${workroot}/include
-    export LIBRARY_PATH=${workroot}/lib
-    BuildDeps_  ${pkgsrc_gettext}
+    BuildDeps_  ${pkgsrc_gettext} --enable-threads=posix --without-emacs
     BuildDeps_  ${pkgsrc_xz}
 } # end Bootstrap_
 

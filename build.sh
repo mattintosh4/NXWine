@@ -55,12 +55,13 @@ make_args="-j $(($(sysctl -n hw.ncpu) + 2))"
 # -------------------------------------- package source
 ## bootstrap
 pkgsrc_autoconf=autoconf-2.69.tar.gz
-pkgsrc_automake=automake-1.13.1.tar.gz
+pkgsrc_automake=automake-1.13.2.tar.gz
 pkgsrc_coreutils=coreutils-8.21.tar.bz2
 pkgsrc_gettext=gettext-0.18.2.tar.gz
 pkgsrc_libtool=libtool-2.4.2.tar.gz
 pkgsrc_m4=m4-1.4.16.tar.bz2
 pkgsrc_readline=readline-master.tar.gz
+pkgsrc_tar=tar-1.26.tar.gz
 pkgsrc_xz=xz-5.0.4.tar.bz2
 ## stage 1
 pkgsrc_gmp=gmp-5.1.2.tar.xz
@@ -99,22 +100,26 @@ DocCopy_ ()
 } # end DocCopy_
 
 # -------------------------------------- begin build processing functions
-function BuildDeps_ {
+BuildDeps_ ()
+{
     (($# != 0)) || { echo "Invalid argment."; exit 1; }
     local n=$1
     shift
-    case ${n} in
-        *.xz)
-            xzcat ${srcroot}/${n} | tar x - -C ${workroot}
-        ;;
-        *)
-            tar xf ${srcroot}/${n} -C ${workroot}
-        ;;
-    esac
+    $(which tar) xf ${srcroot}/${n} -C ${workroot}
     cd ${workroot}/$(echo ${n} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##')
     case ${n} in
-        coreutils-*|m4-*|autoconf-*|automake-*|libtool-*)
-            ./configure --prefix=${workroot} CFLAGS= CXXFLAGS= "$@"
+        coreutils-*|\
+        m4-*|\
+        autoconf-*|\
+        automake-*|\
+        libtool-*)
+            ./configure --prefix=${workroot} \
+                        --build=x86_64-apple-darwin$(uname -r) \
+                        "$@" \
+                        CC="${ccache} $( xcrun -find gcc-4.2)" \
+                        CXX="${ccache} $(xcrun -find g++-4.2)" \
+                        CFLAGS= \
+                        CXXFLAGS=
         ;;
         *)
             ./configure ${configure_args} "$@"
@@ -189,7 +194,7 @@ Bootstrap_ ()
     ### directory installation ###
     install -d  ${deps_destroot}/{bin,include,share/man} \
                 ${wine_destroot}/lib \
-                ${workroot}
+                ${workroot}/bin
     (
         cd ${deps_destroot}
         ln -s ../Resources/lib lib
@@ -197,6 +202,17 @@ Bootstrap_ ()
     )
     
     # -------------------------------------- begin build
+    {
+        tar xf ${srcroot}/${pkgsrc_tar} -C ${workroot}
+        cd ${workroot}/${pkgsrc_tar%.tar.*}
+        ./configure --prefix=${workroot} \
+                    --build=x86_64-apple-darwin$(uname -r) \
+                    --disable-nls \
+                    CC="${ccache} $( xcrun -find gcc-4.2)" CFLAGS=
+        make ${make_args}
+        make install
+        cd -
+    }
     BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
     (
         cd ${workroot}/bin
@@ -229,14 +245,13 @@ Bootstrap_ ()
 
 BuildStage1_ ()
 {
-    xzcat ${srcroot}/${pkgsrc_gmp} | tar x - -C ${workroot}
-    (
-        cd ${workroot}/${pkgsrc_gmp%.tar.*}
+    $(which tar) xf ${srcroot}/${pkgsrc_gmp} -C ${workroot}
+    popd ${workroot}/${pkgsrc_gmp%.tar.*}
         ./configure ${configure_args} ABI=32 CC=$(xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2)
         make ${make_args}
         make check
         make install
-    )
+    pushd
     BuildDeps_  ${pkgsrc_libtasn1}
     BuildDeps_  ${pkgsrc_nettle}
     BuildDeps_  ${pkgsrc_gnutls} --disable-guile --without-p11-kit
@@ -280,7 +295,7 @@ BuildStage4_ ()
 BuildStage5_ ()
 {
     # -------------------------------------- begin cabextract
-    tar -xf ${srcroot}/cabextract-1.4.tar.gz -C ${workroot}
+    $(which tar) -xf ${srcroot}/cabextract-1.4.tar.gz -C ${workroot}
     (
         cd ${workroot}/cabextract-1.4
         ./configure ${configure_args/${deps_destroot}/${wine_destroot}}

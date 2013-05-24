@@ -123,12 +123,14 @@ function BuildDeps_ {
     esac
     make ${make_args}
     make install
-    : || exit
 } # end BuildDeps_
 
 BuildDevel_ ()
 {
-    if [ -d ${srcroot}/$1 ] ; then :
+    if
+        test -n "$1" &&
+        test -d ${srcroot}/$1
+    then :
     else
         echo "${srcroot}/$1 is not found, or Invalid argment."
         exit 1

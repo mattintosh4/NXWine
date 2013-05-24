@@ -41,9 +41,10 @@ export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
 export LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
 
+triple=i686-apple-darwin$(uname -r)
 configure_args="\
 --prefix=${deps_destroot} \
---build=i686-apple-darwin$(uname -r) \
+--build=${triple} \
 --enable-shared \
 --disable-debug \
 --disable-maintainer-mode \
@@ -74,6 +75,7 @@ pkgsrc_glib=glib-2.36.2.tar.xz
 pkgsrc_icns=libicns-0.8.1.tar.gz
 pkgsrc_jasper=jasper-1.900.1.zip
 pkgsrc_jpeg=jpeg-8d.tar.bz2
+pkgsrc_nasm=nasm-2.10.07.tar.xz
 pkgsrc_odbc=unixODBC-2.3.1.tar.gz
 pkgsrc_tiff=tiff-4.0.3.tar.gz
 ## stage 4
@@ -156,11 +158,6 @@ BuildDevel_ ()
         libpng)
             git checkout -f libpng15
             autoreconf -i
-            ./configure ${configure_args}
-        ;;
-        nasm)
-            git checkout -f master
-            ./autogen.sh
             ./configure ${configure_args}
         ;;
         orc)
@@ -261,7 +258,7 @@ BuildStage3_ ()
     BuildDevel_ orc
     BuildDeps_  ${pkgsrc_odbc}
     BuildDevel_ libpng
-    BuildDevel_ nasm
+    BuildDeps_  ${pkgsrc_nasm}
     BuildDevel_ libjpeg-turbo
     BuildDeps_  ${pkgsrc_tiff}
     BuildDeps_  ${pkgsrc_jasper} --disable-opengl --without-x
@@ -273,6 +270,7 @@ BuildStage4_ ()
     BuildDeps_  ${pkgsrc_ogg}
     BuildDeps_  ${pkgsrc_vorbis}
     BuildDeps_  ${pkgsrc_flac} --disable-{asm-optimizations,xmms-plugin}
+    ## SDL required nasm
     BuildDeps_  ${pkgsrc_sdl}
     BuildDeps_  ${pkgsrc_sdlsound}
     ## libtheora required SDL
@@ -310,7 +308,7 @@ BuildWine_ ()
 {
     install -d ${workroot}/wine
     cd $_
-    ${srcroot}/wine/configure   --prefix=${wine_destroot} \
+    ${srcroot}/wine/configure   --prefix=${wine_destroot} --build=${triple} \
                                 --without-{capi,cms,gphoto,gsm,oss,sane,v4l,x}
     make ${make_args}
     make install

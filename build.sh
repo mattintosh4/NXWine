@@ -40,8 +40,6 @@ export CFLAGS="-pipe -m32 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${M
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
 export LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
-export CPATH=${workroot}/include
-export LIBRARY_PATH=${workroot}/lib
 
 configure_args="\
 --prefix=${deps_destroot} \
@@ -143,7 +141,7 @@ BuildDevel_ ()
             ./configure ${configure_args}
         ;;
         glib)
-            git checkout -f master
+            git checkout -f glib-2-36
             ./autogen.sh ${configure_args} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr,libelf} --with-threads=posix --without-{html-dir,xml-catalog}
         ;;
         libffi)
@@ -187,7 +185,6 @@ Bootstrap_ ()
     
     ### clean up ###
     rm -rf ${workroot} ${destroot}
-    sleep 1
     
     sed "s|@DATE@|$(date +%F)|g" ${origin}/NXWine.applescript | osacompile -o ${destroot}
     install -m 0644 ${origin}/nxwine.icns ${destroot}/Contents/Resources/droplet.icns
@@ -206,14 +203,14 @@ Bootstrap_ ()
     BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
     (
         cd ${workroot}/bin
-        ln {g,}readlink
+        ln -s {g,}readlink
     )
     BuildDeps_  ${pkgsrc_readline} --with-curses --enable-multibyte
     BuildDeps_  ${pkgsrc_m4} --program-prefix=g
     (
         cd ${workroot}/bin
-        ln {g,}m4
-        m4 --version &>/dev/null
+        ln -s {g,}m4
+        ./m4 --version &>/dev/null
     )
     BuildDeps_  ${pkgsrc_autoconf}
     (
@@ -224,10 +221,10 @@ Bootstrap_ ()
     BuildDeps_  ${pkgsrc_libtool} --program-prefix=g
     (
         cd ${workroot}/bin
-        ln {g,}libtool
-        ln {g,}libtoolize
-        libtool    --version &>/dev/null
-        libtoolize --version &>/dev/null
+        ln -s {g,}libtool
+        ln -s {g,}libtoolize
+        ./libtool       --version &>/dev/null
+        ./libtoolize    --version &>/dev/null
     )
     BuildDeps_  ${pkgsrc_gettext} --enable-threads=posix --without-emacs
     BuildDeps_  ${pkgsrc_xz}
@@ -253,8 +250,8 @@ BuildStage1_ ()
 BuildStage2_ ()
 {
     BuildDevel_ libffi
-    BuildDevel_ glib
-#    BuildDeps_  ${pkgsrc_glib} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr,libelf} --with-threads=posix --without-{html-dir,xml-catalog}
+#    BuildDevel_ glib
+    BuildDeps_  ${pkgsrc_glib} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr,libelf} --with-threads=posix --without-{html-dir,xml-catalog}
     BuildDevel_ freetype
     [ -f ${deps_destroot}/lib/libfreetype.6.dylib ]
 } # end BuildStage2_

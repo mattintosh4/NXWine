@@ -434,7 +434,7 @@ BuildStage3_
 BuildStage4_
 BuildStage5_
 BuildWine_
-Builddmg_
+BuildDmg_
 
 # -------------------------------------- end processing section
 

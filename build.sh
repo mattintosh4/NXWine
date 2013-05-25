@@ -382,10 +382,11 @@ __EOS__
     install -d ${wine_destroot}/libexec
     mv ${wine_destroot}/{bin,libexec}/wine
     install -m 0755 ${origin}/wineloader.in ${wine_destroot}/bin/wine
+    sed -i "" "s|@DATE@|$(date +%F)|g" ${wine_destroot}/bin/wine
     
     ### native dlls ###
     install -d ${wine_destroot}/lib/wine/nativedlls
-    cp ${origin}/nativedlls/{quartz.dll,gdiplus.dll} $_
+    cp ${origin}/nativedlls/* $_
     
     ### update plist ###
     iconfile=droplet

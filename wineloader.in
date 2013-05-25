@@ -14,12 +14,8 @@ prefix=/Applications/NXWine.app/Contents/Resources
 export PATH=${prefix}/bin:/usr/bin:/bin:/usr/sbin:/sbin
 export WINELOADER=${prefix}/libexec/wine
 
-# -------------------------------------- native dll registration
-if [ ! -n "${WINEPREFIX}" ]; then
-    export WINEPREFIX=${HOME}/.wine
-fi
-
-if [ ! -d "${WINEPREFIX}" ]; then
+CreateWineprefix_ ()
+{
     ${WINELOADER} wineboot.exe --init
     install -v -m 0644 ${prefix}/lib/wine/nativedlls/* "${WINEPREFIX}"/drive_c/windows/system32
     for x in \
@@ -52,6 +48,14 @@ if [ ! -d "${WINEPREFIX}" ]; then
 "quartz"="native"
 "streamci"="native"
 __REGEDIT__
+} # end CreateWineprefix_
+
+if [ ! -n "${WINEPREFIX}" ]; then
+    export WINEPREFIX=${HOME}/.wine
+fi
+
+if [ ! -d "${WINEPREFIX}" ]; then
+    CreateWineprefix_
 fi
 
 exec ${WINELOADER} "$@"

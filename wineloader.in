@@ -8,6 +8,6 @@ export WINEDEBUG=+loaddll
 # native dlls
 [ -n "${WINEPREFIX}" ] || export WINEPREFIX=${HOME}/.wine
 ditto ${prefix}/lib/wine/nativedlls ${WINEPREFIX}/drive_c/windows/system32
-export WINEDLLOVERRIDES="quartz,gdiplus=n"
+export WINEDLLOVERRIDES="quartz,gdiplus=n,b"
 
 exec ${WINELOADER} "$@"

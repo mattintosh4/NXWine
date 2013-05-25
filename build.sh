@@ -46,7 +46,6 @@ configure_args="\
 --prefix=${deps_destroot} \
 --build=${triple} \
 --enable-shared \
---disable-static \
 --disable-debug \
 --disable-maintainer-mode \
 --disable-dependency-tracking \

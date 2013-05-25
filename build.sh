@@ -74,8 +74,7 @@ pkgsrc_usbcompat=libusb-compat-0.1.4.tar.bz2
 pkgsrc_glib=glib-2.36.2.tar.xz
 ## stage 3
 pkgsrc_icns=libicns-0.8.1.tar.gz
-pkgsrc_jasper=jasper-1.900.1.zip
-pkgsrc_jpeg=jpeg-8d.tar.bz2
+pkgsrc_jasper=jasper-1.900.1.tar.bz2
 pkgsrc_nasm=nasm-2.10.07.tar.xz
 pkgsrc_odbc=unixODBC-2.3.1.tar.gz
 pkgsrc_tiff=tiff-4.0.3.tar.gz

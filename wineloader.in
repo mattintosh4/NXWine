@@ -17,18 +17,10 @@ CreateWineprefix_ ()
 {
     wine wineboot.exe --init
     install -v -m 0644 ${prefix}/lib/wine/nativedlls/* "${WINEPREFIX}"/drive_c/windows/system32
-    for x in \
-        {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dsound,dswave}.dll l3codecx.ax \
-        {ddraw,quartz}.dll
-    do
-        wine regsvr32.exe ${x}
-    done
-    unset x
-    cat <<__REGEDIT__ | wine regedit -
+    cat <<__REGEDIT4__ | wine regedit -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
 "*d3dx9_42"="native"
 "*d3dx9_43"="native"
-"*ddraw"="native"
 "*devenum"="native"
 "*dmband"="native"
 "*dmcompos"="native"
@@ -44,7 +36,11 @@ CreateWineprefix_ ()
 "*gdiplus"="native"
 "*l3codecx"="native"
 "*quartz"="native"
-__REGEDIT__
+__REGEDIT4__
+    
+    wine regsvr32.exe   {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dswave}.dll \
+                        l3codecx.ax \
+                        quartz.dll
 } # end CreateWineprefix_
 
 if [ ! -n "${WINEPREFIX}" ]; then

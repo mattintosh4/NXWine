@@ -1,0 +1,13 @@
+#!/bin/bash -x
+prefix=/Applications/NXWine.app/Contents/Resources
+
+export PATH=${prefix}/bin:/usr/bin:/bin:/usr/sbin:/sbin
+export WINELOADER=${prefix}/libexec/wine
+export WINEDEBUG=+loaddll
+
+# native dlls
+[ -n "${WINEPREFIX}" ] || export WINEPREFIX=${HOME}/.wine
+ditto ${prefix}/lib/wine/nativedlls ${WINEPREFIX}/drive_c/windows/system32
+export WINEDLLOVERRIDES="quartz,gdiplus=n"
+
+exec ${WINELOADER} "$@"

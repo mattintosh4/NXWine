@@ -46,6 +46,7 @@ configure_args="\
 --prefix=${deps_destroot} \
 --build=${triple} \
 --enable-shared \
+--disable-static \
 --disable-debug \
 --disable-maintainer-mode \
 --disable-dependency-tracking \
@@ -381,14 +382,7 @@ __EOS__
     # -------------------------------------- wine loader
     install -d ${wine_destroot}/libexec
     mv ${wine_destroot}/{bin,libexec}/wine
-    cat <<__EOF__ > ${wine_destroot}/bin/wine
-#!/bin/bash -x
-prefix=${wine_destroot}
-export PATH=\${prefix}/bin:$(sysctl -n user.cs_path)
-export WINEDEBUG=+loaddll
-exec \${prefix}/libexec/wine "\$@"
-__EOF__
-    chmod +x ${wine_destroot}/bin/wine
+    install -m 0755 ${origin}/wineloader.in ${wine_destroot}/bin/wine
     
     ### native dlls ###
     install -d ${wine_destroot}/lib/wine/nativedlls

@@ -13,7 +13,6 @@ https://code.google.com/p/mattintosh4-devel/downloads/list?q=label:NXWine
 ## System requirements
 
 - Mac OS X 10.6+
-- IPA Mona Font (http://www.geocities.jp/ipa_mona/)
 
 
 ## Other information

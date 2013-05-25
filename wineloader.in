@@ -46,7 +46,6 @@ CreateWineprefix_ ()
 "*gdiplus"="native"
 "*l3codecx"="native"
 "*quartz"="native"
-"*streamci"="native"
 __REGEDIT__
 } # end CreateWineprefix_
 

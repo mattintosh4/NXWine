@@ -11,21 +11,20 @@ set -x
 export WINEDEBUG=+loaddll
 
 prefix=/Applications/NXWine.app/Contents/Resources
-export PATH=${prefix}/bin:/usr/bin:/bin:/usr/sbin:/sbin
-export WINELOADER=${prefix}/libexec/wine
+export PATH=${prefix}/libexec:${prefix}/bin:/usr/bin:/bin:/usr/sbin:/sbin
 
 CreateWineprefix_ ()
 {
-    ${WINELOADER} wineboot.exe --init
+    wine wineboot.exe --init
     install -v -m 0644 ${prefix}/lib/wine/nativedlls/* "${WINEPREFIX}"/drive_c/windows/system32
     for x in \
         {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dsound,dswave}.dll l3codecx.ax \
         {ddraw,quartz}.dll
     do
-        ${WINELOADER} regsvr32.exe ${x}
+        wine regsvr32.exe ${x}
     done
     unset x
-    cat <<__REGEDIT__ | ${WINELOADER} regedit -
+    cat <<__REGEDIT__ | wine regedit -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
 "*d3dx9_42"="native"
 "*d3dx9_43"="native"
@@ -56,4 +55,4 @@ if [ ! -d "${WINEPREFIX}" ]; then
     CreateWineprefix_
 fi
 
-exec ${WINELOADER} "$@"
+exec wine "$@"

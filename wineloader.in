@@ -21,10 +21,10 @@ fi
 
 if [ ! -d "${WINEPREFIX}" ]; then
     ${WINELOADER} wineboot.exe --init
-    cp ${prefix}/lib/wine/nativedlls/* "${WINEPREFIX}"/drive_c/windows/system32
+    install -v -m 0644 ${prefix}/lib/wine/nativedlls/* "${WINEPREFIX}"/drive_c/windows/system32
     for x in \
         {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dsound,dswave}.dll l3codecx.ax \
-        {quartz,ddraw}.dll
+        {ddraw,quartz}.dll
     do
         ${WINELOADER} regsvr32.exe ${x}
     done

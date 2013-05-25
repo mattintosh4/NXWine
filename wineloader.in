@@ -12,6 +12,7 @@ export WINEDEBUG=+loaddll
 
 prefix=/Applications/NXWine.app/Contents/Resources
 export PATH=${prefix}/libexec:${prefix}/bin:/usr/bin:/bin:/usr/sbin:/sbin
+export LANG=ja_JP.UTF-8
 
 CreateWineprefix_ ()
 {

@@ -39,7 +39,6 @@ CreateWineprefix_ ()
 "*dmstyle"="native"
 "*dmsynth"="native"
 "*dmusic"="native"
-"*dmusic32"="native"
 "*dplayx"="native"
 "*dsound"="native"
 "*dswave"="native"

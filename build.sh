@@ -14,11 +14,13 @@ readonly deps_destroot=${destroot}/Contents/SharedSupport
 readonly ccache=/usr/local/bin/ccache
 readonly uconv=/usr/local/bin/uconv
 readonly git=/usr/local/git/bin/git
+readonly sevenzip=/usr/local/bin/7z
 export PKG_CONFIG=/usr/local/bin/pkg-config
 export PKG_CONFIG_LIBDIR=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
 test -x ${ccache}
 test -x ${uconv}
 test -x ${git}
+test -x ${sevenzip}
 test -x ${PKG_CONFIG}
 
 # -------------------------------------- Xcode
@@ -86,6 +88,8 @@ pkgsrc_sdl=SDL-1.2.15.tar.gz
 pkgsrc_sdlsound=SDL_sound-1.0.3.tar.gz
 pkgsrc_theora=libtheora-1.1.1.tar.bz2
 pkgsrc_vorbis=libvorbis-1.3.3.tar.gz
+## stage 5
+pkgsrc_7z=7z920.exe
 
 # -------------------------------------- begin utilities functions
 DocCopy_ ()
@@ -320,6 +324,9 @@ export PATH=${wine_destroot}/bin:$(sysctl -n user.cs_path)
 which wine || { echo "wine not found."; exit 1; }
 exec winetricks.bin "\$@"
 __EOF__
+    
+    # ------------------------------------- 7-Zip
+    ${sevenzip} x -o${wine_destroot}/lib/wine/programs/7-Zip -x'!$*' ${srcroot}/${pkgsrc_7z}
 } # end BuildStage5_
 
 BuildWine_ ()

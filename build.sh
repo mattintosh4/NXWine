@@ -327,8 +327,9 @@ BuildWine_ ()
     install -d ${workroot}/wine
     cd $_
     ${srcroot}/wine/configure   --prefix=${wine_destroot} --build=${triple} \
-                                --without-{capi,cms,gphoto,gsm,oss,sane,v4l,x}
-    make ${make_args} depend
+                                --without-{capi,cms,gphoto,gsm,oss,sane,v4l} \
+                                CPPFLAGS="${CPPFLAGS} -I/opt/X11/include" \
+                                LDFLAGS="${LDFLAGS} -L/opt/X11/lib"
     make ${make_args}
     make install
     

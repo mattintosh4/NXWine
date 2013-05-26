@@ -59,6 +59,7 @@ pkgsrc_automake=automake-1.13.2.tar.gz
 pkgsrc_coreutils=coreutils-8.21.tar.bz2
 pkgsrc_gettext=gettext-0.18.2.tar.gz
 pkgsrc_libtool=libtool-2.4.2.tar.gz
+pkgsrc_libelf=libelf-0.8.13.tar.gz
 pkgsrc_m4=m4-1.4.16.tar.bz2
 pkgsrc_readline=readline-master.tar.gz
 pkgsrc_tar=tar-1.26.tar.gz
@@ -239,6 +240,7 @@ Bootstrap_ ()
         ./libtoolize    --version &>/dev/null
     )
     BuildDeps_  ${pkgsrc_gettext} --enable-threads=posix --without-emacs
+    BuildDeps_  ${pkgsrc_libelf} --disable-compat
     BuildDeps_  ${pkgsrc_xz}
 } # end Bootstrap_
 
@@ -326,6 +328,7 @@ BuildWine_ ()
     cd $_
     ${srcroot}/wine/configure   --prefix=${wine_destroot} --build=${triple} \
                                 --without-{capi,cms,gphoto,gsm,oss,sane,v4l,x}
+    make ${make_args} depend
     make ${make_args}
     make install
     

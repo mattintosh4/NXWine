@@ -58,6 +58,7 @@ pkgsrc_autoconf=autoconf-2.69.tar.gz
 pkgsrc_automake=automake-1.13.2.tar.gz
 pkgsrc_coreutils=coreutils-8.21.tar.bz2
 pkgsrc_gettext=gettext-0.18.2.tar.gz
+pkgsrc_gperf=gperf-3.0.4.tar.gz
 pkgsrc_libelf=libelf-0.8.13.tar.gz
 pkgsrc_libiconv=libiconv-1.14.tar.gz
 pkgsrc_libtool=libtool-2.4.2.tar.gz
@@ -68,7 +69,6 @@ pkgsrc_readline=readline-master.tar.gz
 pkgsrc_tar=tar-1.26.tar.gz
 pkgsrc_xz=xz-5.0.4.tar.bz2
 pkgsrc_zlib=zlib-1.2.8.tar.gz
-pkgsrc_gperf=gperf-3.0.4.tar.gz
 ## stage 1
 pkgsrc_gmp=gmp-5.1.2.tar.xz
 pkgsrc_gnutls=gnutls-3.1.8.tar.xz
@@ -109,7 +109,7 @@ DocCopy_ ()
 # -------------------------------------- begin build processing functions
 BuildDeps_ ()
 {
-    (($# != 0)) || { echo "Invalid argment."; exit 1; }
+    test -n "$1" || { echo "Invalid argment."; exit 1; }
     local n=$1
     shift
     $(which gnutar) xf ${srcroot}/${n} -C ${workroot}
@@ -179,9 +179,11 @@ BuildDevel_ ()
             ./configure ${configure_args}
         ;;
         libxml2)
+            git checkout -f master
             ./autogen.sh ${configure_args}
         ;;
         libxslt)
+            git checkout -f master
             ./autogen.sh ${configure_args}
         ;;
     esac

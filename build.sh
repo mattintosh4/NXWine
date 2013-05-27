@@ -66,6 +66,7 @@ pkgsrc_m4=m4-1.4.16.tar.bz2
 pkgsrc_readline=readline-master.tar.gz
 pkgsrc_tar=tar-1.26.tar.gz
 pkgsrc_xz=xz-5.0.4.tar.bz2
+pkgsrc_zlib=zlib-1.2.8.tar.gz
 ## stage 1
 pkgsrc_gmp=gmp-5.1.2.tar.xz
 pkgsrc_gnutls=gnutls-3.1.8.tar.xz
@@ -117,13 +118,10 @@ BuildDeps_ ()
         autoconf-*|\
         automake-*|\
         libtool-*)
-            ./configure --prefix=${workroot} \
-                        --build=x86_64-apple-darwin$(uname -r) \
-                        "$@" \
-                        CC="${ccache} $( xcrun -find gcc-4.2)" \
-                        CXX="${ccache} $(xcrun -find g++-4.2)" \
-                        CFLAGS= \
-                        CXXFLAGS=
+            ./configure --prefix=${workroot} --build=${triple} "$@"
+        ;;
+        zlib-*)
+            ./configure --prefix=${deps_destroot}
         ;;
         *)
             ./configure ${configure_args} "$@"
@@ -131,6 +129,7 @@ BuildDeps_ ()
     esac
     make ${make_args}
     make install
+    cd -
 } # end BuildDeps_
 
 BuildDevel_ ()
@@ -173,10 +172,21 @@ BuildDevel_ ()
             git checkout -f master
             ./autogen.sh ${configure_args} --disable-gtk-doc{,-html,-pdf} --without-html-dir
         ;;
+        
+        python) # Python 2.7
+            ./configure ${configure_args}
+        ;;
+        libxml2)
+            ./autogen.sh ${configure_args}
+        ;;
+        libxslt)
+            ./autogen.sh ${configure_args}
+        ;;
     esac
     make ${make_args}
     make install
     DocCopy_ $1
+    cd -
 } # end BuildDevel_
 
 Bootstrap_ ()
@@ -206,6 +216,7 @@ Bootstrap_ ()
     )
     
     # -------------------------------------- begin build
+    BuildDeps_ ${pkgsrc_zlib}
     {
         tar xf ${srcroot}/${pkgsrc_tar} -C ${workroot}
         cd ${workroot}/${pkgsrc_tar%.tar.*}
@@ -246,6 +257,10 @@ Bootstrap_ ()
     BuildDeps_  ${pkgsrc_gettext} --enable-threads=posix --without-emacs
     BuildDeps_  ${pkgsrc_libelf} --disable-compat
     BuildDeps_  ${pkgsrc_xz}
+    
+    BuildDevel_ python
+    BuildDevel_ libxml2
+    BuildDevel_ libxslt
 } # end Bootstrap_
 
 BuildStage1_ ()

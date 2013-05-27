@@ -15,13 +15,10 @@ readonly ccache=/usr/local/bin/ccache
 readonly uconv=/usr/local/bin/uconv
 readonly git=/usr/local/git/bin/git
 readonly sevenzip=/usr/local/bin/7z
-export PKG_CONFIG=/usr/local/bin/pkg-config
-export PKG_CONFIG_LIBDIR=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
 test -x ${ccache}
 test -x ${uconv}
 test -x ${git}
 test -x ${sevenzip}
-test -x ${PKG_CONFIG}
 
 # -------------------------------------- Xcode
 export MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f-2)
@@ -40,7 +37,8 @@ export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
 export CFLAGS="-pipe -m32 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
 export CXXFLAGS="${CFLAGS}"
-export CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
+export CPPFLAGS="-isysroot ${SDKROOT}"
+export CPATH=${deps_destroot}/include:/usr/include/malloc
 export LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
 
 triple=i686-apple-darwin$(uname -r)
@@ -60,13 +58,17 @@ pkgsrc_autoconf=autoconf-2.69.tar.gz
 pkgsrc_automake=automake-1.13.2.tar.gz
 pkgsrc_coreutils=coreutils-8.21.tar.bz2
 pkgsrc_gettext=gettext-0.18.2.tar.gz
-pkgsrc_libtool=libtool-2.4.2.tar.gz
 pkgsrc_libelf=libelf-0.8.13.tar.gz
+pkgsrc_libiconv=libiconv-1.14.tar.gz
+pkgsrc_libtool=libtool-2.4.2.tar.gz
 pkgsrc_m4=m4-1.4.16.tar.bz2
+pkgsrc_ncurses=ncurses-5.9.tar.gz
+pkgsrc_pkgconfig=pkg-config-0.28.tar.gz
 pkgsrc_readline=readline-master.tar.gz
 pkgsrc_tar=tar-1.26.tar.gz
 pkgsrc_xz=xz-5.0.4.tar.bz2
 pkgsrc_zlib=zlib-1.2.8.tar.gz
+pkgsrc_gperf=gperf-3.0.4.tar.gz
 ## stage 1
 pkgsrc_gmp=gmp-5.1.2.tar.xz
 pkgsrc_gnutls=gnutls-3.1.8.tar.xz
@@ -110,15 +112,16 @@ BuildDeps_ ()
     (($# != 0)) || { echo "Invalid argment."; exit 1; }
     local n=$1
     shift
-    $(which tar) xf ${srcroot}/${n} -C ${workroot}
+    $(which gnutar) xf ${srcroot}/${n} -C ${workroot}
     cd ${workroot}/$(echo ${n} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##')
     case ${n} in
+        tar-*|\
         coreutils-*|\
         m4-*|\
         autoconf-*|\
         automake-*|\
         libtool-*)
-            ./configure --prefix=${workroot} --build=${triple} "$@"
+            ./configure ${configure_args/${deps_destroot}/${workroot}} "$@"
         ;;
         zlib-*)
             ./configure --prefix=${deps_destroot}
@@ -172,7 +175,6 @@ BuildDevel_ ()
             git checkout -f master
             ./autogen.sh ${configure_args} --disable-gtk-doc{,-html,-pdf} --without-html-dir
         ;;
-        
         python) # Python 2.7
             ./configure ${configure_args}
         ;;
@@ -215,25 +217,13 @@ Bootstrap_ ()
         ln -s share/man man
     )
     
-    # -------------------------------------- begin build
-    BuildDeps_ ${pkgsrc_zlib}
-    {
-        tar xf ${srcroot}/${pkgsrc_tar} -C ${workroot}
-        cd ${workroot}/${pkgsrc_tar%.tar.*}
-        ./configure --prefix=${workroot} \
-                    --build=x86_64-apple-darwin$(uname -r) \
-                    --disable-nls \
-                    CC="${ccache} $( xcrun -find gcc-4.2)" CFLAGS=
-        make ${make_args}
-        make install
-        cd -
-    }
+    # -------------------------------------- begin tools build
+    BuildDeps_  ${pkgsrc_tar} --program-prefix=gnu --disable-nls
     BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
     (
         cd ${workroot}/bin
         ln -s {g,}readlink
     )
-    BuildDeps_  ${pkgsrc_readline} --with-curses --enable-multibyte
     BuildDeps_  ${pkgsrc_m4} --program-prefix=g
     (
         cd ${workroot}/bin
@@ -254,10 +244,20 @@ Bootstrap_ ()
         ./libtool       --version &>/dev/null
         ./libtoolize    --version &>/dev/null
     )
+    
+    # --------------------------------- begin build
+    BuildDeps_  ${pkgsrc_pkgconfig} --with-internal-glib
+    BuildDeps_  ${pkgsrc_gperf} # required from libiconv
+    BuildDeps_  ${pkgsrc_libiconv}
+    BuildDeps_  ${pkgsrc_ncurses}   --enable-{pc-files,sigwinch} \
+                                    --disable-mixed-case \
+                                    --with-shared \
+                                    --without-{ada,debug,manpages,tests}
+    BuildDeps_  ${pkgsrc_readline} --with-curses --enable-multibyte
+    BuildDeps_  ${pkgsrc_zlib}
     BuildDeps_  ${pkgsrc_gettext} --enable-threads=posix --without-emacs
     BuildDeps_  ${pkgsrc_libelf} --disable-compat
     BuildDeps_  ${pkgsrc_xz}
-    
     BuildDevel_ python
     BuildDevel_ libxml2
     BuildDevel_ libxslt
@@ -266,7 +266,7 @@ Bootstrap_ ()
 BuildStage1_ ()
 {
     {
-        $(which tar) xf ${srcroot}/${pkgsrc_gmp} -C ${workroot}
+        $(which gnutar) xf ${srcroot}/${pkgsrc_gmp} -C ${workroot}
         cd ${workroot}/${pkgsrc_gmp%.tar.*}
         ./configure ${configure_args} ABI=32 CC=$(xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2)
         make ${make_args}
@@ -317,7 +317,7 @@ BuildStage4_ ()
 BuildStage5_ ()
 {
     # -------------------------------------- begin cabextract
-    $(which tar) -xf ${srcroot}/cabextract-1.4.tar.gz -C ${workroot}
+    $(which gnutar) -xf ${srcroot}/cabextract-1.4.tar.gz -C ${workroot}
     (
         cd ${workroot}/cabextract-1.4
         ./configure ${configure_args/${deps_destroot}/${wine_destroot}}

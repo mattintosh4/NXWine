@@ -86,7 +86,7 @@ pkgsrc_odbc=unixODBC-2.3.1.tar.gz
 pkgsrc_tiff=tiff-4.0.3.tar.gz
 ## stage 4
 pkgsrc_flac=flac-1.2.1.tar.gz
-pkgsrc_ogg=libogg-1.3.0.tar.gz
+pkgsrc_ogg=libogg-1.3.1.tar.xz
 pkgsrc_sdl=SDL-1.2.15.tar.gz
 pkgsrc_sdlsound=SDL_sound-1.0.3.tar.gz
 pkgsrc_theora=libtheora-1.1.1.tar.bz2

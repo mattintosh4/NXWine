@@ -81,7 +81,7 @@ pkgsrc_nettle=nettle-2.7.tar.gz
 pkgsrc_usb=libusb-1.0.9.tar.bz2
 pkgsrc_usbcompat=libusb-compat-0.1.4.tar.bz2
 ## stage 2
-pkgsrc_glib=glib-2.36.2.tar.xz
+pkgsrc_glib=glib-2.37.1.tar.xz
 ## stage 3
 pkgsrc_icns=libicns-0.8.1.tar.gz
 pkgsrc_jasper=jasper-1.900.1.tar.bz2

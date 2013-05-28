@@ -40,6 +40,7 @@ CreateWineprefix_ ()
 "*dplayx"="native"
 "*dsound"="native"
 "*dswave"="native"
+"*gdiplus"="builtin,native"
 "*l3codecx"="native"
 "*quartz"="native"
 

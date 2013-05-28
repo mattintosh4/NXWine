@@ -426,9 +426,17 @@ __EOS__
     install -m 0755 ${proj_root}/wineloader.in ${wine_destroot}/bin/wine
     sed -i "" "s|@DATE@|$(date +%F)|g" ${wine_destroot}/bin/wine
     
-    ### native dlls ###
+    # ------------------------------------- native dlls
     install -d ${wine_destroot}/lib/wine/nativedlls
-    cp ${proj_root}/nativedlls/* $_
+    cd $_
+    install -m 0644 ${proj_root}/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
+    ${sevenzip} x ${proj_root}/nativedlls/directx_feb2010_redist.exe dxnt.cab
+    ${sevenzip} x dxnt.cab {devnum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dplayx,dsound,dswave,quartz}.dll l3codecx.ax
+    ${sevenzip} x ${proj_root}/nativedlls/directx_Jun2010_redist.exe Aug2009_d3dx9_42_x86.cab Jun2010_d3dx9_43_x86.cab
+    ${sevenzip} x Aug2009_d3dx9_42_x86.cab d3dx9_42.dll
+    ${sevenzip} x Jun2010_d3dx9_43_x86.cab d3dx9_43.dll
+    rm *.cab
+    cd -
     
     ### update plist ###
     iconfile=droplet

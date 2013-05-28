@@ -1,15 +1,15 @@
 #!/usr/bin/env - LC_ALL=C SHELL=/bin/bash TERM=xterm-color HOME=/tmp /bin/bash -ex
 
-readonly build_version=$(date +%Y%m%d)
-readonly domain=com.github.mattintosh4
-
 readonly proj_name=NXWine
 readonly proj_uuid=E43FF9C9-669C-4319-8351-FF99AFF3230C
 readonly proj_root="$(cd "$(dirname "$0")"; pwd)"
+readonly proj_version=$(date +%Y%m%d)
+readonly proj_domain=com.github.mattintosh4
+
+readonly gnutoolbundle=${proj_root}/gnu-tools.sparsebundle
 readonly gnuprefix=/Volumes/${proj_uuid}
 
-readonly origin="$(cd "$(dirname "$0")"; pwd)"
-readonly srcroot=${origin}/source
+readonly srcroot=${proj_root}/source
 readonly workroot=/tmp/${proj_uuid}
 readonly destroot=/Applications/${proj_name}.app
 readonly wine_destroot=${destroot}/Contents/Resources
@@ -219,8 +219,8 @@ Bootstrap_ ()
     ### clean up ###
     rm -rf ${workroot} ${destroot}
     
-    sed "s|@DATE@|$(date +%F)|g" ${origin}/main.applescript | osacompile -o ${destroot}
-    install -m 0644 ${origin}/nxwine.icns ${destroot}/Contents/Resources/droplet.icns
+    sed "s|@DATE@|$(date +%F)|g" ${proj_root}/main.applescript | osacompile -o ${destroot}
+    install -m 0644 ${proj_root}/nxwine.icns ${destroot}/Contents/Resources/droplet.icns
     
     ### directory installation ###
     install -d  ${deps_destroot}/{bin,include,share/man} \
@@ -233,12 +233,12 @@ Bootstrap_ ()
     )
     
     # -------------------------------------- begin tools build
-    if test -e ${gnubundle=${proj_root}/gnu-tools.sparsebundle}
+    if [ -e ${gnutoolbundle} ]
     then
-        hdiutil attach ${gnubundle}
+        hdiutil attach ${gnutoolbundle}
     else
-        hdiutil create -type SPARSEBUNDLE -fs HFS+ -size 1g -volname ${proj_uuid} ${gnubundle}
-        hdiutil attach ${gnubundle}
+        hdiutil create -type SPARSEBUNDLE -fs HFS+ -size 1g -volname ${proj_uuid} ${gnutoolbundle}
+        hdiutil attach ${gnutoolbundle}
         
         BuildDeps_  ${pkgsrc_tar} --program-prefix=gnu --disable-nls
         BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
@@ -420,22 +420,18 @@ HKCU,Software\Wine\Fonts\Replacements,"ＭＳ ゴシック",,"小夏 等幅"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐゴシック",,"小夏"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"IPA モナー 明朝"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"IPA モナー P明朝"
-
-;; Mouse ;;
-HKCU,Control Panel\Mouse,"DoubleClickHeight",,"8"
-HKCU,Control Panel\Mouse,"DoubleClickWidth",,"8"
 __EOS__
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf} ${inftmp}
     
     # -------------------------------------- wine loader
     install -d ${wine_destroot}/libexec
     mv ${wine_destroot}/{bin,libexec}/wine
-    install -m 0755 ${origin}/wineloader.in ${wine_destroot}/bin/wine
+    install -m 0755 ${proj_root}/wineloader.in ${wine_destroot}/bin/wine
     sed -i "" "s|@DATE@|$(date +%F)|g" ${wine_destroot}/bin/wine
     
     ### native dlls ###
     install -d ${wine_destroot}/lib/wine/nativedlls
-    cp ${origin}/nativedlls/* $_
+    cp ${proj_root}/nativedlls/* $_
     
     ### update plist ###
     iconfile=droplet
@@ -448,8 +444,8 @@ __EOS__
     done <<__EOS__
 Set :CFBundleIconFile ${iconfile}
 Add :NSHumanReadableCopyright string ${wine_version}, Copyright © 2013 mattintosh4, https://github.com/mattintosh4/NXWine
-Add :CFBundleVersion string ${build_version}
-Add :CFBundleIdentifier string ${domain}.${proj_name}
+Add :CFBundleVersion string ${proj_version}
+Add :CFBundleIdentifier string ${proj_domain}.${proj_name}
 Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions array
 Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions:0 string exe
 Add :CFBundleDocumentTypes:1:CFBundleTypeIconFile string ${iconfile}
@@ -471,7 +467,7 @@ __EOS__
 
 BuildDmg_ ()
 {
-    local dmg=${origin}/${proj_name}_${build_version}_${wine_version/wine-}.dmg
+    local dmg=${proj_root}/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
     local srcdir=$(mktemp -dt XXXXXX)
     
     test ! -f ${dmg} || rm ${dmg}

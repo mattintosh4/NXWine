@@ -43,6 +43,10 @@ CreateWineprefix_ ()
 "*gdiplus"="native"
 "*l3codecx"="native"
 "*quartz"="native"
+
+[HKEY_CURRENT_USER\\Control Panel\\Mouse]
+"DoubleClickHeight"="8"
+"DoubleClickWidth"="8"
 __REGEDIT4__
     
     wine regsvr32.exe   {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dswave}.dll \

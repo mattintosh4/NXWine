@@ -25,6 +25,9 @@ test -x ${uconv}
 test -x ${git}
 test -x ${sevenzip}
 
+export FONTFORGE=/opt/local/bin/fontforge
+test -x ${FONTFORGE}
+
 # -------------------------------------- Xcode
 export MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f-2)
 export DEVELOPER_DIR=$(xcode-select -print-path)
@@ -69,7 +72,6 @@ pkgsrc_m4=m4-1.4.16.tar.bz2
 pkgsrc_gettext=gettext-0.18.2.tar.gz
 pkgsrc_libelf=libelf-0.8.13.tar.gz
 pkgsrc_ncurses=ncurses-5.9.tar.gz
-pkgsrc_pkgconfig=pkg-config-719abc791036f1e2222f652966b0ad7dcf5dc837.tar.gz
 pkgsrc_readline=readline-master.tar.gz
 pkgsrc_tar=tar-1.26.tar.gz
 pkgsrc_xz=xz-5.0.4.tar.bz2
@@ -128,9 +130,6 @@ BuildDeps_ ()
         libtool-*)
             ./configure ${configure_args/${deps_destroot}/${gnuprefix}} "$@"
         ;;
-        pkg-config-*)
-            ./autogen.sh ${configure_args} "$@"
-        ;;
         zlib-*)
             ./configure --prefix=${deps_destroot}
         ;;
@@ -182,6 +181,12 @@ BuildDevel_ ()
         orc)
             git checkout -f master
             ./autogen.sh ${configure_args} --disable-gtk-doc{,-html,-pdf} --without-html-dir
+        ;;
+        pkg-config)
+            git checkout -f master
+            ./autogen.sh ${configure_args}  --disable-host-tool \
+                                            --with-internal-glib \
+                                            --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
         ;;
         python) # Python 2.7
             ./configure ${configure_args}
@@ -261,9 +266,7 @@ Bootstrap_ ()
     trap "hdiutil detach ${gnuprefix}" EXIT
     
     # --------------------------------- begin build
-    BuildDeps_  ${pkgsrc_pkgconfig} --disable-host-tool \
-                                    --with-internal-glib \
-                                    --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
+    BuildDevel_ pkg-config
     BuildDeps_  ${pkgsrc_ncurses}   --enable-{pc-files,sigwinch} \
                                     --disable-mixed-case \
                                     --with-shared \
@@ -370,7 +373,8 @@ BuildWine_ ()
     ${srcroot}/wine/configure   --prefix=${wine_destroot} --build=${triple} \
                                 --without-{capi,cms,gphoto,gsm,oss,sane,v4l} \
                                 CPPFLAGS="${CPPFLAGS} -I/opt/X11/include" \
-                                LDFLAGS="${LDFLAGS} -L/opt/X11/lib"
+                                LDFLAGS="${LDFLAGS} -L/opt/X11/lib" \
+                                PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig:/opt/X11/share/pkgconfig
     make ${make_args}
     make install
     

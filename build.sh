@@ -25,9 +25,6 @@ test -x ${uconv}
 test -x ${git}
 test -x ${sevenzip}
 
-export FONTFORGE=/opt/local/bin/fontforge
-test -x ${FONTFORGE}
-
 # -------------------------------------- Xcode
 export MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f-2)
 export DEVELOPER_DIR=$(xcode-select -print-path)
@@ -46,7 +43,7 @@ export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
 export CFLAGS="-pipe -m32 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
 export CXXFLAGS="${CFLAGS}"
 export CPPFLAGS="-isysroot ${SDKROOT}"
-export CPATH=${deps_destroot}/include:/usr/include/malloc
+export CPATH=${deps_destroot}/include:${SDKROOT}/include/sys
 export LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
 
 triple=i686-apple-darwin$(uname -r)

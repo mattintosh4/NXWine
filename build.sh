@@ -3,10 +3,15 @@
 readonly build_version=$(date +%Y%m%d)
 readonly domain=com.github.mattintosh4
 
+readonly proj_name=NXWine
+readonly proj_uuid=E43FF9C9-669C-4319-8351-FF99AFF3230C
+readonly proj_root="$(cd "$(dirname "$0")"; pwd)"
+readonly gnuprefix=/Volumes/${proj_uuid}
+
 readonly origin="$(cd "$(dirname "$0")"; pwd)"
 readonly srcroot=${origin}/source
-readonly workroot=/tmp/E43FF9C9-669C-4319-8351-FF99AFF3230C
-readonly destroot=/Applications/NXWine.app
+readonly workroot=/tmp/${proj_uuid}
+readonly destroot=/Applications/${proj_name}.app
 readonly wine_destroot=${destroot}/Contents/Resources
 readonly deps_destroot=${destroot}/Contents/SharedSupport
 
@@ -23,15 +28,15 @@ test -x ${sevenzip}
 # -------------------------------------- Xcode
 export MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f-2)
 export DEVELOPER_DIR=$(xcode-select -print-path)
-export SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/^Path/{;s/^Path: //;p;}')
+export SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/^Path: /{;s/^Path: //;p;}')
 test -n "${MACOSX_DEPLOYMENT_TARGET}"
 test -d "${DEVELOPER_DIR}"
 test -d "${SDKROOT}"
 
 # -------------------------------------- envs
-PATH=$(/usr/sbin/sysctl -n user.cs_path):${DEVELOPER_DIR}/bin:${DEVELOPER_DIR}/sbin
+PATH=$(/usr/sbin/sysctl -n user.cs_path)
 PATH=$(dirname ${git}):$PATH
-PATH=${deps_destroot}/bin:${workroot}/bin:$PATH
+PATH=${deps_destroot}/bin:${gnuprefix}/bin:$PATH
 export PATH
 export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
@@ -56,6 +61,7 @@ make_args="-j $(($(sysctl -n hw.ncpu) + 2))"
 ## bootstrap
 pkgsrc_autoconf=autoconf-2.69.tar.gz
 pkgsrc_automake=automake-1.13.2.tar.gz
+pkgsrc_bison=bison-2.7.1.tar.gz
 pkgsrc_coreutils=coreutils-8.21.tar.bz2
 pkgsrc_gettext=gettext-0.18.2.tar.gz
 pkgsrc_gperf=gperf-3.0.4.tar.gz
@@ -121,7 +127,7 @@ BuildDeps_ ()
         autoconf-*|\
         automake-*|\
         libtool-*)
-            ./configure ${configure_args/${deps_destroot}/${workroot}} "$@"
+            ./configure ${configure_args/${deps_destroot}/${gnuprefix}} "$@"
         ;;
         zlib-*)
             ./configure --prefix=${deps_destroot}
@@ -155,7 +161,7 @@ BuildDevel_ ()
         ;;
         glib)
             git checkout -f glib-2-36
-            ./autogen.sh ${configure_args} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr,libelf} --with-threads=posix --without-{html-dir,xml-catalog}
+            ACLOCAL_FLAGS="-I ${gnuprefix}/share/aclocal" ./autogen.sh ${configure_args} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr} --with-threads=posix --without-{html-dir,xml-catalog}
         ;;
         libffi)
             git checkout -f master
@@ -206,7 +212,7 @@ Bootstrap_ ()
     ### clean up ###
     rm -rf ${workroot} ${destroot}
     
-    sed "s|@DATE@|$(date +%F)|g" ${origin}/NXWine.applescript | osacompile -o ${destroot}
+    sed "s|@DATE@|$(date +%F)|g" ${origin}/main.applescript | osacompile -o ${destroot}
     install -m 0644 ${origin}/nxwine.icns ${destroot}/Contents/Resources/droplet.icns
     
     ### directory installation ###
@@ -220,35 +226,42 @@ Bootstrap_ ()
     )
     
     # -------------------------------------- begin tools build
-    BuildDeps_  ${pkgsrc_tar} --program-prefix=gnu --disable-nls
-    BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
-    (
-        cd ${workroot}/bin
-        ln -s {g,}readlink
-    )
-    BuildDeps_  ${pkgsrc_m4} --program-prefix=g
-    (
-        cd ${workroot}/bin
-        ln -s {g,}m4
-        ./m4 --version &>/dev/null
-    )
-    BuildDeps_  ${pkgsrc_autoconf}
-    (
-        cd ${workroot}/bin
-        for x in auto{conf,header,m4te,reconf,scan,update} ifnames ; do ln ${x} ${x}-2.69 ; done
-    )
-    BuildDeps_  ${pkgsrc_automake}
-    BuildDeps_  ${pkgsrc_libtool} --program-prefix=g
-    (
-        cd ${workroot}/bin
-        ln -s {g,}libtool
-        ln -s {g,}libtoolize
-        ./libtool       --version &>/dev/null
-        ./libtoolize    --version &>/dev/null
-    )
+    if test -e ${gnubundle=${proj_root}/gnu-tools.sparsebundle}
+    then
+        hdiutil attach ${gnubundle}
+    else
+        hdiutil create -type SPARSEBUNDLE -fs HFS+ -size 1g -volname ${proj_uuid} ${gnubundle}
+        hdiutil attach ${gnubundle}
+        
+        BuildDeps_  ${pkgsrc_tar} --program-prefix=gnu --disable-nls
+        BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
+        {
+            cd ${gnuprefix}/bin
+            ln -s {g,}readlink
+            cd -
+        }
+        BuildDeps_  ${pkgsrc_m4} --program-prefix=g
+        {
+            cd ${gnuprefix}/bin
+            ln -s {g,}m4
+            cd -
+        }
+        BuildDeps_  ${pkgsrc_autoconf}
+        BuildDeps_  ${pkgsrc_automake}
+        BuildDeps_  ${pkgsrc_libtool} --program-prefix=g
+        {
+            cd ${gnuprefix}/bin
+            ln -s {g,}libtool
+            ln -s {g,}libtoolize
+            cd -
+        }
+    fi
+    trap "hdiutil detach ${gnuprefix}" EXIT
     
     # --------------------------------- begin build
-    BuildDeps_  ${pkgsrc_pkgconfig} --with-internal-glib
+    BuildDeps_  ${pkgsrc_pkgconfig} --disable-host-tool \
+                                    --with-internal-glib \
+                                    --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
     BuildDeps_  ${pkgsrc_gperf} # required from libiconv
     BuildDeps_  ${pkgsrc_libiconv}
     BuildDeps_  ${pkgsrc_ncurses}   --enable-{pc-files,sigwinch} \
@@ -258,6 +271,7 @@ Bootstrap_ ()
     BuildDeps_  ${pkgsrc_readline} --with-curses --enable-multibyte
     BuildDeps_  ${pkgsrc_zlib}
     BuildDeps_  ${pkgsrc_gettext} --enable-threads=posix --without-emacs
+    BuildDeps_  ${pkgsrc_bison}
     BuildDeps_  ${pkgsrc_libelf} --disable-compat
     BuildDeps_  ${pkgsrc_xz}
     BuildDevel_ python
@@ -270,7 +284,10 @@ BuildStage1_ ()
     {
         $(which gnutar) xf ${srcroot}/${pkgsrc_gmp} -C ${workroot}
         cd ${workroot}/${pkgsrc_gmp%.tar.*}
-        ./configure ${configure_args} ABI=32 CC=$(xcrun -find gcc-4.2) CXX=$(xcrun -find g++-4.2)
+        CC=$( xcrun -find gcc-4.2) \
+        CXX=$(xcrun -find g++-4.2) \
+        ABI=32 \
+        ./configure --prefix=${deps_destroot} --build=${triple} --enable-cxx
         make ${make_args}
         make check
         make install
@@ -287,7 +304,7 @@ BuildStage2_ ()
 {
     BuildDevel_ libffi
 #    BuildDevel_ glib
-    BuildDeps_  ${pkgsrc_glib} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr,libelf} --with-threads=posix --without-{html-dir,xml-catalog}
+    BuildDeps_  ${pkgsrc_glib} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr} --with-threads=posix --without-{html-dir,xml-catalog}
     BuildDevel_ freetype
     [ -f ${deps_destroot}/lib/libfreetype.6.dylib ]
 } # end BuildStage2_
@@ -428,7 +445,7 @@ __EOS__
 Set :CFBundleIconFile ${iconfile}
 Add :NSHumanReadableCopyright string ${wine_version}, Copyright © 2013 mattintosh4, https://github.com/mattintosh4/NXWine
 Add :CFBundleVersion string ${build_version}
-Add :CFBundleIdentifier string ${domain}.NXWine
+Add :CFBundleIdentifier string ${domain}.${proj_name}
 Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions array
 Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions:0 string exe
 Add :CFBundleDocumentTypes:1:CFBundleTypeIconFile string ${iconfile}
@@ -450,7 +467,7 @@ __EOS__
 
 BuildDmg_ ()
 {
-    local dmg=${origin}/NXWine_${build_version}_${wine_version/wine-}.dmg
+    local dmg=${origin}/${proj_name}_${build_version}_${wine_version/wine-}.dmg
     local srcdir=$(mktemp -dt XXXXXX)
     
     test ! -f ${dmg} || rm ${dmg}
@@ -460,7 +477,7 @@ BuildDmg_ ()
     install -d ${srcdir}/sources
     cp ${srcroot}/opfc-ModuleHP-1.1.1_withIPAMonaFonts-1.0.8.tar.gz ${srcdir}/sources
     
-    hdiutil create -format UDBZ -srcdir ${srcdir} -volname NXWine ${dmg}
+    hdiutil create -format UDBZ -srcdir ${srcdir} -volname ${proj_name} ${dmg}
     rm -rf ${srcdir}
 } # end BuildDmg_
 

@@ -58,19 +58,18 @@ configure_args="\
 make_args="-j $(($(sysctl -n hw.ncpu) + 2))"
 
 # -------------------------------------- package source
-## bootstrap
+## gnutools
 pkgsrc_autoconf=autoconf-2.69.tar.gz
 pkgsrc_automake=automake-1.13.2.tar.gz
 pkgsrc_bison=bison-2.7.1.tar.gz
 pkgsrc_coreutils=coreutils-8.21.tar.bz2
-pkgsrc_gettext=gettext-0.18.2.tar.gz
-pkgsrc_gperf=gperf-3.0.4.tar.gz
-pkgsrc_libelf=libelf-0.8.13.tar.gz
-pkgsrc_libiconv=libiconv-1.14.tar.gz
 pkgsrc_libtool=libtool-2.4.2.tar.gz
 pkgsrc_m4=m4-1.4.16.tar.bz2
+## bootstrap
+pkgsrc_gettext=gettext-0.18.2.tar.gz
+pkgsrc_libelf=libelf-0.8.13.tar.gz
 pkgsrc_ncurses=ncurses-5.9.tar.gz
-pkgsrc_pkgconfig=pkg-config-0.28.tar.gz
+pkgsrc_pkgconfig=pkg-config-719abc791036f1e2222f652966b0ad7dcf5dc837.tar.gz
 pkgsrc_readline=readline-master.tar.gz
 pkgsrc_tar=tar-1.26.tar.gz
 pkgsrc_xz=xz-5.0.4.tar.bz2
@@ -128,6 +127,9 @@ BuildDeps_ ()
         automake-*|\
         libtool-*)
             ./configure ${configure_args/${deps_destroot}/${gnuprefix}} "$@"
+        ;;
+        pkg-config-*)
+            ./autogen.sh ${configure_args} "$@"
         ;;
         zlib-*)
             ./configure --prefix=${deps_destroot}
@@ -262,8 +264,6 @@ Bootstrap_ ()
     BuildDeps_  ${pkgsrc_pkgconfig} --disable-host-tool \
                                     --with-internal-glib \
                                     --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
-    BuildDeps_  ${pkgsrc_gperf} # required from libiconv
-    BuildDeps_  ${pkgsrc_libiconv}
     BuildDeps_  ${pkgsrc_ncurses}   --enable-{pc-files,sigwinch} \
                                     --disable-mixed-case \
                                     --with-shared \

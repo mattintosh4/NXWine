@@ -1,13 +1,8 @@
 # NXWine is No X11 Wine for Mac OS X
 
-## Information
+## Information and application bundle download page
 
 http://mattintosh.hatenablog.com/entry/nxwine (Japanese)
-
-
-## Application bundle download page
-
-https://code.google.com/p/mattintosh4-devel/downloads/list?q=label:NXWine
 
 
 ## System requirements

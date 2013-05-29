@@ -1,4 +1,4 @@
-wine wineboot.exe --init
+${prefix}/libexec/wine wineboot.exe --init
 
 install -v -m 0644 ${prefix}/lib/wine/nativedlls/* "${WINEPREFIX}"/drive_c/windows/system32
 
@@ -21,14 +21,18 @@ cat <<__REGEDIT4__ | wine regedit -
 "*dmstyle"="native"
 "*dmsynth"="native"
 "*dmusic"="native"
-"*dplayx"="native"
 "*dsound"="native"
 "*dswave"="native"
 "*l3codecx"="native"
+
+;;; dplayx ;;;
+
+"*dplayx"="native"
 
 "*gdiplus"="builtin,native"
 "*quartz"="native"
 __REGEDIT4__
 
-wine regsvr32.exe   {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dswave}.dll l3codecx.ax \
-                    quartz.dll
+${prefix}/libexec/wine regsvr32.exe \
+    {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dswave}.dll l3codecx.ax \
+    quartz.dll

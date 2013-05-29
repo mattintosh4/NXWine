@@ -493,6 +493,16 @@ Add :CFBundleDocumentTypes:9:CFBundleTypeExtensions:0 string zip
 Add :CFBundleDocumentTypes:9:CFBundleTypeIconFile string ${iconfile}
 Add :CFBundleDocumentTypes:9:CFBundleTypeName string zip Archive
 Add :CFBundleDocumentTypes:9:CFBundleTypeRole string Viewer
+Add :CFBundleDocumentTypes:10:CFBundleTypeExtensions array
+Add :CFBundleDocumentTypes:10:CFBundleTypeExtensions:0 string cab
+Add :CFBundleDocumentTypes:10:CFBundleTypeIconFile string ${iconfile}
+Add :CFBundleDocumentTypes:10:CFBundleTypeName string cab Archive
+Add :CFBundleDocumentTypes:10:CFBundleTypeRole string Viewer
+Add :CFBundleDocumentTypes:11:CFBundleTypeExtensions array
+Add :CFBundleDocumentTypes:11:CFBundleTypeExtensions:0 string lzma
+Add :CFBundleDocumentTypes:11:CFBundleTypeIconFile string ${iconfile}
+Add :CFBundleDocumentTypes:11:CFBundleTypeName string lzma Archive
+Add :CFBundleDocumentTypes:11:CFBundleTypeRole string Viewer
 __EOS__
 
 } # end BuildWine_

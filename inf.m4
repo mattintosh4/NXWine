@@ -52,8 +52,10 @@ HKCR,7-Zip.$1\DefaultIcon,,2,"Z:\Applications\NXWine.app\Contents\Resources\lib\
 
 [Classes]
 _7z_class_regist(7z, 0)
+_7z_class_regist(cab, 7)
 _7z_class_regist(lha, 6)
 _7z_class_regist(lzh, 6)
+_7z_class_regist(lzma, 16)
 _7z_class_regist(rar, 3)
 _7z_class_regist(xz, 23)
 _7z_class_regist(zip, 1)

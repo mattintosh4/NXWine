@@ -4,14 +4,8 @@ install -v -m 0644 ${prefix}/lib/wine/nativedlls/* "${WINEPREFIX}"/drive_c/windo
 
 cat <<__REGEDIT4__ | wine regedit -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
-
-;;;  d3dx9 ;;;
-
 "*d3dx9_42"="native"
 "*d3dx9_43"="native"
-
-;;; directmusic ;;;
-
 "*devenum"="native"
 "*dmband"="native"
 "*dmcompos"="native"
@@ -21,15 +15,11 @@ cat <<__REGEDIT4__ | wine regedit -
 "*dmstyle"="native"
 "*dmsynth"="native"
 "*dmusic"="native"
+"*dplayx"="native"
 "*dsound"="native"
 "*dswave"="native"
-"*l3codecx"="native"
-
-;;; dplayx ;;;
-
-"*dplayx"="native"
-
 "*gdiplus"="builtin,native"
+"*l3codecx"="native"
 "*quartz"="native"
 __REGEDIT4__
 

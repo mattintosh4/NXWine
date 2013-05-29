@@ -456,7 +456,7 @@ __EOS__
     cd -
     
     # ------------------------------------- core fonts
-    for x in $(find ${proj_root}/corefonts/*.exe); do ${sevenzip} x -o${wine_destroot}/share/wine/fonts ${x} '*.TTF'; done
+    for x in $(find ${proj_root}/corefonts/*.exe); do ${sevenzip} x -o${wine_destroot}/share/wine/fonts ${x} '*.TTF'; done; unset x
     
     # ------------------------------------- plist
     iconfile=droplet

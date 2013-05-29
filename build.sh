@@ -399,41 +399,61 @@ BuildWine_ ()
     local inf=${wine_destroot}/share/wine/wine.inf
     local inftmp=$(mktemp -t XXXXXX)
     mv ${inf}{,.orig}
-    sed '   s|@GOTHIC_FILE@|KonatuTohaba.ttf|
-            s|@GOTHIC_NAME@|Konatu Tohaba|
-            s|@PGOTHIC_FILE@|Konatu.ttf|
-            s|@PGOTHIC_NAME@|Konatu|
-            s|@MINCHO_FILE@|ipam-mona.ttf|
-            s|@MINCHO_NAME@|IPAMonaMincho|
-            s|@PMINCHO_FILE@|ipamp-mona.ttf|
-            s|@PMINCHO_NAME@|IPAMonaPMincho|
-    ' <<'__EOS__' | cat ${inf}.orig /dev/fd/3 3<&0 > ${inftmp}
+    m4 <<'__EOS__' | cat ${inf}.orig /dev/fd/3 3<&0 > ${inftmp}
 
+;;; ----------- NXWine original section ----------- ;;;
 
+; この行以降は NXWine 独自の初期値です。これらの初期化が不要であれば削除して下さい。
+; この INF ファイルは BOM 付きの UTF-8 に変換されていますので編集の際はご注意下さい。
+
+define(`G_FILE', `KonatuTohaba.ttf')dnl
+define(`G_NAME', `Konatu Tohaba')dnl
+define(`PG_FILE', `Konatu.ttf')dnl
+define(`PG_NAME', `Konatu')dnl
+define(`M_FILE', `ipam-mona.ttf')dnl
+define(`M_NAME', `IPAMonaMincho')dnl
+define(`PM_FILE', `ipamp-mona.ttf')dnl
+define(`PM_NAME', `IPAMonaPMincho')dnl
 
 ;;; Japanese font settings ;;;
 
 [Fonts]
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Microsoft Sans Serif",,"@GOTHIC_FILE@"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Sans Serif",,"@GOTHIC_FILE@"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Gothic",,"@GOTHIC_FILE@"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PGothic",,"@PGOTHIC_FILE@"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Serif",,"@MINCHO_FILE@"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Mincho",,"@MINCHO_FILE@"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PMincho",,"@PMINCHO_FILE@"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Tahoma",,"@PGOTHIC_FILE@"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Verdana",,"@PGOTHIC_FILE@"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Microsoft Sans Serif",,"G_FILE"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Sans Serif",,"G_FILE"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Gothic",,"G_FILE"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PGothic",,"PG_FILE"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Serif",,"M_FILE"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Mincho",,"M_FILE"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PMincho",,"PM_FILE"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Tahoma",,"PG_FILE"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Verdana",,"PG_FILE"
 
-HKCU,Software\Wine\Fonts\Replacements,"MS UI Gothic",,"@PGOTHIC_NAME@"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ ゴシック",,"@GOTHIC_NAME@"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐゴシック",,"@PGOTHIC_NAME@"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"@MINCHO_NAME@"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"@PMINCHO_NAME@"
-HKCU,Software\Wine\Fonts\Replacements,"ｺﾞｼｯｸ",,"@GOTHIC_NAME@"
-HKCU,Software\Wine\Fonts\Replacements,"ゴシック",,"@GOTHIC_NAME@"
-HKCU,Software\Wine\Fonts\Replacements,"標準ゴシック",,"@GOTHIC_NAME@"
-HKCU,Software\Wine\Fonts\Replacements,"明朝",,"@MINCHO_NAME@"
-HKCU,Software\Wine\Fonts\Replacements,"標準明朝",,"@MINCHO_NAME@"
+HKCU,Software\Wine\Fonts\Replacements,"MS UI Gothic",,"PG_NAME"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ ゴシック",,"G_NAME"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐゴシック",,"PG_NAME"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"M_NAME"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"PM_NAME"
+HKCU,Software\Wine\Fonts\Replacements,"ｺﾞｼｯｸ",,"G_NAME"
+HKCU,Software\Wine\Fonts\Replacements,"ゴシック",,"G_NAME"
+HKCU,Software\Wine\Fonts\Replacements,"標準ゴシック",,"G_NAME"
+HKCU,Software\Wine\Fonts\Replacements,"明朝",,"M_NAME"
+HKCU,Software\Wine\Fonts\Replacements,"標準明朝",,"M_NAME"
+
+define(`_7z_class_regist', `dnl
+HKCR,.$1,,2,"7-Zip.$1"
+HKCR,7-Zip.$1,,2,"$1 Archive"
+HKCR,7-Zip.$1\shell\open\command,,2,"""Z:\Applications\NXWine.app\Contents\Resources\lib\wine\programs\7-Zip\7zFM.exe"" ""%1"""
+HKCR,7-Zip.$1\DefaultIcon,,2,"Z:\Applications\NXWine.app\Contents\Resources\lib\wine\programs\7-Zip\7z.dll,$2"')dnl
+
+;;; 7-Zip classes ;;;
+
+[Classes]
+_7z_class_regist(7z, 0)
+_7z_class_regist(lha, 6)
+_7z_class_regist(lzh, 6)
+_7z_class_regist(rar, 3)
+_7z_class_regist(xz, 23)
+_7z_class_regist(zip, 1)
 __EOS__
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf} ${inftmp}
     
@@ -486,6 +506,36 @@ Add :CFBundleDocumentTypes:3:CFBundleTypeExtensions:0 string lnk
 Add :CFBundleDocumentTypes:3:CFBundleTypeIconFile string ${iconfile}
 Add :CFBundleDocumentTypes:3:CFBundleTypeName string Windows Shortcut File
 Add :CFBundleDocumentTypes:3:CFBundleTypeRole string Viewer
+Add :CFBundleDocumentTypes:4:CFBundleTypeExtensions array
+Add :CFBundleDocumentTypes:4:CFBundleTypeExtensions:0 string 7z
+Add :CFBundleDocumentTypes:4:CFBundleTypeIconFile string ${iconfile}
+Add :CFBundleDocumentTypes:4:CFBundleTypeName string 7z Archive
+Add :CFBundleDocumentTypes:4:CFBundleTypeRole string Viewer
+Add :CFBundleDocumentTypes:5:CFBundleTypeExtensions array
+Add :CFBundleDocumentTypes:5:CFBundleTypeExtensions:0 string lha
+Add :CFBundleDocumentTypes:5:CFBundleTypeIconFile string ${iconfile}
+Add :CFBundleDocumentTypes:5:CFBundleTypeName string lha Archive
+Add :CFBundleDocumentTypes:5:CFBundleTypeRole string Viewer
+Add :CFBundleDocumentTypes:6:CFBundleTypeExtensions array
+Add :CFBundleDocumentTypes:6:CFBundleTypeExtensions:0 string lzh
+Add :CFBundleDocumentTypes:6:CFBundleTypeIconFile string ${iconfile}
+Add :CFBundleDocumentTypes:6:CFBundleTypeName string lzh Archive
+Add :CFBundleDocumentTypes:6:CFBundleTypeRole string Viewer
+Add :CFBundleDocumentTypes:7:CFBundleTypeExtensions array
+Add :CFBundleDocumentTypes:7:CFBundleTypeExtensions:0 string rar
+Add :CFBundleDocumentTypes:7:CFBundleTypeIconFile string ${iconfile}
+Add :CFBundleDocumentTypes:7:CFBundleTypeName string rar Archive
+Add :CFBundleDocumentTypes:7:CFBundleTypeRole string Viewer
+Add :CFBundleDocumentTypes:8:CFBundleTypeExtensions array
+Add :CFBundleDocumentTypes:8:CFBundleTypeExtensions:0 string xz
+Add :CFBundleDocumentTypes:8:CFBundleTypeIconFile string ${iconfile}
+Add :CFBundleDocumentTypes:8:CFBundleTypeName string xz Archive
+Add :CFBundleDocumentTypes:8:CFBundleTypeRole string Viewer
+Add :CFBundleDocumentTypes:9:CFBundleTypeExtensions array
+Add :CFBundleDocumentTypes:9:CFBundleTypeExtensions:0 string zip
+Add :CFBundleDocumentTypes:9:CFBundleTypeIconFile string ${iconfile}
+Add :CFBundleDocumentTypes:9:CFBundleTypeName string zip Archive
+Add :CFBundleDocumentTypes:9:CFBundleTypeRole string Viewer
 __EOS__
 
 } # end BuildWine_

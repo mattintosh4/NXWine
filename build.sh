@@ -439,6 +439,12 @@ HKCU,Software\Wine\Fonts\Replacements,"標準ゴシック",,"G_NAME"
 HKCU,Software\Wine\Fonts\Replacements,"明朝",,"M_NAME"
 HKCU,Software\Wine\Fonts\Replacements,"標準明朝",,"M_NAME"
 
+
+;;; Mouse ;;;
+
+HKCU,Control Panel\Mouse,"DoubleClickHeight",,"8"
+HKCU,Control Panel\Mouse,"DoubleClickWidth",,"8"
+
 define(`_7z_class_regist', `dnl
 HKCR,.$1,,2,"7-Zip.$1"
 HKCR,7-Zip.$1,,2,"$1 Archive"

@@ -124,8 +124,7 @@ BuildDeps_ ()
         coreutils-*|\
         m4-*|\
         autoconf-*|\
-        automake-*|\
-        libtool-*)
+        automake-*)
             ./configure ${configure_args/${deps_destroot}/${gnuprefix}} "$@"
         ;;
         zlib-*)
@@ -253,17 +252,17 @@ Bootstrap_ ()
         }
         BuildDeps_  ${pkgsrc_autoconf}
         BuildDeps_  ${pkgsrc_automake}
-        BuildDeps_  ${pkgsrc_libtool} --program-prefix=g
-        {
-            cd ${gnuprefix}/bin
-            ln -s {g,}libtool
-            ln -s {g,}libtoolize
-            cd -
-        }
     fi
     trap "hdiutil detach ${gnuprefix}" EXIT
     
     # --------------------------------- begin build
+    BuildDeps_  ${pkgsrc_libtool} --program-prefix=g
+    {
+        cd ${deps_destroot}/bin
+        ln -s {g,}libtool
+        ln -s {g,}libtoolize
+        cd -
+    }
     BuildDevel_ pkg-config
     BuildDeps_  ${pkgsrc_ncurses}   --enable-{pc-files,sigwinch} \
                                     --disable-mixed-case \

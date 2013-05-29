@@ -399,9 +399,7 @@ BuildWine_ ()
     local inf=${wine_destroot}/share/wine/wine.inf
     local inftmp=$(mktemp -t XXXXXX)
     mv ${inf}{,.orig}
-    sed '   s|@SYSTEMLINK@|HKLM,Software\\Microsoft\\Windows NT\\CurrentVersion\\FontLink\\SystemLink|
-            s|@REPLACEMENTS@|HKCU,Software\\Wine\\Fonts\\Replacements|
-            s|@GOTHIC_FILE@|KonatuTohaba.ttf|
+    sed '   s|@GOTHIC_FILE@|KonatuTohaba.ttf|
             s|@GOTHIC_NAME@|Konatu Tohaba|
             s|@PGOTHIC_FILE@|Konatu.ttf|
             s|@PGOTHIC_NAME@|Konatu|
@@ -416,22 +414,26 @@ BuildWine_ ()
 ;;; Japanese font settings ;;;
 
 [Fonts]
-@SYSTEMLINK@,"Sans",,"@GOTHIC_FILE@"
-@SYSTEMLINK@,"Microsoft Sans Serif",,"@GOTHIC_FILE@"
-@SYSTEMLINK@,"MS Sans Serif",,"@GOTHIC_FILE@"
-@SYSTEMLINK@,"MS Gothic",,"@GOTHIC_FILE@"
-@SYSTEMLINK@,"MS PGothic",,"@PGOTHIC_FILE@"
-@SYSTEMLINK@,"MS Serif",,"@MINCHO_FILE@"
-@SYSTEMLINK@,"MS Mincho",,"@MINCHO_FILE@"
-@SYSTEMLINK@,"MS PMincho",,"@PMINCHO_FILE@"
-@SYSTEMLINK@,"Tahoma",,"@PGOTHIC_FILE@"
-@SYSTEMLINK@,"Verdana",,"@PGOTHIC_FILE@"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Microsoft Sans Serif",,"@GOTHIC_FILE@"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Sans Serif",,"@GOTHIC_FILE@"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Gothic",,"@GOTHIC_FILE@"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PGothic",,"@PGOTHIC_FILE@"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Serif",,"@MINCHO_FILE@"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Mincho",,"@MINCHO_FILE@"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PMincho",,"@PMINCHO_FILE@"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Tahoma",,"@PGOTHIC_FILE@"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Verdana",,"@PGOTHIC_FILE@"
 
-@REPLACEMENTS@,"MS UI Gothic",,"@PGOTHIC_NAME@"
-@REPLACEMENTS@,"ＭＳ ゴシック",,"@GOTHIC_NAME@"
-@REPLACEMENTS@,"ＭＳ Ｐゴシック",,"@PGOTHIC_NAME@"
-@REPLACEMENTS@,"ＭＳ 明朝",,"@MINCHO_NAME@"
-@REPLACEMENTS@,"ＭＳ Ｐ明朝",,"@PMINCHO_NAME@"
+HKCU,Software\Wine\Fonts\Replacements,"MS UI Gothic",,"@PGOTHIC_NAME@"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ ゴシック",,"@GOTHIC_NAME@"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐゴシック",,"@PGOTHIC_NAME@"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"@MINCHO_NAME@"
+HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"@PMINCHO_NAME@"
+HKCU,Software\Wine\Fonts\Replacements,"ｺﾞｼｯｸ",,"@GOTHIC_NAME@"
+HKCU,Software\Wine\Fonts\Replacements,"ゴシック",,"@GOTHIC_NAME@"
+HKCU,Software\Wine\Fonts\Replacements,"標準ゴシック",,"@GOTHIC_NAME@"
+HKCU,Software\Wine\Fonts\Replacements,"明朝",,"@MINCHO_NAME@"
+HKCU,Software\Wine\Fonts\Replacements,"標準明朝",,"@MINCHO_NAME@"
 __EOS__
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf} ${inftmp}
     

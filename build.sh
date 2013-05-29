@@ -25,6 +25,8 @@ test -x ${uconv}
 test -x ${git}
 test -x ${sevenzip}
 
+if [ -x ${FONTFORGE=/opt/local/bin/fontforge} ]; then export FONTFORGE; fi
+
 # -------------------------------------- Xcode
 export MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f-2)
 export DEVELOPER_DIR=$(xcode-select -print-path)
@@ -397,26 +399,39 @@ BuildWine_ ()
     local inf=${wine_destroot}/share/wine/wine.inf
     local inftmp=$(mktemp -t XXXXXX)
     mv ${inf}{,.orig}
-    cat <<'__EOS__' | cat ${inf}.orig /dev/fd/3 3<&0 > ${inftmp}
+    sed '   s|@SYSTEMLINK@|HKLM,Software\\Microsoft\\Windows NT\\CurrentVersion\\FontLink\\SystemLink|
+            s|@REPLACEMENTS@|HKCU,Software\\Wine\\Fonts\\Replacements|
+            s|@GOTHIC_FILE@|KonatuTohaba.ttf|
+            s|@GOTHIC_NAME@|Konatu Tohaba|
+            s|@PGOTHIC_FILE@|Konatu.ttf|
+            s|@PGOTHIC_NAME@|Konatu|
+            s|@MINCHO_FILE@|ipam-mona.ttf|
+            s|@MINCHO_NAME@|IPAMonaMincho|
+            s|@PMINCHO_FILE@|ipamp-mona.ttf|
+            s|@PMINCHO_NAME@|IPAMonaPMincho|
+    ' <<'__EOS__' | cat ${inf}.orig /dev/fd/3 3<&0 > ${inftmp}
 
-;; added by NXWine ;;
+
+
+;;; Japanese font settings ;;;
 
 [Fonts]
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Microsoft Sans Serif",,"KonatuTohaba.ttf"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Sans Serif",,"KonatuTohaba.ttf"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Gothic",,"KonatuTohaba.ttf"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PGothic",,"Konatu.ttf"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Serif",,"ipam-mona.ttf"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Mincho",,"ipam-mona.ttf"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PMincho",,"ipamp-mona.ttf"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Tahoma",,"Konatu.ttf"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Verdana",,"Konatu.ttf"
+@SYSTEMLINK@,"Sans",,"@GOTHIC_FILE@"
+@SYSTEMLINK@,"Microsoft Sans Serif",,"@GOTHIC_FILE@"
+@SYSTEMLINK@,"MS Sans Serif",,"@GOTHIC_FILE@"
+@SYSTEMLINK@,"MS Gothic",,"@GOTHIC_FILE@"
+@SYSTEMLINK@,"MS PGothic",,"@PGOTHIC_FILE@"
+@SYSTEMLINK@,"MS Serif",,"@MINCHO_FILE@"
+@SYSTEMLINK@,"MS Mincho",,"@MINCHO_FILE@"
+@SYSTEMLINK@,"MS PMincho",,"@PMINCHO_FILE@"
+@SYSTEMLINK@,"Tahoma",,"@PGOTHIC_FILE@"
+@SYSTEMLINK@,"Verdana",,"@PGOTHIC_FILE@"
 
-HKCU,Software\Wine\Fonts\Replacements,"MS UI Gothic",,"小夏"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ ゴシック",,"小夏 等幅"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐゴシック",,"小夏"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"IPA モナー 明朝"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"IPA モナー P明朝"
+@REPLACEMENTS@,"MS UI Gothic",,"@PGOTHIC_NAME@"
+@REPLACEMENTS@,"ＭＳ ゴシック",,"@GOTHIC_NAME@"
+@REPLACEMENTS@,"ＭＳ Ｐゴシック",,"@PGOTHIC_NAME@"
+@REPLACEMENTS@,"ＭＳ 明朝",,"@MINCHO_NAME@"
+@REPLACEMENTS@,"ＭＳ Ｐ明朝",,"@PMINCHO_NAME@"
 __EOS__
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf} ${inftmp}
     
@@ -431,14 +446,17 @@ __EOS__
     cd $_
     install -m 0644 ${proj_root}/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
     ${sevenzip} x ${proj_root}/nativedlls/directx_feb2010_redist.exe dxnt.cab
-    ${sevenzip} x dxnt.cab {devnum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dplayx,dsound,dswave,quartz}.dll l3codecx.ax
+    ${sevenzip} x dxnt.cab {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dplayx,dsound,dswave,quartz}.dll l3codecx.ax
     ${sevenzip} x ${proj_root}/nativedlls/directx_Jun2010_redist.exe Aug2009_d3dx9_42_x86.cab Jun2010_d3dx9_43_x86.cab
     ${sevenzip} x Aug2009_d3dx9_42_x86.cab d3dx9_42.dll
     ${sevenzip} x Jun2010_d3dx9_43_x86.cab d3dx9_43.dll
     rm *.cab
     cd -
     
-    ### update plist ###
+    # ------------------------------------- core fonts
+    for x in $(find ${proj_root}/corefonts/*.exe); do ${sevenzip} x -o${wine_destroot}/share/wine/fonts ${x} '*.TTF'; done
+    
+    # ------------------------------------- plist
     iconfile=droplet
     wine_version="$(${wine_destroot}/bin/wine --version)"
     test "${wine_version}"

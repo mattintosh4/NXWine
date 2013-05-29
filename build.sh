@@ -44,9 +44,10 @@ export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
 export CFLAGS="-pipe -m32 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
 export CXXFLAGS="${CFLAGS}"
-export CPPFLAGS="-isysroot ${SDKROOT}"
-export CPATH=${deps_destroot}/include:${SDKROOT}/include/sys
+export CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
+export CPATH=${SDKROOT}/include/sys
 export LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
+export ACLOCAL_PATH=${deps_destroot}/share/aclocal
 
 triple=i686-apple-darwin$(uname -r)
 configure_args="\
@@ -163,7 +164,7 @@ BuildDevel_ ()
         ;;
         glib)
             git checkout -f glib-2-36
-            ACLOCAL_FLAGS="-I ${gnuprefix}/share/aclocal" ./autogen.sh ${configure_args} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr} --with-threads=posix --without-{html-dir,xml-catalog}
+            ./autogen.sh ${configure_args} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr} --with-threads=posix --without-{html-dir,xml-catalog}
         ;;
         libffi)
             git checkout -f master
@@ -226,7 +227,7 @@ Bootstrap_ ()
     ### directory installation ###
     install -d  ${deps_destroot}/{bin,include,share/man} \
                 ${wine_destroot}/lib \
-                ${workroot}/bin
+                ${workroot}
     (
         cd ${deps_destroot}
         ln -s ../Resources/lib lib
@@ -260,6 +261,13 @@ Bootstrap_ ()
     trap "hdiutil detach ${gnuprefix}" EXIT
     
     # --------------------------------- begin build
+    BuildGettext_ ()
+    {
+        BuildDeps_ ${pkgsrc_gettext}    --disable-{csharp,native-java,openmp} \
+                                        --without-{emacs,git,cvs} \
+                                        --with-included-{gettext,glib,libcroro,libunistring,libxml}
+    }
+    BuildGettext_
     BuildDeps_  ${pkgsrc_libtool} --program-prefix=g
     {
         cd ${deps_destroot}/bin
@@ -274,7 +282,7 @@ Bootstrap_ ()
                                     --without-{ada,debug,manpages,tests}
     BuildDeps_  ${pkgsrc_readline} --with-curses --enable-multibyte
     BuildDeps_  ${pkgsrc_zlib}
-    BuildDeps_  ${pkgsrc_gettext} --enable-threads=posix --without-emacs
+    BuildGettext_
     BuildDeps_  ${pkgsrc_libelf} --disable-compat
     BuildDeps_  ${pkgsrc_xz}
     BuildDevel_ python
@@ -306,11 +314,8 @@ BuildStage1_ ()
 BuildStage2_ ()
 {
     BuildDevel_ libffi
-#    BuildDevel_ glib
-    BuildDeps_  ${pkgsrc_glib} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr} --with-threads=posix --without-{html-dir,xml-catalog}
-    BuildDevel_ freetype
-    [ -f ${deps_destroot}/lib/libfreetype.6.dylib ]
-    BuildDevel_ fontconfig
+    BuildDevel_ glib
+#    BuildDeps_  ${pkgsrc_glib} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr} --with-threads=posix --without-{html-dir,xml-catalog}
 } # end BuildStage2_
 
 BuildStage3_ ()
@@ -318,6 +323,9 @@ BuildStage3_ ()
     BuildDevel_ orc
     BuildDeps_  ${pkgsrc_odbc}
     BuildDevel_ libpng
+    BuildDevel_ freetype
+    [ -f ${deps_destroot}/lib/libfreetype.6.dylib ] # freetype required libpng
+    BuildDevel_ fontconfig
     BuildDeps_  ${pkgsrc_nasm}
     BuildDevel_ libjpeg-turbo
     BuildDeps_  ${pkgsrc_tiff}

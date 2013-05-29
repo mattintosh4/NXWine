@@ -152,6 +152,10 @@ BuildDevel_ ()
     ditto {${srcroot},${workroot}}/$1
     cd $_
     case $1 in
+        fontconfig)
+            git checkout -f master
+            ./autogen.sh ${configure_args} --with-add-fonts=/Library/Fonts,~/Library/Fonts
+        ;;
         freetype)
             git checkout -f master
             ./autogen.sh
@@ -306,6 +310,7 @@ BuildStage2_ ()
     BuildDeps_  ${pkgsrc_glib} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr} --with-threads=posix --without-{html-dir,xml-catalog}
     BuildDevel_ freetype
     [ -f ${deps_destroot}/lib/libfreetype.6.dylib ]
+    BuildDevel_ fontconfig
 } # end BuildStage2_
 
 BuildStage3_ ()

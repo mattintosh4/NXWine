@@ -63,7 +63,6 @@ make_args="-j $(($(sysctl -n hw.ncpu) + 2))"
 ## gnutools
 pkgsrc_autoconf=autoconf-2.69.tar.gz
 pkgsrc_automake=automake-1.13.2.tar.gz
-pkgsrc_bison=bison-2.7.1.tar.gz
 pkgsrc_coreutils=coreutils-8.21.tar.bz2
 pkgsrc_libtool=libtool-2.4.2.tar.gz
 pkgsrc_m4=m4-1.4.16.tar.bz2
@@ -273,7 +272,6 @@ Bootstrap_ ()
     BuildDeps_  ${pkgsrc_readline} --with-curses --enable-multibyte
     BuildDeps_  ${pkgsrc_zlib}
     BuildDeps_  ${pkgsrc_gettext} --enable-threads=posix --without-emacs
-    BuildDeps_  ${pkgsrc_bison}
     BuildDeps_  ${pkgsrc_libelf} --disable-compat
     BuildDeps_  ${pkgsrc_xz}
     BuildDevel_ python

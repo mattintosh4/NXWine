@@ -21,10 +21,7 @@ export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib:/usr/X11/lib
 export WINEPATH=${prefix}/lib/wine/programs/7-Zip
 
 # note: usage options must be processing before standard run.
-case $1 in
-    --version)  exec ${prefix}/libexec/wine --version;;
-    --help)     exec ${prefix}/libexec/wine --help;;
-esac
+case $1 in (--help|--version) exec ${prefix}/libexec/wine $1 ;; esac
 
 # ------------------------------------ begin standard run
 if [ ! -n "${WINEPREFIX}" ]; then

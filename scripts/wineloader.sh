@@ -6,7 +6,7 @@
 # Copyright (C) 2013 mattintosh4, https://github.com/mattintosh4/NXWine
 #
 
-# some debug options is enabled because this script is incomplete yet.
+# note: some debug options is enabled because this script is incomplete yet.
 set -x
 export WINEDEBUG=+loaddll
 
@@ -14,12 +14,19 @@ prefix=/Applications/NXWine.app/Contents/Resources
 export PATH=${prefix}/libexec:${prefix}/bin:$(dirname ${prefix})/SharedSupport/bin:/usr/bin:/bin:/usr/sbin:/sbin
 export LANG=${LANG:=ja_JP.UTF-8}
 
-# glu32.dll still needs Mesa libraries.
+# note: glu32.dll still needs Mesa libraries.
 export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib:/usr/X11/lib
 
-# special Windows application path
+# special Windows applications path
 export WINEPATH=${prefix}/lib/wine/programs/7-Zip
 
+# note: usage options must be processing before standard run.
+case $1 in
+    --version)  exec ${prefix}/libexec/wine --version;;
+    --help)     exec ${prefix}/libexec/wine --help;;
+esac
+
+# ------------------------------------ begin standard run
 if [ ! -n "${WINEPREFIX}" ]; then
     export WINEPREFIX=${HOME}/.wine
 fi

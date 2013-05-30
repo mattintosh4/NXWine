@@ -447,8 +447,9 @@ BuildWine_ ()
     
     # ------------------------------------- plist
     iconfile=droplet
-    wine_version="$(${wine_destroot}/bin/wine --version)"
-    test "${wine_version}"
+#    wine_version=$(GIT_DIR=${srcroot}/wine/.git git describe HEAD 2>/dev/null || echo "wine-$(cat ${srcroot}/wine/VERSION | cut -d' ' -f3)")
+    wine_version=$(${wine_destdir}/libexec/wine --version)
+    [ "${wine_version}" ]
     
     while read
     do

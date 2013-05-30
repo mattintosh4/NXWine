@@ -329,6 +329,12 @@ BuildStage3_ ()
 #    BuildDevel_ fontconfig
     BuildDeps_  ${pkgsrc_nasm}
     BuildDevel_ libjpeg-turbo
+    {
+        cd ${deps_destroot}/share/doc
+        install -d libjpeg-turbo
+        mv -f {libjpeg,README-turbo,structure,usage,wizard}.txt example.c README libjpeg-turbo
+        cd -
+    }
     BuildDeps_  ${pkgsrc_tiff}
     BuildDeps_  ${pkgsrc_jasper} --disable-opengl --without-x
     BuildDeps_  ${pkgsrc_icns}

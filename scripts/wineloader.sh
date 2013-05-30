@@ -5,6 +5,7 @@
 # Created by mattintosh4 on @DATE@.
 # Copyright (C) 2013 mattintosh4, https://github.com/mattintosh4/NXWine
 #
+set -e
 
 # some debug options is enabled because this script is incomplete yet.
 set -x
@@ -53,5 +54,7 @@ __REGEDIT4__
         l3codecx.ax \
         quartz.dll
 fi
+
+set +e
 
 exec ${prefix}/libexec/wine "$@"

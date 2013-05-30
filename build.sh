@@ -44,8 +44,7 @@ export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
 export CFLAGS="-pipe -m32 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
 export CXXFLAGS="${CFLAGS}"
-export CPPFLAGS="-isysroot ${SDKROOT}"
-export CPATH=${deps_destroot}/include:${SDKROOT}/include/sys
+export CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
 export LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
 export ACLOCAL_PATH=${deps_destroot}/share/aclocal
 
@@ -360,16 +359,8 @@ BuildStage5_ ()
     
     # -------------------------------------- begin winetricks
     ditto {${srcroot}/winetricks/src,${wine_destroot}/share/doc/winetricks}/COPYING
-    install -m 0755 ${srcroot}/winetricks/src/winetricks ${wine_destroot}/bin/winetricks.bin
-    winetricks=${wine_destroot}/bin/winetricks
-    touch ${winetricks}
-    chmod +x ${winetricks}
-    cat <<__EOF__ > ${winetricks}
-#!/bin/bash
-export PATH=${wine_destroot}/bin:$(sysctl -n user.cs_path)
-which wine || { echo "wine not found."; exit 1; }
-exec winetricks.bin "\$@"
-__EOF__
+    install -m 0755 {${srcroot}/winetricks/src,${wine_destroot}/libexec}/winetricks
+    install -m 0755 ${proj_root}/winetricksloader.sh ${wine_destroot}/bin/winetricks
     
     # ------------------------------------- 7-Zip
     ${sevenzip} x -o${wine_destroot}/lib/wine/programs/7-Zip -x'!$*' ${srcroot}/${pkgsrc_7z}
@@ -378,13 +369,14 @@ __EOF__
 BuildWine_ ()
 {
     install -d ${workroot}/wine
-    cd $_
-    export CPATH=${CPATH}:/opt/X11/include
-    export LDFLAGS="${LDFLAGS} -L/opt/X11/lib"
-    export PKG_CONFIG_LIBDIR=${PKG_CONFIG_LIBDIR}:/opt/X11/lib/pkgconfig:/opt/X11/share/pkgconfig
+    cd $_ 
+    export PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig:/opt/X11/share/pkgconfig
     ${srcroot}/wine/configure   --prefix=${wine_destroot} \
                                 --build=${triple} \
-                                --without-{capi,cms,gphoto,gsm,oss,sane,v4l}
+                                --with-{fontconfig,freetype,opengl} \
+                                --without-{capi,cms,gphoto,gsm,oss,sane,v4l} \
+                                CPPFLAGS="${CPPFLAGS} -I/opt/X11/include" \
+                                LDFLAGS="${LDFLAGS} -L/opt/X11/lib"
     make ${make_args}
     make install
     

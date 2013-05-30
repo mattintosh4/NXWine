@@ -27,26 +27,26 @@ test -x ${sevenzip}
 
 if [ -x ${FONTFORGE=/opt/local/bin/fontforge} ]; then export FONTFORGE; fi
 
-# -------------------------------------- Xcode
-export MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f-2)
-export DEVELOPER_DIR=$(xcode-select -print-path)
-export SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/^Path: /{;s/^Path: //;p;}')
-test -n "${MACOSX_DEPLOYMENT_TARGET}"
-test -d "${DEVELOPER_DIR}"
-test -d "${SDKROOT}"
+# -------------------------------------- environment variables
+set -a
+MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f-2)
+DEVELOPER_DIR=$(xcode-select -print-path)
+SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/^Path: /{;s/^Path: //;p;}')
+[ -n "${MACOSX_DEPLOYMENT_TARGET}" ]
+[ -d "${DEVELOPER_DIR}" ]
+[ -d "${SDKROOT}" ]
 
-# -------------------------------------- envs
 PATH=$(/usr/sbin/sysctl -n user.cs_path)
 PATH=$(dirname ${git}):$PATH
 PATH=${deps_destroot}/bin:${gnuprefix}/bin:$PATH
-export PATH
-export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
-export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
-export CFLAGS="-pipe -m32 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
-export CXXFLAGS="${CFLAGS}"
-export CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
-export LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
-export ACLOCAL_PATH=${deps_destroot}/share/aclocal
+CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
+CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
+CFLAGS="-pipe -m32 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
+CXXFLAGS="${CFLAGS}"
+CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
+LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
+ACLOCAL_PATH=${deps_destroot}/share/aclocal
+set +a
 
 triple=i686-apple-darwin$(uname -r)
 configure_args="\

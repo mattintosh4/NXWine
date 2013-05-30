@@ -9,7 +9,7 @@ readonly proj_domain=com.github.mattintosh4.${proj_name}
 readonly gnutoolbundle=${proj_root}/gnu-tools.sparsebundle
 readonly gnuprefix=/Volumes/${proj_uuid}
 
-readonly srcroot=${proj_root}/source
+readonly srcroot=${proj_root}/sources
 readonly workroot=/tmp/${proj_uuid}
 readonly destroot=/Applications/${proj_name}.app
 readonly wine_destroot=${destroot}/Contents/Resources

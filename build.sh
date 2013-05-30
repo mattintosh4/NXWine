@@ -379,11 +379,12 @@ BuildWine_ ()
 {
     install -d ${workroot}/wine
     cd $_
-    ${srcroot}/wine/configure   --prefix=${wine_destroot} --build=${triple} \
-                                --without-{capi,cms,gphoto,gsm,oss,sane,v4l} \
-                                CPPFLAGS="${CPPFLAGS} -I/opt/X11/include" \
-                                LDFLAGS="${LDFLAGS} -L/opt/X11/lib" \
-                                PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig:/opt/X11/share/pkgconfig
+    export CPATH=${CPATH}:/opt/X11/include
+    export LDFLAGS="${LDFLAGS} -L/opt/X11/lib"
+    export PKG_CONFIG_LIBDIR=${PKG_CONFIG_LIBDIR}:/opt/X11/lib/pkgconfig:/opt/X11/share/pkgconfig
+    ${srcroot}/wine/configure   --prefix=${wine_destroot} \
+                                --build=${triple} \
+                                --without-{capi,cms,gphoto,gsm,oss,sane,v4l}
     make ${make_args}
     make install
     

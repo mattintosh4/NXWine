@@ -5,7 +5,6 @@
 # Created by mattintosh4 on @DATE@.
 # Copyright (C) 2013 mattintosh4, https://github.com/mattintosh4/NXWine
 #
-set -e
 
 # some debug options is enabled because this script is incomplete yet.
 set -x
@@ -26,6 +25,7 @@ if [ ! -n "${WINEPREFIX}" ]; then
 fi
 
 if [ ! -d "${WINEPREFIX}" ]; then
+    set -e
     ${prefix}/libexec/wine wineboot.exe --init
     install -v -m 0644 ${prefix}/lib/wine/nativedlls/* "${WINEPREFIX}"/drive_c/windows/system32
     cat <<__REGEDIT4__ | wine regedit -
@@ -53,8 +53,7 @@ __REGEDIT4__
         {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dswave}.dll \
         l3codecx.ax \
         quartz.dll
+    set +e
 fi
-
-set +e
 
 exec ${prefix}/libexec/wine "$@"

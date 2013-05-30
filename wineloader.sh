@@ -11,7 +11,7 @@ set -x
 export WINEDEBUG=+loaddll
 
 prefix=/Applications/NXWine.app/Contents/Resources
-export PATH=${prefix}/libexec:${prefix}/bin:/usr/bin:/bin:/usr/sbin:/sbin
+export PATH=${prefix}/libexec:${prefix}/bin:$(dirname ${prefix})/SharedSupport/bin:/usr/bin:/bin:/usr/sbin:/sbin
 export LANG=${LANG:=ja_JP.UTF-8}
 
 # glu32.dll still needs Mesa libraries.

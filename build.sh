@@ -478,7 +478,7 @@ $(
     do
         cat <<__EOS1__
 Add :CFBundleDocumentTypes:${i}:CFBundleTypeExtensions array
-Add :CFBundleDocumentTypes:${i}:CFBundleTypeExtensions:0 string exe
+Add :CFBundleDocumentTypes:${i}:CFBundleTypeExtensions:0 string ${x}
 Add :CFBundleDocumentTypes:${i}:CFBundleTypeIconFile string ${iconfile}
 Add :CFBundleDocumentTypes:${i}:CFBundleTypeName string ${x} Archive
 Add :CFBundleDocumentTypes:${i}:CFBundleTypeRole string Viewer

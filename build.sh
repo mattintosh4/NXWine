@@ -223,7 +223,7 @@ Bootstrap_ ()
     ### clean up ###
     rm -rf ${workroot} ${destroot}
     
-    sed "s|@DATE@|$(date +%F)|g" ${proj_root}/main.applescript | osacompile -o ${destroot}
+    sed "s|@DATE@|$(date +%F)|g" ${proj_root}/scripts/main.applescript | osacompile -o ${destroot}
     install -m 0644 ${proj_root}/nxwine.icns ${destroot}/Contents/Resources/droplet.icns
     
     ### directory installation ###
@@ -367,7 +367,7 @@ BuildStage5_ ()
         local libexecdir=${wine_destroot}/libexec
         
         install -d ${bindir}
-        install -m 0755 ${proj_root}/winetricksloader.sh ${bindir}
+        install -m 0755 ${proj_root}/scripts/winetricksloader.sh ${bindir}
         install -d ${libexecdir}
         install -m 0755 ${srcroot}/winetricks/src/winetricks ${libexecdir}
         install -d ${docdir}
@@ -415,16 +415,15 @@ BuildWine_ ()
     local inf=${wine_destroot}/share/wine/wine.inf
     local inftmp=$(mktemp -t XXXXXX)
     mv ${inf}{,.orig}
-    m4 ${proj_root}/inf.m4 | cat ${inf}.orig /dev/fd/3 3<&0 > ${inftmp}
+    m4 ${proj_root}/scripts/inf.m4 | cat ${inf}.orig /dev/fd/3 3<&0 > ${inftmp}
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf} ${inftmp}
     
     # -------------------------------------- executables
     install -d ${wine_destroot}/libexec
     mv ${wine_destroot}/{bin,libexec}/wine
-    install -m 0755 ${proj_root}/wineloader.sh ${wine_destroot}/bin/wine
+    install -m 0755 ${proj_root}/scripts/wineloader.sh ${wine_destroot}/bin/wine
+    install -m 0755 ${proj_root}/scripts/createwineprefix.sh ${wine_destroot}/bin/createwineprefix
     sed -i "" "s|@DATE@|$(date +%F)|g" ${wine_destroot}/bin/wine
-    
-    install -m 0755 ${proj_root}/createwineprefix.sh ${wine_destroot}/bin/createwineprefix
     
     # ------------------------------------- native dlls
     install -d ${wine_destroot}/lib/wine/nativedlls

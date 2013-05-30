@@ -373,7 +373,7 @@ BuildStage5_ ()
         local libexecdir=${wine_destroot}/libexec
         
         install -d ${bindir}
-        install -m 0755 ${proj_root}/scripts/winetricksloader.sh ${bindir}
+        install -m 0755 ${proj_root}/scripts/winetricksloader.sh ${bindir}/winetricks
         install -d ${libexecdir}
         install -m 0755 ${srcroot}/winetricks/src/winetricks ${libexecdir}
         install -d ${docdir}
@@ -428,7 +428,6 @@ BuildWine_ ()
     install -d ${wine_destroot}/libexec
     mv ${wine_destroot}/{bin,libexec}/wine
     install -m 0755 ${proj_root}/scripts/wineloader.sh ${wine_destroot}/bin/wine
-    install -m 0755 ${proj_root}/scripts/createwineprefix.sh ${wine_destroot}/bin/createwineprefix
     sed -i "" "s|@DATE@|$(date +%F)|g" ${wine_destroot}/bin/wine
     
     # ------------------------------------- native dlls

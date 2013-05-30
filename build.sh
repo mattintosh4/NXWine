@@ -4,7 +4,7 @@ readonly proj_name=NXWine
 readonly proj_uuid=E43FF9C9-669C-4319-8351-FF99AFF3230C
 readonly proj_root="$(cd "$(dirname "$0")"; pwd)"
 readonly proj_version=$(date +%Y%m%d)
-readonly proj_domain=com.github.mattintosh4
+readonly proj_domain=com.github.mattintosh4.${proj_name}
 
 readonly gnutoolbundle=${proj_root}/gnu-tools.sparsebundle
 readonly gnuprefix=/Volumes/${proj_uuid}
@@ -448,7 +448,7 @@ BuildWine_ ()
 Set :CFBundleIconFile ${iconfile}
 Add :NSHumanReadableCopyright string ${wine_version}, Copyright © 2013 mattintosh4, https://github.com/mattintosh4/NXWine
 Add :CFBundleVersion string ${proj_version}
-Add :CFBundleIdentifier string ${proj_domain}.${proj_name}
+Add :CFBundleIdentifier string ${proj_domain}
 Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions array
 Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions:0 string exe
 Add :CFBundleDocumentTypes:1:CFBundleTypeIconFile string ${iconfile}
@@ -464,46 +464,28 @@ Add :CFBundleDocumentTypes:3:CFBundleTypeExtensions:0 string lnk
 Add :CFBundleDocumentTypes:3:CFBundleTypeIconFile string ${iconfile}
 Add :CFBundleDocumentTypes:3:CFBundleTypeName string Windows Shortcut File
 Add :CFBundleDocumentTypes:3:CFBundleTypeRole string Viewer
-Add :CFBundleDocumentTypes:4:CFBundleTypeExtensions array
-Add :CFBundleDocumentTypes:4:CFBundleTypeExtensions:0 string 7z
-Add :CFBundleDocumentTypes:4:CFBundleTypeIconFile string ${iconfile}
-Add :CFBundleDocumentTypes:4:CFBundleTypeName string 7z Archive
-Add :CFBundleDocumentTypes:4:CFBundleTypeRole string Viewer
-Add :CFBundleDocumentTypes:5:CFBundleTypeExtensions array
-Add :CFBundleDocumentTypes:5:CFBundleTypeExtensions:0 string lha
-Add :CFBundleDocumentTypes:5:CFBundleTypeIconFile string ${iconfile}
-Add :CFBundleDocumentTypes:5:CFBundleTypeName string lha Archive
-Add :CFBundleDocumentTypes:5:CFBundleTypeRole string Viewer
-Add :CFBundleDocumentTypes:6:CFBundleTypeExtensions array
-Add :CFBundleDocumentTypes:6:CFBundleTypeExtensions:0 string lzh
-Add :CFBundleDocumentTypes:6:CFBundleTypeIconFile string ${iconfile}
-Add :CFBundleDocumentTypes:6:CFBundleTypeName string lzh Archive
-Add :CFBundleDocumentTypes:6:CFBundleTypeRole string Viewer
-Add :CFBundleDocumentTypes:7:CFBundleTypeExtensions array
-Add :CFBundleDocumentTypes:7:CFBundleTypeExtensions:0 string rar
-Add :CFBundleDocumentTypes:7:CFBundleTypeIconFile string ${iconfile}
-Add :CFBundleDocumentTypes:7:CFBundleTypeName string rar Archive
-Add :CFBundleDocumentTypes:7:CFBundleTypeRole string Viewer
-Add :CFBundleDocumentTypes:8:CFBundleTypeExtensions array
-Add :CFBundleDocumentTypes:8:CFBundleTypeExtensions:0 string xz
-Add :CFBundleDocumentTypes:8:CFBundleTypeIconFile string ${iconfile}
-Add :CFBundleDocumentTypes:8:CFBundleTypeName string xz Archive
-Add :CFBundleDocumentTypes:8:CFBundleTypeRole string Viewer
-Add :CFBundleDocumentTypes:9:CFBundleTypeExtensions array
-Add :CFBundleDocumentTypes:9:CFBundleTypeExtensions:0 string zip
-Add :CFBundleDocumentTypes:9:CFBundleTypeIconFile string ${iconfile}
-Add :CFBundleDocumentTypes:9:CFBundleTypeName string zip Archive
-Add :CFBundleDocumentTypes:9:CFBundleTypeRole string Viewer
-Add :CFBundleDocumentTypes:10:CFBundleTypeExtensions array
-Add :CFBundleDocumentTypes:10:CFBundleTypeExtensions:0 string cab
-Add :CFBundleDocumentTypes:10:CFBundleTypeIconFile string ${iconfile}
-Add :CFBundleDocumentTypes:10:CFBundleTypeName string cab Archive
-Add :CFBundleDocumentTypes:10:CFBundleTypeRole string Viewer
-Add :CFBundleDocumentTypes:11:CFBundleTypeExtensions array
-Add :CFBundleDocumentTypes:11:CFBundleTypeExtensions:0 string lzma
-Add :CFBundleDocumentTypes:11:CFBundleTypeIconFile string ${iconfile}
-Add :CFBundleDocumentTypes:11:CFBundleTypeName string lzma Archive
-Add :CFBundleDocumentTypes:11:CFBundleTypeRole string Viewer
+$(
+    i=4
+    for x in \
+        7z \
+        cab \
+        lha \
+        lzh \
+        lzma \
+        rar \
+        xz \
+        zip
+    do
+        cat <<__EOS1__
+Add :CFBundleDocumentTypes:${i}:CFBundleTypeExtensions array
+Add :CFBundleDocumentTypes:${i}:CFBundleTypeExtensions:0 string exe
+Add :CFBundleDocumentTypes:${i}:CFBundleTypeIconFile string ${iconfile}
+Add :CFBundleDocumentTypes:${i}:CFBundleTypeName string ${x} Archive
+Add :CFBundleDocumentTypes:${i}:CFBundleTypeRole string Viewer
+__EOS1__
+        : $((i++))
+    done
+)
 __EOS__
 
 } # end BuildWine_

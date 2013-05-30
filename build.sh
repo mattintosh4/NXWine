@@ -155,7 +155,9 @@ BuildDevel_ ()
     case $1 in
         fontconfig)
             git checkout -f master
-            ./autogen.sh ${configure_args} --with-add-fonts=/Library/Fonts,~/Library/Fonts
+            ./autogen.sh ${configure_args}  --disable-docs \
+                                            --sysconfdir=/System/Library \
+                                            --with-add-fonts=/Library/Fonts,~/Library/Fonts
         ;;
         freetype)
             git checkout -f master
@@ -324,7 +326,7 @@ BuildStage3_ ()
     BuildDevel_ libpng
     BuildDevel_ freetype
     [ -f ${deps_destroot}/lib/libfreetype.6.dylib ] # freetype required libpng
-    BuildDevel_ fontconfig
+#    BuildDevel_ fontconfig
     BuildDeps_  ${pkgsrc_nasm}
     BuildDevel_ libjpeg-turbo
     BuildDeps_  ${pkgsrc_tiff}
@@ -384,7 +386,7 @@ BuildWine_ ()
     export PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig:/opt/X11/share/pkgconfig
     ${srcroot}/wine/configure   --prefix=${wine_destroot} \
                                 --build=${triple} \
-                                --with-{fontconfig,freetype,opengl} \
+                                --with-opengl \
                                 --without-{capi,cms,gphoto,gsm,oss,sane,v4l} \
                                 CPPFLAGS="${CPPFLAGS} -I/opt/X11/include" \
                                 LDFLAGS="${LDFLAGS} -L/opt/X11/lib"

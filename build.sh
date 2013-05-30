@@ -44,8 +44,8 @@ export CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 export CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
 export CFLAGS="-pipe -m32 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
 export CXXFLAGS="${CFLAGS}"
-export CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
-export CPATH=${SDKROOT}/include/sys
+export CPPFLAGS="-isysroot ${SDKROOT}"
+export CPATH=${deps_destroot}/include:${SDKROOT}/include/sys
 export LDFLAGS="-Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
 export ACLOCAL_PATH=${deps_destroot}/share/aclocal
 
@@ -54,6 +54,7 @@ configure_args="\
 --prefix=${deps_destroot} \
 --build=${triple} \
 --enable-shared \
+--enable-static \
 --disable-debug \
 --disable-maintainer-mode \
 --disable-dependency-tracking \
@@ -180,6 +181,14 @@ BuildDevel_ ()
             autoreconf -i
             ./configure ${configure_args}
         ;;
+        libxml2)
+            git checkout -f master
+            ./autogen.sh ${configure_args}
+        ;;
+        libxslt)
+            git checkout -f master
+            ./autogen.sh ${configure_args}
+        ;;
         orc)
             git checkout -f master
             ./autogen.sh ${configure_args} --disable-gtk-doc{,-html,-pdf} --without-html-dir
@@ -192,14 +201,6 @@ BuildDevel_ ()
         ;;
         python) # Python 2.7
             ./configure ${configure_args}
-        ;;
-        libxml2)
-            git checkout -f master
-            ./autogen.sh ${configure_args}
-        ;;
-        libxslt)
-            git checkout -f master
-            ./autogen.sh ${configure_args}
         ;;
     esac
     make ${make_args}
@@ -315,7 +316,6 @@ BuildStage2_ ()
 {
     BuildDevel_ libffi
     BuildDevel_ glib
-#    BuildDeps_  ${pkgsrc_glib} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr} --with-threads=posix --without-{html-dir,xml-catalog}
 } # end BuildStage2_
 
 BuildStage3_ ()

@@ -358,9 +358,20 @@ BuildStage5_ ()
     )
     
     # -------------------------------------- begin winetricks
-    ditto {${srcroot}/winetricks/src,${wine_destroot}/share/doc/winetricks}/COPYING
-    install -m 0755 {${srcroot}/winetricks/src,${wine_destroot}/libexec}/winetricks
-    install -m 0755 ${proj_root}/winetricksloader.sh ${wine_destroot}/bin/winetricks
+    InstallWinetricks_ ()
+    {
+        local bindir=${wine_destroot}/bin
+        local docdir=${wine_destroot}/share/doc/winetricks
+        local libexecdir=${wine_destroot}/libexec
+        
+        install -d ${bindir}
+        install -m 0755 ${proj_root}/winetricksloader.sh ${bindir}
+        install -d ${libexecdir}
+        install -m 0755 ${srcroot}/winetricks/src/winetricks ${libexecdir}
+        install -d ${docdir}
+        install -m 0644 ${srcroot}/winetricks/src/COPYING ${docdir}
+    }
+    InstallWinetricks_
     
     # ------------------------------------- 7-Zip
     ${sevenzip} x -o${wine_destroot}/lib/wine/programs/7-Zip -x'!$*' ${srcroot}/${pkgsrc_7z}
@@ -369,7 +380,7 @@ BuildStage5_ ()
 BuildWine_ ()
 {
     install -d ${workroot}/wine
-    cd $_ 
+    cd $_
     export PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig:/opt/X11/share/pkgconfig
     ${srcroot}/wine/configure   --prefix=${wine_destroot} \
                                 --build=${triple} \

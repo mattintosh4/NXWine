@@ -30,6 +30,7 @@ export WINEPATH=${prefix}/lib/wine/programs/7-Zip
 
 CreateWineprefix_ ()
 {
+    set -e
     ${prefix}/libexec/wine wineboot.exe --init
     install -v -m 0644 ${prefix}/lib/wine/nativedlls/* "${WINEPREFIX}"/drive_c/windows/system32
     cat <<__REGEDIT4__ | wine regedit -
@@ -57,13 +58,13 @@ __REGEDIT4__
         {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dswave}.dll \
         l3codecx.ax \
         quartz.dll
+    
+    set +e
 } # end CreateWineprefix_
 
 # ------------------------------------ begin standard run
 if [ ! -d "${WINEPREFIX}" ]; then
-    set -e
     CreateWineprefix_
-    set +e
 fi
 
 exec ${prefix}/libexec/wine "$@"

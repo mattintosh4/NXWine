@@ -9,6 +9,9 @@
 
 ;;; Japanese font settings ;;;
 dnl
+define(`_KEY_systemlink',       `HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink')dnl
+define(`_KEY_fontsubstitutes',  `HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes')dnl
+define(`_KEY_replacements',     `HKCU,Software\Wine\Fonts\Replacements')dnl
 define(`G_FILE',  `KonatuTohaba.ttf')dnl
 define(`G_NAME',  `小夏 等幅')dnl
 define(`PG_FILE', `Konatu.ttf')dnl
@@ -19,34 +22,34 @@ define(`PM_FILE', `sazanami-mincho.ttf')dnl
 define(`PM_NAME', `さざなみ明朝')dnl
 
 [Fonts]
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Lucida Sans Unicode",,"PG_FILE"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Microsoft Sans Serif",,"PG_FILE"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Sans Serif",,"PG_FILE"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Gothic",,"G_FILE"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PGothic",,"PG_FILE"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Serif",,"PM_FILE"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Mincho",,"M_FILE"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PMincho",,"PM_FILE"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Tahoma",,"PG_FILE"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Verdana",,"PG_FILE"
+_KEY_systemlink,"Lucida Sans Unicode",,"PG_FILE"
+_KEY_systemlink,"Microsoft Sans Serif",,"PG_FILE"
+_KEY_systemlink,"MS Sans Serif",,"PG_FILE"
+_KEY_systemlink,"MS Gothic",,"G_FILE"
+_KEY_systemlink,"MS PGothic",,"PG_FILE"
+_KEY_systemlink,"MS Serif",,"PM_FILE"
+_KEY_systemlink,"MS Mincho",,"M_FILE"
+_KEY_systemlink,"MS PMincho",,"PM_FILE"
+_KEY_systemlink,"Tahoma",,"PG_FILE"
+_KEY_systemlink,"Verdana",,"PG_FILE"
 
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"@MS Shell Dlg",,"@MS UI Gothic"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"@標準ゴシック",,"@ＭＳ ゴシック"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"@標準明朝",,"@ＭＳ 明朝"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"ｺﾞｼｯｸ",,"ＭＳ ゴシック"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"ゴシック",,"ＭＳ ゴシック"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"標準ゴシック",,"ＭＳ ゴシック"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"標準明朝",,"ＭＳ 明朝"
+_KEY_fontsubstitutes,"@MS Shell Dlg",,"@MS UI Gothic"
+_KEY_fontsubstitutes,"@標準ゴシック",,"@ＭＳ ゴシック"
+_KEY_fontsubstitutes,"@標準明朝",,"@ＭＳ 明朝"
+_KEY_fontsubstitutes,"ｺﾞｼｯｸ",,"ＭＳ ゴシック"
+_KEY_fontsubstitutes,"ゴシック",,"ＭＳ ゴシック"
+_KEY_fontsubstitutes,"標準ゴシック",,"ＭＳ ゴシック"
+_KEY_fontsubstitutes,"標準明朝",,"ＭＳ 明朝"
 
-HKCU,Software\Wine\Fonts\Replacements,"@MS UI Gothic",,"@PG_NAME"
-HKCU,Software\Wine\Fonts\Replacements,"@ＭＳ ゴシック",,"@PG_NAME"
-HKCU,Software\Wine\Fonts\Replacements,"@ＭＳ 明朝",,"@ヒラギノ明朝 Pro W3"
+_KEY_replacements,"@MS UI Gothic",,"@PG_NAME"
+_KEY_replacements,"@ＭＳ ゴシック",,"@PG_NAME"
+_KEY_replacements,"@ＭＳ 明朝",,"@ヒラギノ明朝 Pro W3"
 
-HKCU,Software\Wine\Fonts\Replacements,"MS UI Gothic",,"PG_NAME"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ ゴシック",,"G_NAME"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐゴシック",,"PG_NAME"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"M_NAME"
-HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"PM_NAME"
+_KEY_replacements,"MS UI Gothic",,"PG_NAME"
+_KEY_replacements,"ＭＳ ゴシック",,"G_NAME"
+_KEY_replacements,"ＭＳ Ｐゴシック",,"PG_NAME"
+_KEY_replacements,"ＭＳ 明朝",,"M_NAME"
+_KEY_replacements,"ＭＳ Ｐ明朝",,"PM_NAME"
 
 
 ;;; Control Panel ;;;

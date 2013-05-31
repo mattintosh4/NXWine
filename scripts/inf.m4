@@ -44,6 +44,7 @@ HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐゴシック",,"PG_NAME"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"M_NAME"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"PM_NAME"
 
+
 ;;; Control Panel ;;;
 
 HKCU,Control Panel\Desktop,"FontSmoothing",,"0"

@@ -23,13 +23,8 @@ export WINEPATH=${prefix}/lib/wine/programs/7-Zip
 # note: usage options must be processing before standard run.
 case $1 in (--help|--version) exec ${prefix}/libexec/wine $1 ;; esac
 
-# ------------------------------------ begin standard run
-if [ ! -n "${WINEPREFIX}" ]; then
-    export WINEPREFIX=${HOME}/.wine
-fi
-
-if [ ! -d "${WINEPREFIX}" ]; then
-    set -e
+CreateWineprefix_ ()
+{
     ${prefix}/libexec/wine wineboot.exe --init
     install -v -m 0644 ${prefix}/lib/wine/nativedlls/* "${WINEPREFIX}"/drive_c/windows/system32
     cat <<__REGEDIT4__ | wine regedit -
@@ -57,6 +52,16 @@ __REGEDIT4__
         {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dswave}.dll \
         l3codecx.ax \
         quartz.dll
+}
+
+# ------------------------------------ begin standard run
+if [ ! -n "${WINEPREFIX}" ]; then
+    export WINEPREFIX=${HOME}/.wine
+fi
+
+if [ ! -d "${WINEPREFIX}" ]; then
+    set -e
+    CreateWineprefix_
     set +e
 fi
 

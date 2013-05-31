@@ -428,7 +428,11 @@ BuildWine_ ()
         /usr/bin/tar xf ${srcroot}/sazanami-20040629.tar.bz2 -C ${docdir}
         mv ${docdir}/sazanami-20040629/*.ttf ${wine_destroot}/share/wine/fonts
         # corefonts
-        for x in $(find ${srcroot}/corefonts/*.exe); do ${sevenzip} x -o${wine_destroot}/share/wine/fonts ${x} '*.TTF'; done; unset x
+        for x in $(find ${srcroot}/corefonts/*.exe); do ${sevenzip} x -o${wine_destroot}/share/wine/fonts ${x} '*.TTF' '*.ttf'; done; unset x
+        
+        # remove duplicate fonts
+        rm ${wine_destroot}/share/wine/fonts/{symbol,tahoma,tahomabd,wingding}.ttf
+        
     } # end InstallJPFonts_
     InstallFonts_
     
@@ -513,11 +517,14 @@ BuildDmg_ ()
 {
     local dmg=${proj_root}/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
     local srcdir=$(mktemp -dt XXXXXX)
+        
+    install -d ${wine_destroot}/share/doc/NXWine
+    install -m 0644 ${proj_root}/COPYING $_
     
-    [ ! -f ${dmg} ] || rm ${dmg}
     mv ${destroot} ${srcdir}
     ln -s /Applications ${srcdir}
     
+    [ ! -f ${dmg} ] || rm ${dmg}
     hdiutil create -format UDBZ -srcdir ${srcdir} -volname ${proj_name} ${dmg}
     rm -rf ${srcdir}
 } # end BuildDmg_

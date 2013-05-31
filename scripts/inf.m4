@@ -15,14 +15,6 @@ define(`PM_NAME', `さざなみ明朝')dnl
 ;;; Japanese font settings ;;;
 
 [Fonts]
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"@MS Shell Dlg",,"@MS UI Gothic"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"@標準ゴシック",,"@ＭＳ ゴシック"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"@標準明朝",,"@ＭＳ 明朝"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"ｺﾞｼｯｸ",,"ＭＳ ゴシック"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"ゴシック",,"ＭＳ ゴシック"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"標準ゴシック",,"ＭＳ ゴシック"
-HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"標準明朝",,"ＭＳ 明朝"
-
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Lucida Sans Unicode",,"PG_FILE"
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Microsoft Sans Serif",,"PG_FILE"
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Sans Serif",,"PG_FILE"
@@ -33,6 +25,14 @@ HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Mincho
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PMincho",,"PM_FILE"
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Tahoma",,"PG_FILE"
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Verdana",,"PG_FILE"
+
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"@MS Shell Dlg",,"@MS UI Gothic"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"@標準ゴシック",,"@ＭＳ ゴシック"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"@標準明朝",,"@ＭＳ 明朝"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"ｺﾞｼｯｸ",,"ＭＳ ゴシック"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"ゴシック",,"ＭＳ ゴシック"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"標準ゴシック",,"ＭＳ ゴシック"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"標準明朝",,"ＭＳ 明朝"
 
 HKCU,Software\Wine\Fonts\Replacements,"@MS UI Gothic",,"@PG_NAME"
 HKCU,Software\Wine\Fonts\Replacements,"@ＭＳ ゴシック",,"@PG_NAME"

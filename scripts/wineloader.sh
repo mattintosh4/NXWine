@@ -8,11 +8,15 @@
 
 # note: some debug options is enabled because this script is incomplete yet.
 set -x
+export PS4="\e[33mDEBUG:\e[m "
 export WINEDEBUG=+loaddll
 
 prefix=/Applications/NXWine.app/Contents/Resources
 export PATH=${prefix}/libexec:${prefix}/bin:$(dirname ${prefix})/SharedSupport/bin:/usr/bin:/bin:/usr/sbin:/sbin
 export LANG=${LANG:=ja_JP.UTF-8}
+
+# note: WINEPREFIX variable should be set for initializing.
+export WINEPREFIX="${WINEPREFIX:=${HOME}/.wine}"
 
 # note: glu32.dll still needs Mesa libraries.
 export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib:/usr/X11/lib
@@ -20,7 +24,7 @@ export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib:/usr/X11/lib
 # special Windows applications path
 export WINEPATH=${prefix}/lib/wine/programs/7-Zip
 
-# note: usage options and non args must be processing before standard run.
+# note: usage options and non-arguments have to be processed before standard run.
 case $1 in (--help|--version|"") exec ${prefix}/libexec/wine $1 ;; esac
 
 CreateWineprefix_ ()
@@ -55,10 +59,6 @@ __REGEDIT4__
 } # end CreateWineprefix_
 
 # ------------------------------------ begin standard run
-if [ ! -n "${WINEPREFIX}" ]; then
-    export WINEPREFIX=${HOME}/.wine
-fi
-
 if [ ! -d "${WINEPREFIX}" ]; then
     set -e
     CreateWineprefix_

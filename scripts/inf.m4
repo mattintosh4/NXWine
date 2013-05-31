@@ -1,6 +1,5 @@
 
 
-
 ;;; ----------- NXWine original section ----------- ;;;
 
 ; この行以降は NXWine 独自の初期値です。これらの初期化が不要であれば削除して下さい。
@@ -44,7 +43,6 @@ _KEY_fontsubstitutes,"標準明朝",,"ＭＳ 明朝"
 _KEY_replacements,"@MS UI Gothic",,"@PG_NAME"
 _KEY_replacements,"@ＭＳ ゴシック",,"@PG_NAME"
 _KEY_replacements,"@ＭＳ 明朝",,"@ヒラギノ明朝 Pro W3"
-
 _KEY_replacements,"MS UI Gothic",,"PG_NAME"
 _KEY_replacements,"ＭＳ ゴシック",,"G_NAME"
 _KEY_replacements,"ＭＳ Ｐゴシック",,"PG_NAME"

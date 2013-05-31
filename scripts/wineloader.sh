@@ -20,8 +20,8 @@ export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib:/usr/X11/lib
 # special Windows applications path
 export WINEPATH=${prefix}/lib/wine/programs/7-Zip
 
-# note: usage options must be processing before standard run.
-case $1 in (--help|--version) exec ${prefix}/libexec/wine $1 ;; esac
+# note: usage options and non args must be processing before standard run.
+case $1 in (--help|--version|"") exec ${prefix}/libexec/wine $1 ;; esac
 
 CreateWineprefix_ ()
 {
@@ -52,7 +52,7 @@ __REGEDIT4__
         {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dswave}.dll \
         l3codecx.ax \
         quartz.dll
-}
+} # end CreateWineprefix_
 
 # ------------------------------------ begin standard run
 if [ ! -n "${WINEPREFIX}" ]; then

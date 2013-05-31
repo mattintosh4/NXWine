@@ -56,6 +56,18 @@ HKCU,Control Panel\Mouse,"DoubleClickHeight",,"8"
 HKCU,Control Panel\Mouse,"DoubleClickWidth",,"8"
 
 
+;;; Favorites ;;;
+dnl
+define(`_KEY_favorites',`HKCU,Software\Microsoft\Windows\CurrentVersion\Applets\Regedit\Favorites')dnl
+
+_KEY_favorites,"フォント (FontSubstitutes)",,"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes"
+_KEY_favorites,"フォント (SystemLink)",,"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink"
+_KEY_favorites,"フォント (Replacements)",,"HKEY_CURRENT_USER\Software\Wine\Fonts\Replacements"
+_KEY_favorites,"デスクトップ",,"HKEY_CURRENT_USER\Control Panel\Desktop"
+_KEY_favorites,"マウス",,"HKEY_CURRENT_USER\Control Panel\Mouse"
+_KEY_favorites,"ライブラリオーバーライド",,"HKEY_CURRENT_USER\Software\Wine\DllOverrides"
+
+
 ;;; 7-Zip classes ;;;
 dnl
 define(`_7z_class_regist', `dnl

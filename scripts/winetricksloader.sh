@@ -1,4 +1,4 @@
 #!/bin/sh
-export PATH=${prefix=/Applications/NXWine.app/Contents/Resources}/bin:/usr/bin:/bin:/usr/sbin:/sbin
+export PATH=/Applications/NXWine.app/Contents/Resources/bin:/usr/bin:/bin:/usr/sbin:/sbin
 type wine || exit
-exec ${prefix}/libexec/winetricks "$@"
+exec /Applications/NXWine.app/Contents/Resources/libexec/winetricks "$@"

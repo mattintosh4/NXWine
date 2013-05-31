@@ -416,7 +416,7 @@ BuildWine_ ()
     install -d ${wine_destroot}/share/doc/wine
     cp ${srcroot}/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $_
     
-    InstallJPFonts_ ()
+    InstallFonts_ ()
     {
         local docdir=${wine_destroot}/share/doc
         local fontdir=${wine_destroot}/share/wine/fonts
@@ -427,8 +427,10 @@ BuildWine_ ()
         # Sazanami
         /usr/bin/tar xf ${srcroot}/sazanami-20040629.tar.bz2 -C ${docdir}
         mv ${docdir}/sazanami-20040629/*.ttf ${wine_destroot}/share/wine/fonts
+        # corefonts
+        for x in $(find ${srcroot}/corefonts/*.exe); do ${sevenzip} x -o${wine_destroot}/share/wine/fonts ${x} '*.TTF'; done; unset x
     } # end InstallJPFonts_
-    InstallJPFonts_
+    InstallFonts_
     
     ### inf ###
     local inf=${wine_destroot}/share/wine/wine.inf
@@ -446,17 +448,14 @@ BuildWine_ ()
     # ------------------------------------- native dlls
     install -d ${wine_destroot}/lib/wine/nativedlls
     cd $_
-    install -m 0644 ${proj_root}/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
-    ${sevenzip} x ${proj_root}/nativedlls/directx_feb2010_redist.exe dxnt.cab
+    install -m 0644 ${srcroot}/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
+    ${sevenzip} x ${srcroot}/nativedlls/directx_feb2010_redist.exe dxnt.cab
     ${sevenzip} x dxnt.cab {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dplayx,dsound,dswave,quartz}.dll l3codecx.ax
-    ${sevenzip} x ${proj_root}/nativedlls/directx_Jun2010_redist.exe Aug2009_d3dx9_42_x86.cab Jun2010_d3dx9_43_x86.cab
+    ${sevenzip} x ${srcroot}/nativedlls/directx_Jun2010_redist.exe Aug2009_d3dx9_42_x86.cab Jun2010_d3dx9_43_x86.cab
     ${sevenzip} x Aug2009_d3dx9_42_x86.cab d3dx9_42.dll
     ${sevenzip} x Jun2010_d3dx9_43_x86.cab d3dx9_43.dll
     rm *.cab
     cd -
-    
-    # ------------------------------------- core fonts
-    for x in $(find ${proj_root}/corefonts/*.exe); do ${sevenzip} x -o${wine_destroot}/share/wine/fonts ${x} '*.TTF'; done; unset x
     
     # ------------------------------------- plist
     iconfile=droplet

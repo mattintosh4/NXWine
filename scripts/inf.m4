@@ -1,7 +1,11 @@
+
+
+
 ;;; ----------- NXWine original section ----------- ;;;
 
 ; この行以降は NXWine 独自の初期値です。これらの初期化が不要であれば削除して下さい。
 ; この INF ファイルは BOM 付きの UTF-8 に変換されていますので編集の際はご注意下さい。
+
 
 ;;; Japanese font settings ;;;
 dnl

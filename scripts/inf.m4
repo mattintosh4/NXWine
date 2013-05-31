@@ -4,17 +4,25 @@
 ; この INF ファイルは BOM 付きの UTF-8 に変換されていますので編集の際はご注意下さい。
 
 define(`G_FILE',  `KonatuTohaba.ttf')dnl
-define(`G_NAME',  `Konatu Tohaba')dnl
+define(`G_NAME',  `小夏 等幅')dnl
 define(`PG_FILE', `Konatu.ttf')dnl
-define(`PG_NAME', `Konatu')dnl
-define(`M_FILE',  `ipam-mona.ttf')dnl
-define(`M_NAME',  `IPAMonaMincho')dnl
-define(`PM_FILE', `ipamp-mona.ttf')dnl
-define(`PM_NAME', `IPAMonaPMincho')dnl
+define(`PG_NAME', `小夏')dnl
+define(`M_FILE',  `sazanami-mincho.ttf')dnl
+define(`M_NAME',  `さざなみ明朝')dnl
+define(`PM_FILE', `sazanami-mincho.ttf')dnl
+define(`PM_NAME', `さざなみ明朝')dnl
 
 ;;; Japanese font settings ;;;
 
 [Fonts]
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"@MS Shell Dlg",,"@MS UI Gothic"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"@標準ゴシック",,"@ＭＳ ゴシック"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"@標準明朝",,"@ＭＳ 明朝"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"ｺﾞｼｯｸ",,"ＭＳ ゴシック"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"ゴシック",,"ＭＳ ゴシック"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"標準ゴシック",,"ＭＳ ゴシック"
+HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes,"標準明朝",,"ＭＳ 明朝"
+
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Lucida Sans Unicode",,"PG_FILE"
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Microsoft Sans Serif",,"PG_FILE"
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS Sans Serif",,"PG_FILE"
@@ -26,16 +34,15 @@ HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"MS PMinch
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Tahoma",,"PG_FILE"
 HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink,"Verdana",,"PG_FILE"
 
+HKCU,Software\Wine\Fonts\Replacements,"@MS UI Gothic",,"@PG_NAME"
+HKCU,Software\Wine\Fonts\Replacements,"@ＭＳ ゴシック",,"@PG_NAME"
+HKCU,Software\Wine\Fonts\Replacements,"@ＭＳ 明朝",,"@ヒラギノ明朝 Pro W3"
+
 HKCU,Software\Wine\Fonts\Replacements,"MS UI Gothic",,"PG_NAME"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ ゴシック",,"G_NAME"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐゴシック",,"PG_NAME"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"M_NAME"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"PM_NAME"
-HKCU,Software\Wine\Fonts\Replacements,"ｺﾞｼｯｸ",,"G_NAME"
-HKCU,Software\Wine\Fonts\Replacements,"ゴシック",,"G_NAME"
-HKCU,Software\Wine\Fonts\Replacements,"標準ゴシック",,"G_NAME"
-HKCU,Software\Wine\Fonts\Replacements,"明朝",,"M_NAME"
-HKCU,Software\Wine\Fonts\Replacements,"標準明朝",,"M_NAME"
 
 
 ;;; Mouse ;;;

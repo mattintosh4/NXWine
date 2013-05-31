@@ -378,7 +378,7 @@ BuildStage5_ ()
         install -m 0755 ${srcroot}/winetricks/src/winetricks ${libexecdir}
         install -d ${docdir}
         install -m 0644 ${srcroot}/winetricks/src/COPYING ${docdir}
-    }
+    } # end InstallWinetricks_
     InstallWinetricks_
     
     # ------------------------------------- 7-Zip
@@ -416,10 +416,19 @@ BuildWine_ ()
     install -d ${wine_destroot}/share/doc/wine
     cp ${srcroot}/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $_
     
-    ### fonts ###
-    cp  ${srcroot}/Konatu_ver_20121218/*.ttf \
-        ${srcroot}/opfc-ModuleHP-1.1.1_withIPAMonaFonts-1.0.8/fonts/*.ttf \
-        ${wine_destroot}/share/wine/fonts
+    InstallJPFonts_ ()
+    {
+        local docdir=${wine_destroot}/share/doc
+        local fontdir=${wine_destroot}/share/wine/fonts
+        
+        # Konatu
+        /usr/bin/tar xf ${srcroot}/Konatu_ver_20121218.zip -C ${docdir}
+        mv ${docdir}/Konatu_ver_20121218/*.ttf ${wine_destroot}/share/wine/fonts
+        # Sazanami
+        /usr/bin/tar xf ${srcroot}/sazanami-20040629.tar.bz2 -C ${docdir}
+        mv ${docdir}/sazanami-20040629/*.ttf ${wine_destroot}/share/wine/fonts
+    } # end InstallJPFonts_
+    InstallJPFonts_
     
     ### inf ###
     local inf=${wine_destroot}/share/wine/wine.inf
@@ -506,12 +515,9 @@ BuildDmg_ ()
     local dmg=${proj_root}/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
     local srcdir=$(mktemp -dt XXXXXX)
     
-    test ! -f ${dmg} || rm ${dmg}
+    [ ! -f ${dmg} ] || rm ${dmg}
     mv ${destroot} ${srcdir}
     ln -s /Applications ${srcdir}
-    
-    install -d ${srcdir}/sources
-    cp ${srcroot}/opfc-ModuleHP-1.1.1_withIPAMonaFonts-1.0.8.tar.gz ${srcdir}/sources
     
     hdiutil create -format UDBZ -srcdir ${srcdir} -volname ${proj_name} ${dmg}
     rm -rf ${srcdir}

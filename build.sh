@@ -423,16 +423,13 @@ BuildWine_ ()
         
         # Konatu
         /usr/bin/tar xf ${srcroot}/Konatu_ver_20121218.zip -C ${docdir}
-        mv ${docdir}/Konatu_ver_20121218/*.ttf ${wine_destroot}/share/wine/fonts
+        mv ${docdir}/Konatu_ver_20121218/*.ttf ${fontdir}
         # Sazanami
         /usr/bin/tar xf ${srcroot}/sazanami-20040629.tar.bz2 -C ${docdir}
-        mv ${docdir}/sazanami-20040629/*.ttf ${wine_destroot}/share/wine/fonts
-        # corefonts
-        for x in $(find ${srcroot}/corefonts/*.exe); do ${sevenzip} x -o${wine_destroot}/share/wine/fonts ${x} '*.TTF' '*.ttf'; done; unset x
+        mv ${docdir}/sazanami-20040629/*.ttf ${fontdir}
         
         # remove duplicate fonts
-        rm ${wine_destroot}/share/wine/fonts/{symbol,tahoma,tahomabd,wingding}.ttf
-        
+        rm ${fontdir}/{symbol,tahoma,tahomabd,wingding}.ttf
     } # end InstallJPFonts_
     InstallFonts_
     

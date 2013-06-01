@@ -67,6 +67,7 @@ function install_rpgvx {
     curl -o $1 'http://ftp.vector.co.jp/pack/winnt/util/runtime/vx_rtp202.zip'
     ${extract} -o'c:\tkool\VX202' $1
     ${wine} 'c:\tkool\VX202\Setup.exe'
+    ${wine} 'c:\tkool\VX202\利用規約.txt'
 }
 
 # ------------------------------------- begin processing

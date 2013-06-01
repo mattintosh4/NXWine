@@ -7,8 +7,8 @@
 #
 
 # note: some debug options is enabled because this script is incomplete yet.
+PS4="\[\e[33m\]DEBUG:\[\e[m\] "
 set -x
-export PS4="\[\e[33m\]DEBUG:\[\e[m\] "
 export WINEDEBUG=+loaddll
 
 # ------------------------------------ begin preparing

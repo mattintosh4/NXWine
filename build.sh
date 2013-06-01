@@ -430,6 +430,7 @@ BuildWine_ ()
         
         # remove duplicate fonts
         rm ${fontdir}/{symbol,tahoma,tahomabd,wingding}.ttf
+        
     } # end InstallJPFonts_
     InstallFonts_
     

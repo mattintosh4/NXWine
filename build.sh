@@ -1,4 +1,5 @@
 #!/usr/bin/env - LC_ALL=C SHELL=/bin/bash TERM=xterm-color HOME=/tmp /bin/bash -ex
+PS4='\[\e[31m\]+\[\e[m\] '
 
 readonly proj_name=NXWine
 readonly proj_uuid=E43FF9C9-669C-4319-8351-FF99AFF3230C

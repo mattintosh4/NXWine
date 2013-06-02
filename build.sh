@@ -458,11 +458,19 @@ BuildWine_ ()
     install -d ${wine_destroot}/lib/wine/nativedlls
     cd $_
     install -m 0644 ${srcroot}/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
+    
     ${sevenzip} x ${srcroot}/nativedlls/directx_feb2010_redist.exe dxnt.cab
     ${sevenzip} x dxnt.cab {devenum,dmband,dmcompos,dmime,dmloader,dmscript,dmstyle,dmsynth,dmusic,dplayx,dsound,dswave,quartz}.dll l3codecx.ax
-    ${sevenzip} x ${srcroot}/nativedlls/directx_Jun2010_redist.exe Aug2009_d3dx9_42_x86.cab Jun2010_d3dx9_43_x86.cab
+    
+    ${sevenzip} x ${srcroot}/nativedlls/directx_Jun2010_redist.exe \
+        Aug2009_d3dx9_42_x86.cab \
+        Jun2010_d3dx9_43_x86.cab \
+        Aug2009_D3DCompiler_42_x86.cab \
+        Jun2010_D3DCompiler_43_x86.cab
     ${sevenzip} x Aug2009_d3dx9_42_x86.cab d3dx9_42.dll
     ${sevenzip} x Jun2010_d3dx9_43_x86.cab d3dx9_43.dll
+    ${sevenzip} x Aug2009_D3DCompiler_42_x86.cab D3DCompiler_42.dll
+    ${sevenzip} x Jun2010_D3DCompiler_43_x86.cab D3DCompiler_43.dll
     rm *.cab
     cd -
     

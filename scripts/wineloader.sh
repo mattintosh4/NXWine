@@ -33,6 +33,8 @@ CreateWineprefix_ ()
     install -v -m 0644 ${prefix}/lib/wine/nativedlls/* "${WINEPREFIX}"/drive_c/windows/system32
     cat <<__REGEDIT4__ | wine regedit -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
+"*D3DCompiler_42"="native"
+"*D3DCompiler_43"="native"
 "*d3dx9_42"="native"
 "*d3dx9_43"="native"
 "*devenum"="native"
@@ -45,7 +47,7 @@ CreateWineprefix_ ()
 "*dmsynth"="native"
 "*dmusic"="native"
 "*dplayx"="native"
-"*dsound"="native"
+"*dsound"="builtin,native"
 "*dswave"="native"
 "*gdiplus"="builtin,native"
 "*l3codecx"="native"

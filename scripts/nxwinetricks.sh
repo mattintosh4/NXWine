@@ -11,21 +11,22 @@ usage="Usage: $(cd "$(dirname "$0")" && pwd)/nxwinetricks [package]
 
 package                 description
 ------------------------------------------------
-rpg2000                 RPG TKOOL 2000 RTP
-rpg2003                 RPG TKOOL 2003 RTP
-rpgxp                   RPG TKOOL XP RTP v103
-rpgvx                   RPG TKOOL VX RTP v202"
+rpg2000                 RPG ツクール 2000 RTP
+rpg2003                 RPG ツクール 2003 RTP
+rpgxp                   RPG ツクール XP RTP v103
+rpgvx                   RPG ツクール VX RTP v202
+
+?????                   青鬼 (Japanese)
+??                      Ib v1.05
+?????????               ゆめにっき v0.10"
 
 case $1 in
-    rpg2000|rpg2003|rpgxp|rpgvx)
+    aooni|ib|yumenikki|rpg2000|rpg2003|rpgxp|rpgvx)
         name=$1
-        cachefile=/tmp/$(uuidgen)
-        touch ${cachefile}
-        trap "rm ${cachefile}" EXIT
+        cachedir=$HOME/Library/Caches/com.github.mattintosh4.NXWine/$1
     ;;
-    -h|--help|*)
-        echo "${usage}"
-        exit
+    *)
+        exec echo "${usage}"
     ;;
 esac
 printf "package... ${name}\n"
@@ -38,39 +39,79 @@ sevenzip=/Applications/NXWine.app/Contents/Resources/lib/wine/programs/7-Zip/7z.
 printf "checking 7z.exe... "
 [ -f "${sevenzip}" ] && printf "${sevenzip}\n" || { echo no; false; }
 
-extract="${wine} ${sevenzip} e -y"
+export WINEDEBUG=
+
+flat_extract="${wine} ${sevenzip} e -y"
+path_extract="${wine} ${sevenzip} x -y"
+winepath="${wine} winepath"
+notepad="${wine} notepad"
 
 # ------------------------------------- begin functions
+function docview_ {
+    iconv -f CP932 -t UTF-8 "$@" | less -e
+}
+docview="docview_"
+
 function install_rpg2000 {
     # f1ea2dd0610d005282f3840c349754cdece9f3ad
-    curl -o $1 'http://ftp.vector.co.jp/pack/winnt/util/runtime/2000rtp.zip'
-    ${extract} -o'c:\tkool\2000' $1
-    ${wine} 'c:\tkool\2000\RPG2000RTP.exe'
-    ${wine} notepad 'c:\tkool\2000\使用規約.txt'
+    f=2000rtp.zip
+    [ -f $f ] || curl -O 'http://ftp.vector.co.jp/pack/winnt/util/runtime/2000rtp.zip'
+    ${flat_extract} $f
+    ${wine} RPG2000RTP.exe
+    ${docview} "使用規約.txt"
 }
 function install_rpg2003 {
     # 9a63d4e58d752d6ed5de79492a31ce43d0060564
-    curl -o $1 'http://ftp.vector.co.jp/pack/winnt/util/runtime/2003rtp.zip'
-    ${extract} -o'c:\tkool\2003' $1
-    ${wine} 'c:\tkool\2003\RPG2003RTP.exe'
-    ${wine} notepad 'c:\tkool\2003\使用規約.txt'
+    f=2003rtp.zip
+    [ -f $f ] || curl -O 'http://ftp.vector.co.jp/pack/winnt/util/runtime/2003rtp.zip'
+    ${flat_extract} $f
+    ${wine} RPG2003RTP.exe
+    ${docview} "使用規約.txt"
 }
 function install_rpgxp {
     # 2079f38b692569c1fc734320862badb170bbd29d
-    curl -o $1 'http://ftp.vector.co.jp/pack/winnt/util/runtime/xp_rtp103.zip'
-    ${extract} -o'c:\tkool\XP103' $1
-    ${wine} 'c:\tkool\XP103\Setup.exe'
-    ${wine} notepad 'c:\tkool\XP103\利用規約.txt'
+    f=xp_rtp103.zip
+    [ -f $f ] || curl -O 'http://ftp.vector.co.jp/pack/winnt/util/runtime/xp_rtp103.zip'
+    ${flat_extract} $f
+    ${wine} Setup.exe
+    ${docview} "利用規約.txt"
 }
 function install_rpgvx {
     # 351b4e528dc6ed4ed9988f0a636da6b1df48d6f2
-    curl -o $1 'http://ftp.vector.co.jp/pack/winnt/util/runtime/vx_rtp202.zip'
-    ${extract} -o'c:\tkool\VX202' $1
-    ${wine} 'c:\tkool\VX202\Setup.exe'
-    ${wine} notepad 'c:\tkool\VX202\利用規約.txt'
+    f=vx_rtp202.zip
+    [ -f $f ] || curl -O 'http://ftp.vector.co.jp/pack/winnt/util/runtime/vx_rtp202.zip'
+    ${flat_extract} $f
+    ${wine} setup.exe
+    ${docview} "利用規約.txt"
+}
+
+function install_aooni {
+    f=aooni.zip
+    [ -f $f ] || curl -O 'http://mygames888.info/zip/aooni.zip'
+    unzip -o $f
+    ${path_extract} -o'c:\Program Files\aooni' $(basename $f .zip).exe
+    less -e "$(${wine}path 'c:\Program Files\aooni\README.txt')"
+}
+function install_ib {
+    f=Ib_1.05.zip
+    [ -f $f ] || curl -O 'http://ftp.vector.co.jp/pack/win95/game/avg/horror/Ib_1.05.zip'
+    ${path_extract} -o'c:\Program Files' $f
+    ${docview} "$(${wine} winepath 'c:\Program Files\Ib_1.05\Ib_説明書.txt')"
+}
+function install_yumenikki {
+    f=yumenikki0.10.lzh
+    p=yumesyuusei.lzh
+    [ -f $f ] || curl -O 'http://ftp.vector.co.jp/pack/win95/game/avg/yumenikki0.10.lzh'
+    [ -f $p ] || curl -O 'http://www3.nns.ne.jp/pri/tk-mto/yumesyuusei.lzh'
+    ${path_extract} -o'c:\Program Files' $f
+    ${flat_extract} -o'c:\Program Files\ゆめにっき\ゆめにっき0.10' $p
+    ${docview}  "$(${wine} winepath 'c:\Program Files\ゆめにっき\初めに読んで下さい。0.10.txt')" \
+                "$(${wine} winepath 'c:\Program Files\ゆめにっき\ゆめにっき0.10\ゆめにっき修正ファイルについて.txt')"
 }
 
 # ------------------------------------- begin processing
 PS4=
 set -x
-install_${name} ${cachefile}
+install -d ${cachedir}
+cd ${cachedir}
+install_${name}

@@ -9,16 +9,16 @@ LANG=${LANG:=ja_JP.UTF-8}
 
 usage="Usage: $(cd "$(dirname "$0")" && pwd)/nxwinetricks [package]
 
-package                 description
+package             description
 ------------------------------------------------
-rpg2000                 RPG ツクール 2000 RTP
-rpg2003                 RPG ツクール 2003 RTP
-rpgxp                   RPG ツクール XP RTP v103
-rpgvx                   RPG ツクール VX RTP v202
+rpg2000             RPG TKOOL 2000 RTP
+rpg2003             RPG TKOOL 2003 RTP
+rpgxp               RPG TKOOL XP RTP v103
+rpgvx               RPG TKOOL VX RTP v202
 
-?????                   青鬼 (Japanese)
-??                      Ib v1.05
-?????????               ゆめにっき v0.10"
+?????               Aooni (Japanese version)
+??                  Ib v1.05
+?????????           Yumenikki v0.10"
 
 case $1 in
     aooni|ib|yumenikki|rpg2000|rpg2003|rpgxp|rpgvx)

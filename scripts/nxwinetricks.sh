@@ -33,11 +33,11 @@ printf "package... ${name}\n"
 
 wine=/Applications/NXWine.app/Contents/Resources/bin/wine
 printf "checking wine... "
-[ -x "${wine}" ] && printf "${wine}\n" || { echo no; false; }
+[ -x "${wine}" ] && printf "${wine}\n" || { echo no; exit 1; }
 
 sevenzip=/Applications/NXWine.app/Contents/Resources/lib/wine/programs/7-Zip/7z.exe
 printf "checking 7z.exe... "
-[ -f "${sevenzip}" ] && printf "${sevenzip}\n" || { echo no; false; }
+[ -f "${sevenzip}" ] && printf "${sevenzip}\n" || { echo no; exit 1; }
 
 export WINEDEBUG=
 

@@ -519,8 +519,7 @@ BuildDmg_ ()
     local dmg=${proj_root}/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
     local srcdir=$(mktemp -dt XXXXXX)
     
-    install -d ${wine_destroot}/share/doc/Faenza
-    ${sevenzip} x -o$_ ${srcroot}/faenza-icon-theme_1.3.zip AUTHORS ChangeLog COPYING README
+    unzip -o -d ${wine_destroot}/share/doc/Faenza ${srcroot}/faenza-icon-theme_1.3.zip AUTHORS ChangeLog COPYING README
     
     install -d ${wine_destroot}/share/doc/NXWine
     install -m 0644 ${proj_root}/COPYING $_

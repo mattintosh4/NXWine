@@ -404,6 +404,10 @@ BuildWine_ ()
     wine_version=$(${wine_destroot}/bin/wine --version)
     [ "${wine_version}" ]
     
+    ### remove unnecessary files ###
+    rm -r ${wine_destroot}/share/applications
+    find ${wine_destroot}/lib -maxdepth 1 -name "*.a" -o -name "*.la" | xargs rm
+    
     ### install name ###
     install_name_tool -add_rpath /usr/lib ${wine_destroot}/bin/wine
     install_name_tool -add_rpath /usr/lib ${wine_destroot}/bin/wineserver

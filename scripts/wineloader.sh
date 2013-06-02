@@ -8,8 +8,7 @@
 
 # note: some debug options is enabled because this script is incomplete yet.
 PS4="\[\e[33m\]DEBUG:\[\e[m\] "
-set -x
-case ${WINEDEBUG-X} in X) export WINEDEBUG=+loaddll ;; esac
+case ${WINEDEBUG-X} in X) set -x; export WINEDEBUG=+loaddll;; esac
 
 # ------------------------------------ begin preparing
 prefix=/Applications/NXWine.app/Contents/Resources

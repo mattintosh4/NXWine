@@ -43,15 +43,16 @@ export WINEDEBUG=
 
 flat_extract="${wine} ${sevenzip} e -y"
 path_extract="${wine} ${sevenzip} x -y"
-winepath="${wine} winepath"
 notepad="${wine} notepad"
+winepath="${wine} winepath"
 
-# ------------------------------------- begin functions
+# ------------------------------------- tool functions
 function docview_ {
     iconv -f CP932 -t UTF-8 "$@" | less -e
 }
 docview="docview_"
 
+# ------------------------------------- plugins
 function install_rpg2000 {
     # f1ea2dd0610d005282f3840c349754cdece9f3ad
     f=2000rtp.zip
@@ -85,6 +86,7 @@ function install_rpgvx {
     ${docview} "利用規約.txt"
 }
 
+# ------------------------------------- applications
 function install_aooni {
     f=aooni.zip
     [ -f $f ] || curl -O 'http://mygames888.info/zip/aooni.zip'
@@ -105,8 +107,8 @@ function install_yumenikki {
     [ -f $p ] || curl -O 'http://www3.nns.ne.jp/pri/tk-mto/yumesyuusei.lzh'
     ${path_extract} -o'c:\Program Files' $f
     ${flat_extract} -o'c:\Program Files\ゆめにっき\ゆめにっき0.10' $p
-    ${docview}  "$(${wine} winepath 'c:\Program Files\ゆめにっき\初めに読んで下さい。0.10.txt')" \
-                "$(${wine} winepath 'c:\Program Files\ゆめにっき\ゆめにっき0.10\ゆめにっき修正ファイルについて.txt')"
+    ${docview}  "$(${winepath} 'c:\Program Files\ゆめにっき\初めに読んで下さい。0.10.txt')" \
+                "$(${winepath} 'c:\Program Files\ゆめにっき\ゆめにっき0.10\ゆめにっき修正ファイルについて.txt')"
 }
 
 # ------------------------------------- begin processing

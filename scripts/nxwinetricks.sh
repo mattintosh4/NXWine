@@ -22,14 +22,15 @@ rpgvx               RPG TKOOL VX RTP v202
 
 case $1 in
     aooni|ib|yumenikki|rpg2000|rpg2003|rpgxp|rpgvx)
-        name=$1
-        cachedir=$HOME/Library/Caches/com.github.mattintosh4.NXWine/$1
+        # nothing to do
     ;;
     *)
         exec echo "${usage}"
     ;;
 esac
-printf "package... ${name}\n"
+
+cachedir=$HOME/Library/Caches/com.github.mattintosh4.NXWine/$1
+printf "package... $1\n"
 
 wine=/Applications/NXWine.app/Contents/Resources/bin/wine
 printf "checking wine... "
@@ -38,8 +39,6 @@ printf "checking wine... "
 sevenzip=/Applications/NXWine.app/Contents/Resources/lib/wine/programs/7-Zip/7z.exe
 printf "checking 7z.exe... "
 [ -f "${sevenzip}" ] && printf "${sevenzip}\n" || { echo no; exit 1; }
-
-export WINEDEBUG=
 
 # ------------------------------------- processing variables
 FlatExtract="${wine} ${sevenzip} e -y"
@@ -111,8 +110,10 @@ function install_yumenikki {
 }
 
 # ------------------------------------- begin processing
+# note: suppress wine debug messages.
+export WINEDEBUG=
 PS4=
 set -x
 install -d ${cachedir}
 cd ${cachedir}
-install_${name}
+install_$1

@@ -445,8 +445,10 @@ BuildWine_ ()
     # -------------------------------------- executables
     install -d ${wine_destroot}/libexec
     mv ${wine_destroot}/{bin,libexec}/wine
+    
     install -m 0755 ${proj_root}/scripts/wineloader.sh ${wine_destroot}/bin/wine
-    sed -i "" "s|@DATE@|$(date +%F)|g" ${wine_destroot}/bin/wine
+    install -m 0755 ${proj_root}/scripts/nxwinetricks.sh ${wine_destroot}/bin/nxwinetricks
+    sed -i "" "s|@DATE@|$(date +%F)|g" ${wine_destroot}/bin/{wine,nxwinetricks}
     
     # ------------------------------------- native dlls
     install -d ${wine_destroot}/lib/wine/nativedlls

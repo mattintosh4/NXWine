@@ -14,9 +14,6 @@ prefix=/Applications/NXWine.app/Contents/Resources
 export PATH=${prefix}/libexec:${prefix}/bin:$(dirname ${prefix})/SharedSupport/bin:/usr/bin:/bin:/usr/sbin:/sbin
 export LANG=${LANG:=ja_JP.UTF-8}
 
-# note: usage options and non-arguments have to be processed before standard run.
-case $1 in (--help|--version|"") exec ${prefix}/libexec/wine $1 ;; esac
-
 # note: WINEPREFIX variable should be set for initializing.
 export WINEPREFIX="${WINEPREFIX:=${HOME}/.wine}"
 
@@ -25,6 +22,9 @@ export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib:/usr/X11/lib
 
 # special Windows applications path
 export WINEPATH=${prefix}/lib/wine/programs/7-Zip
+
+# note: usage options and non-arguments have to be processed before standard run.
+case $1 in (--help|--version|"") exec ${prefix}/libexec/wine $1 ;; esac
 
 CreateWineprefix_ ()
 {

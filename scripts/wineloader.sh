@@ -48,11 +48,11 @@ $(printf '"*d3dx9_%d"="native"\n' {24..43})
 "*dmsynth"="native"
 "*dmusic"="native"
 "*dplayx"="native"
-"*dsound"="builtin,native"
+"*dsound"="native"
 "*dswave"="native"
 "*gdiplus"="builtin,native"
 "*l3codecx"="native"
-"*mciqtz32"="native,builtin"
+"*mciqtz32"="native"
 "*quartz"="native"
 __REGEDIT4__
     

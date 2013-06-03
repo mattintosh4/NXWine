@@ -1,4 +1,5 @@
-define(`_PROG_PREFIX', `Z:\Applications\NXWine.app\Contents\Resources\lib\wine\programs')
+define(`_PROG_PREFIX', `Z:\Applications\NXWine.app\Contents\Resources\lib\wine\programs')dnl
+
 
 
 ;;; ----------- NXWine original section ----------- ;;;

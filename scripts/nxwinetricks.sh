@@ -29,7 +29,7 @@ case $1 in
     ;;
 esac
 
-cachedir=$HOME/Library/Caches/com.github.mattintosh4.NXWine/$1
+cachedir=/Users/$(users)/Library/Caches/com.github.mattintosh4.NXWine/$1
 printf "package... $1\n"
 
 wine=/Applications/NXWine.app/Contents/Resources/bin/wine

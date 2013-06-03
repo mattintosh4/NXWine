@@ -18,7 +18,7 @@ rpgvx               RPG TKOOL VX RTP v202
 
 ?????               Aooni (Japanese version)
 ??                  Ib v1.05
-?????????           Yumenikki v0.10"
+?????????           Yumenikki v0.10 (with patch)"
 
 case $1 in
     aooni|ib|yumenikki|rpg2000|rpg2003|rpgxp|rpgvx)

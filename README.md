@@ -20,7 +20,7 @@ $ /Applications/NXWine.app/Contents/Resources/bin/wine [args]
 
 ### NXWinetricks
 
-NXWinetricks is plugin installation supoprt script.
+NXWinetricks is plugin installation support script.
 
 #### packages
 
@@ -35,13 +35,20 @@ and some Windows free games. See more info, `nxwinetricks --help`.
 $ /Applications/NXWine.app/Contents/Resources/bin/nxwinetricks [package]
 ```
 
-### How to use Winetricks
+### Winetricks
 
 ```sh
 $ /Applications/NXWine.app/Contents/Resources/bin/winetricks [args]
 ```
 
-See more info, `winetricks -h`.
+See more info, `winetricks -h` and [ Winetricks official page](winetricks.org).
+
+### 7-Zip
+
+```sh
+$ /Applications/NXWine.app/Contents/Resources/bin/wine 7z.exe [args]
+$ /Applications/NXWine.app/Contents/Resources/bin/wine 7zFM.exe file
+```
 
 ## How to customize AppleScript
 

@@ -91,11 +91,11 @@ HKCR,7-Zip.$1,,2,"$1 Archive"
 HKCR,7-Zip.$1\shell\open\command,,2,"""_PROG_PREFIX\7-Zip\7zFM.exe"" ""%1"""
 HKCR,7-Zip.$1\DefaultIcon,,2,"_PROG_PREFIX\7-Zip\7z.dll,$2"')dnl
 dnl
-_7z_class_regist(7z, 0)
-_7z_class_regist(cab, 7)
-_7z_class_regist(lha, 6)
-_7z_class_regist(lzh, 6)
+_7z_class_regist(7z,    0)
+_7z_class_regist(cab,   7)
+_7z_class_regist(lha,   6)
+_7z_class_regist(lzh,   6)
 _7z_class_regist(lzma, 16)
-_7z_class_regist(rar, 3)
-_7z_class_regist(xz, 23)
-_7z_class_regist(zip, 1)
+_7z_class_regist(rar,   3)
+_7z_class_regist(xz,   23)
+_7z_class_regist(zip,   1)

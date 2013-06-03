@@ -465,18 +465,9 @@ BuildWine_ ()
         ${sevenzip} x dxnt.cab l3codecx.ax {\
 amstream,\
 ddrawex,\
-devenum,\
-dmband,\
-dmcompos,\
-dmime,\
-dmloader,\
-dmscript,\
-dmstyle,\
-dmsynth,\
-dmusic,\
+dinput,\
+dinput8,\
 dplayx,\
-dsound,\
-dswave,\
 mciqtz32,\
 quartz}.dll
         

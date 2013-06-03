@@ -31,44 +31,26 @@ CreateWineprefix_ ()
     set -e
     ${prefix}/libexec/wine wineboot.exe --init
     ${prefix}/lib/wine/nativedlls/nativedlls.exe x -y -o"${WINEPREFIX}"/drive_c/windows
-    cat <<__REGEDIT4__ | wine regedit -
+    cat <<__REGEDIT4__ | WINEDEBUG= wine regedit -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
 $(printf '"*D3DCompiler_%d"="native"\n' {37..43})
 "*XAPOFX1_1"="native"
 "*amstream"="native"
 $(printf '"*d3dx9_%d"="native"\n' {24..43})
 "*ddrawex"="native"
-"*devenum"="native"
-"*dmband"="native"
-"*dmcompos"="native"
-"*dmime"="native"
-"*dmloader"="native"
-"*dmscript"="native"
-"*dmstyle"="native"
-"*dmsynth"="native"
-"*dmusic"="native"
+"*dinput"="native"
+"*dinput8"="native"
 "*dplayx"="native"
-"*dsound"="native"
-"*dswave"="native"
 "*gdiplus"="builtin,native"
 "*l3codecx"="native"
 "*mciqtz32"="native"
 "*quartz"="native"
 __REGEDIT4__
     
-    ${prefix}/libexec/wine regsvr32.exe l3codecx.ax {\
+    WINEDEBUG= ${prefix}/libexec/wine regsvr32.exe l3codecx.ax {\
 amstream,\
 ddrawex,\
-devenum,\
-dmband,\
-dmcompos,\
-dmime,\
-dmloader,\
-dmscript,\
-dmstyle,\
-dmsynth,\
-dmusic,\
-dswave,\
+dinput,\
 XAudio2_{0..7},\
 quartz}.dll
     

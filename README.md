@@ -10,21 +10,30 @@ http://mattintosh.hatenablog.com/entry/nxwine (Japanese)
 - Mac OS X 10.6+
 
 
-## Other information
+## Command-line usage
 
-### Launch from command line
+### Wine
 
 ```sh
 $ /Applications/NXWine.app/Contents/Resources/bin/wine [args]
 ```
 
-### How to customize AppleScript
+### NXWinetricks
+
+NXWinetricks is plugin installation supoprt script.
+
+#### packages
+
+- RPG TKOOL 2000 RTP
+- RPG TKOOL 2003 RTP
+- RPG TKOOL XP RTP v103
+- RPG TKOOL VX RTP v202
+
+and some Windows free games. See more info, `nxwinetricks --help`.
 
 ```sh
-$ open /Applications/NXWine.app/Contents/Resources/Scripts/main.scpt
+$ /Applications/NXWine.app/Contents/Resources/bin/nxwinetricks [package]
 ```
-
-_Do not open NXWine.app by AppleScript Editor._
 
 ### How to use Winetricks
 
@@ -33,3 +42,11 @@ $ /Applications/NXWine.app/Contents/Resources/bin/winetricks [args]
 ```
 
 See more info, `winetricks -h`.
+
+## How to customize AppleScript
+
+```sh
+$ open /Applications/NXWine.app/Contents/Resources/Scripts/main.scpt
+```
+
+_Do not open NXWine.app by AppleScript Editor._

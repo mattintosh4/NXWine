@@ -1,13 +1,8 @@
 NXWine is No X11 Wine for Mac OS X 10.6+. However, if you play game that need glu32.dll, have to install XQuartz. NXWine does not have Mesa libraries.
 
-## Information and application bundle download page
+#### Information and application bundle download page
 
 http://mattintosh.hatenablog.com/entry/nxwine (Japanese)
-
-
-## System requirements
-
-- Mac OS X 10.6+
 
 
 ## Command-line usage

@@ -1,4 +1,4 @@
-
+define(`_PROG_PREFIX', `Z:\Applications\NXWine.app\Contents\Resources\lib\wine\programs')
 
 
 ;;; ----------- NXWine original section ----------- ;;;
@@ -6,8 +6,18 @@
 ; この行以降は NXWine 独自の初期値です。これらの初期化が不要であれば削除して下さい。
 ; この INF ファイルは BOM 付きの UTF-8 に変換されていますので編集の際はご注意下さい。
 
+[DefaultInstall.NT]
+AddReg=\
+  Classes,\
+  Control Panel,\
+  Environment,\
+  Favorites,\
+  Fonts
 
-;;; Japanese font settings ;;;
+[Environment]
+HKCU,Environment,"PATH",,"_PROG_PREFIX\7-Zip"
+
+[Fonts]
 dnl
 define(`_KEY_systemlink',       `HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink')dnl
 define(`_KEY_fontsubstitutes',  `HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes')dnl
@@ -20,8 +30,7 @@ define(`MM_FILE', `sazanami-mincho.ttf')dnl
 define(`MM_NAME', `さざなみ明朝')dnl
 define(`PM_FILE', `sazanami-mincho.ttf')dnl
 define(`PM_NAME', `さざなみ明朝')dnl
-
-[Fonts]
+dnl
 _KEY_systemlink,"Helvetica",,"PG_FILE"
 _KEY_systemlink,"Lucida Grande",,"PG_FILE"
 _KEY_systemlink,"Microsoft Sans Serif",,"PG_FILE"
@@ -56,35 +65,31 @@ _KEY_replacements,"ＭＳ Ｐゴシック",,"PG_NAME"
 _KEY_replacements,"ＭＳ 明朝",,"MM_NAME"
 _KEY_replacements,"ＭＳ Ｐ明朝",,"PM_NAME"
 
-
-;;; Control Panel ;;;
-
+[Control Panel]
 HKCU,Control Panel\Desktop,"FontSmoothing",,"0"
 HKCU,Control Panel\Mouse,"DoubleClickHeight",,"8"
 HKCU,Control Panel\Mouse,"DoubleClickWidth",,"8"
 
-
-;;; Favorites ;;;
+[Favorites]
 dnl
 define(`_KEY_favorites',`HKCU,Software\Microsoft\Windows\CurrentVersion\Applets\Regedit\Favorites')dnl
-
-_KEY_favorites,"フォント (FontSubstitutes)",,"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes"
-_KEY_favorites,"フォント (SystemLink)",,"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink"
-_KEY_favorites,"フォント (Replacements)",,"HKEY_CURRENT_USER\Software\Wine\Fonts\Replacements"
+dnl
 _KEY_favorites,"デスクトップ",,"HKEY_CURRENT_USER\Control Panel\Desktop"
+_KEY_favorites,"フォント (FontSubstitutes)",,"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes"
+_KEY_favorites,"フォント (Replacements)",,"HKEY_CURRENT_USER\Software\Wine\Fonts\Replacements"
+_KEY_favorites,"フォント (SystemLink)",,"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink"
 _KEY_favorites,"マウス",,"HKEY_CURRENT_USER\Control Panel\Mouse"
+_KEY_favorites,"ユーザー環境変数",,"HKEY_CURRENT_USER\Environment"
 _KEY_favorites,"ライブラリオーバーライド",,"HKEY_CURRENT_USER\Software\Wine\DllOverrides"
 
-
-;;; 7-Zip classes ;;;
+[Classes]
 dnl
 define(`_7z_class_regist', `dnl
 HKCR,.$1,,2,"7-Zip.$1"
 HKCR,7-Zip.$1,,2,"$1 Archive"
-HKCR,7-Zip.$1\shell\open\command,,2,"""Z:\Applications\NXWine.app\Contents\Resources\lib\wine\programs\7-Zip\7zFM.exe"" ""%1"""
-HKCR,7-Zip.$1\DefaultIcon,,2,"Z:\Applications\NXWine.app\Contents\Resources\lib\wine\programs\7-Zip\7z.dll,$2"')dnl
-
-[Classes]
+HKCR,7-Zip.$1\shell\open\command,,2,"""_PROG_PREFIX\7-Zip\7zFM.exe"" ""%1"""
+HKCR,7-Zip.$1\DefaultIcon,,2,"_PROG_PREFIX\7-Zip\7z.dll,$2"')dnl
+dnl
 _7z_class_regist(7z, 0)
 _7z_class_regist(cab, 7)
 _7z_class_regist(lha, 6)

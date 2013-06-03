@@ -7,7 +7,7 @@
 #
 
 # note: some debug options is enabled because this script is incomplete yet.
-case ${WINEDEBUG-X} in X) PS4="\[\e[33m\]DEBUG:\[\e[m\] " ; set -x ; export WINEDEBUG=+loaddll ;; esac
+case ${WINEDEBUG-X} in X) export PS4="\[\e[33m\]DEBUG:\[\e[m\] " ; set -x ; export WINEDEBUG=+loaddll ;; esac
 
 # ------------------------------------ begin preparing
 prefix=/Applications/NXWine.app/Contents/Resources
@@ -21,7 +21,7 @@ export WINEPREFIX="${WINEPREFIX:=${HOME}/.wine}"
 export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib:/usr/X11/lib
 
 # special Windows applications path
-export WINEPATH=${prefix}/lib/wine/programs/7-Zip
+#export WINEPATH=
 
 # note: usage options and non-arguments have to be processed before standard run.
 case $1 in (--help|--version|"") exec ${prefix}/libexec/wine $1 ;; esac

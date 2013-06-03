@@ -26,7 +26,7 @@ rpgvx               RPG TKOOL VX RTP v202
 ?????????           Yumenikki v0.10 (with patch)"
 
 case $1 in
-    aooni|ib|yumenikki|rpg2000|rpg2003|rpgxp|rpgvx)
+    aooni|ib|yumenikki|rpg200[03]|rpgxp|rpgvx)
         # nothing to do
     ;;
     *)

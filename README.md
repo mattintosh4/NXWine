@@ -21,7 +21,7 @@ NXWinetricks is plugin installation support script. (You need to connect to netw
 - RPG TKOOL XP RTP v103
 - RPG TKOOL VX RTP v202
 
-and some Windows free games. Cache files are saved into `$HOME/Library/Caches/com.github.mattintosh4.NXWine/[package]`. See more info, `nxwinetricks --help`.
+and some Windows free games. Cache files are saved into `/Users/yourname/Library/Caches/com.github.mattintosh4.NXWine/[package]`. See more info, `nxwinetricks --help`.
 
 ```sh
 $ /Applications/NXWine.app/Contents/Resources/bin/nxwinetricks [package]

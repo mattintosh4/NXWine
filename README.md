@@ -20,7 +20,7 @@ $ /Applications/NXWine.app/Contents/Resources/bin/wine [args]
 
 ### NXWinetricks
 
-NXWinetricks is plugin installation support script.
+NXWinetricks is plugin installation support script. (You need to connect to network)
 
 #### packages
 

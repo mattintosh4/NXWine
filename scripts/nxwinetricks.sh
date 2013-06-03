@@ -36,13 +36,13 @@ wine=/Applications/NXWine.app/Contents/Resources/bin/wine
 printf "checking wine... "
 [ -x "${wine}" ] && printf "${wine}\n" || { echo no; exit 1; }
 
-sevenzip=/Applications/NXWine.app/Contents/Resources/lib/wine/programs/7-Zip/7z.exe
+sevenzip=/Applications/NXWine.app/Contents/Resources/share/nxwine/programs/7-Zip/7z.exe
 printf "checking 7z.exe... "
 [ -f "${sevenzip}" ] && printf "${sevenzip}\n" || { echo no; exit 1; }
 
 # ------------------------------------- processing variables
-FlatExtract="${wine} ${sevenzip} e -y"
-PathExtract="${wine} ${sevenzip} x -y"
+FlatExtract="${wine} 7z.exe e -y"
+PathExtract="${wine} 7z.exe x -y"
 notepad="${wine} notepad"
 winepath="${wine} winepath"
 function DocView_ {

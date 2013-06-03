@@ -383,7 +383,7 @@ BuildStage5_ ()
     InstallWinetricks_
     
     # ------------------------------------- 7-Zip
-    ${sevenzip} x -o${wine_destroot}/lib/wine/programs/7-Zip -x'!$*' ${srcroot}/${pkgsrc_7z}
+    ${sevenzip} x -o${wine_destroot}/share/nxwine/programs/7-Zip -x'!$*' ${srcroot}/${pkgsrc_7z}
 } # end BuildStage5_
 
 BuildWine_ ()
@@ -484,7 +484,7 @@ d3dx9}_\*.dll
         ${sevenzip} x -y Aug2009_XAudio_x86.cab XAPOFX1_3.dll
         rm *.cab
         
-        ${sevenzip} a -sfx ${wine_destroot}/lib/wine/nativedlls/nativedlls.exe ${D}
+        ${sevenzip} a -sfx ${wine_destroot}/share/nxwine/nativedlls/nativedlls.exe ${D}
         cd -
     }
     InstallNativedlls_
@@ -548,7 +548,7 @@ BuildDmg_ ()
     
     unzip -o -d ${wine_destroot}/share/doc/Faenza ${srcroot}/faenza-icon-theme_1.3.zip AUTHORS ChangeLog COPYING README
     
-    install -d ${wine_destroot}/share/doc/NXWine
+    install -d ${wine_destroot}/share/doc/nxwine
     install -m 0644 ${proj_root}/COPYING $_
     
     mv ${destroot} ${srcdir}

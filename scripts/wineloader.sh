@@ -30,7 +30,7 @@ CreateWineprefix_ ()
 {
     set -e
     ${prefix}/libexec/wine wineboot.exe --init
-    ${prefix}/lib/wine/nativedlls/nativedlls.exe x -y -o"${WINEPREFIX}"/drive_c/windows
+    ${prefix}/share/nxwine/nativedlls/nativedlls.exe x -y -o"${WINEPREFIX}"/drive_c/windows
     cat <<__REGEDIT4__ | WINEDEBUG= wine regedit -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
 $(printf '"*D3DCompiler_%d"="native"\n' {37..43})

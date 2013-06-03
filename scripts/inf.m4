@@ -15,6 +15,12 @@ AddReg=\
   Favorites,\
   Fonts
 
+[Strings]
+Favorites="Software\Microsoft\Windows\CurrentVersion\Applets\Regedit\Favorites"
+FontReplace="Software\Wine\Fonts\Replacements"
+FontSubStr="Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes"
+FontSysLink="Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink"
+
 [Environment]
 HKCU,Environment,"PATH",,"_PROG_PREFIX\7-Zip"
 
@@ -29,10 +35,6 @@ define(`MM_NAME', `さざなみ明朝')dnl
 define(`PM_FILE', `sazanami-mincho.ttf')dnl
 define(`PM_NAME', `さざなみ明朝')dnl
 dnl
-FontSubStr="Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes"
-FontSysLink="Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink"
-FontReplace="Software\Wine\Fonts\Replacements"
-
 HKCU,%FontReplace%,"@MS UI Gothic",,"@PG_NAME"
 HKCU,%FontReplace%,"@ＭＳ ゴシック",,"@PG_NAME"
 HKCU,%FontReplace%,"@ＭＳ Ｐゴシック",,"@PG_NAME"
@@ -73,11 +75,10 @@ HKCU,Control Panel\Mouse,"DoubleClickHeight",,"8"
 HKCU,Control Panel\Mouse,"DoubleClickWidth",,"8"
 
 [Favorites]
-Favorites="Software\Microsoft\Windows\CurrentVersion\Applets\Regedit\Favorites"
 HKCU,%Favorites%,"デスクトップ",,"HKEY_CURRENT_USER\Control Panel\Desktop"
-HKCU,%Favorites%,"フォント (FontSubstitutes)",,"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes"
-HKCU,%Favorites%,"フォント (Replacements)",,"HKEY_CURRENT_USER\Software\Wine\Fonts\Replacements"
-HKCU,%Favorites%,"フォント (SystemLink)",,"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink"
+HKCU,%Favorites%,"フォント (FontSubstitutes)",,"HKEY_LOCAL_MACHINE\%FontSubStr%"
+HKCU,%Favorites%,"フォント (Replacements)",,"HKEY_CURRENT_USER\%FontReplace%"
+HKCU,%Favorites%,"フォント (SystemLink)",,"HKEY_LOCAL_MACHINE\%FontSysLink%"
 HKCU,%Favorites%,"マウス",,"HKEY_CURRENT_USER\Control Panel\Mouse"
 HKCU,%Favorites%,"ユーザー環境変数",,"HKEY_CURRENT_USER\Environment"
 HKCU,%Favorites%,"ライブラリオーバーライド",,"HKEY_CURRENT_USER\Software\Wine\DllOverrides"

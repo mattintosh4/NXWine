@@ -1,13 +1,18 @@
 #!/bin/sh -e
 #
-# NXWine extra package installer
+# NXWinetricks - Plugin installation support script
 #
 # Created by mattintosh4 on @DATE@.
 # Copyright (C) 2013 mattintosh4, https://github.com/mattintosh4/NXWine
 #
 LANG=${LANG:=ja_JP.UTF-8}
 
-usage="Usage: $(cd "$(dirname "$0")" && pwd)/nxwinetricks [package]
+usage="\
+Usage:
+    $(cd "$(dirname "$0")" && pwd)/nxwinetricks [package]
+    
+Cache directory:
+    /Users/$(whoami)/com.github.mattintosh4.NXWine/<package>
 
 package             description
 ------------------------------------------------

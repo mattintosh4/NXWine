@@ -572,4 +572,5 @@ BuildDmg_
 # -------------------------------------- end processing section
 
 :
+echo ${SECONDS}
 afplay /System/Library/Sounds/Hero.aiff

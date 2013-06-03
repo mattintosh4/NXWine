@@ -48,10 +48,11 @@ $(printf '"*d3dx9_%d"="native"\n' {24..43})
 __REGEDIT4__
     
     WINEDEBUG= ${prefix}/libexec/wine regsvr32.exe l3codecx.ax {\
+XAudio2_{0..7},\
 amstream,\
 ddrawex,\
 dinput,\
-XAudio2_{0..7},\
+dplayx,\
 quartz}.dll
     
     set +e

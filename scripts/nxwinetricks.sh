@@ -44,11 +44,10 @@ printf "checking 7z.exe... "
 FlatExtract="${wine} 7z.exe e -y"
 PathExtract="${wine} 7z.exe x -y"
 notepad="${wine} notepad"
-winepath="${wine} winepath"
-function DocView_ {
+winepath="${wine} winepath --unix"
+function ConvLess_ {
     iconv -f CP932 -t UTF-8 "$@" | less -e
 }
-DocView="DocView_"
 
 # ------------------------------------- plugins
 function install_rpg2000 {
@@ -57,7 +56,7 @@ function install_rpg2000 {
     [ -f $f ] || curl -O 'http://ftp.vector.co.jp/pack/winnt/util/runtime/2000rtp.zip'
     ${FlatExtract} $f
     ${wine} RPG2000RTP.exe
-    ${DocView} "使用規約.txt"
+    ConvLess_ "使用規約.txt"
 }
 function install_rpg2003 {
     # 9a63d4e58d752d6ed5de79492a31ce43d0060564
@@ -65,7 +64,7 @@ function install_rpg2003 {
     [ -f $f ] || curl -O 'http://ftp.vector.co.jp/pack/winnt/util/runtime/2003rtp.zip'
     ${FlatExtract} $f
     ${wine} RPG2003RTP.exe
-    ${DocView} "使用規約.txt"
+    ConvLess_ "使用規約.txt"
 }
 function install_rpgxp {
     # 2079f38b692569c1fc734320862badb170bbd29d
@@ -73,7 +72,7 @@ function install_rpgxp {
     [ -f $f ] || curl -O 'http://ftp.vector.co.jp/pack/winnt/util/runtime/xp_rtp103.zip'
     ${FlatExtract} $f
     ${wine} Setup.exe
-    ${DocView} "利用規約.txt"
+    ConvLess_ "利用規約.txt"
 }
 function install_rpgvx {
     # 351b4e528dc6ed4ed9988f0a636da6b1df48d6f2
@@ -81,7 +80,7 @@ function install_rpgvx {
     [ -f $f ] || curl -O 'http://ftp.vector.co.jp/pack/winnt/util/runtime/vx_rtp202.zip'
     ${FlatExtract} $f
     ${wine} setup.exe
-    ${DocView} "利用規約.txt"
+    ConvLess_ "利用規約.txt"
 }
 
 # ------------------------------------- applications
@@ -90,13 +89,13 @@ function install_aooni {
     [ -f $f ] || curl -O 'http://mygames888.info/zip/aooni.zip'
     unzip -o $f
     ${PathExtract} -o'c:\Program Files\aooni' $(basename $f .zip).exe
-    less -e "$(${wine}path 'c:\Program Files\aooni\README.txt')"
+    less -e "$(${winepath} 'c:\Program Files\aooni\README.txt')"
 }
 function install_ib {
     f=Ib_1.05.zip
     [ -f $f ] || curl -O 'http://ftp.vector.co.jp/pack/win95/game/avg/horror/Ib_1.05.zip'
     ${PathExtract} -o'c:\Program Files' $f
-    ${DocView} "$(${wine} winepath 'c:\Program Files\Ib_1.05\Ib_説明書.txt')"
+    ConvLess_ "$(${winepath} 'c:\Program Files\Ib_1.05\Ib_説明書.txt')"
 }
 function install_yumenikki {
     f=yumenikki0.10.lzh
@@ -105,7 +104,7 @@ function install_yumenikki {
     [ -f $p ] || curl -O 'http://www3.nns.ne.jp/pri/tk-mto/yumesyuusei.lzh'
     ${PathExtract} -o'c:\Program Files' $f
     ${FlatExtract} -o'c:\Program Files\ゆめにっき\ゆめにっき0.10' $p
-    ${DocView}  "$(${winepath} 'c:\Program Files\ゆめにっき\初めに読んで下さい。0.10.txt')" \
+    ConvLess_   "$(${winepath} 'c:\Program Files\ゆめにっき\初めに読んで下さい。0.10.txt')" \
                 "$(${winepath} 'c:\Program Files\ゆめにっき\ゆめにっき0.10\ゆめにっき修正ファイルについて.txt')"
 }
 

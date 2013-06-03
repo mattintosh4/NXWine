@@ -20,9 +20,6 @@ HKCU,Environment,"PATH",,"_PROG_PREFIX\7-Zip"
 
 [Fonts]
 dnl
-define(`_KEY_systemlink',       `HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink')dnl
-define(`_KEY_fontsubstitutes',  `HKLM,Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes')dnl
-define(`_KEY_replacements',     `HKCU,Software\Wine\Fonts\Replacements')dnl
 define(`MG_FILE', `KonatuTohaba.ttf')dnl
 define(`MG_NAME', `小夏 等幅')dnl
 define(`PG_FILE', `Konatu.ttf')dnl
@@ -32,39 +29,43 @@ define(`MM_NAME', `さざなみ明朝')dnl
 define(`PM_FILE', `sazanami-mincho.ttf')dnl
 define(`PM_NAME', `さざなみ明朝')dnl
 dnl
-_KEY_systemlink,"Helvetica",,"PG_FILE"
-_KEY_systemlink,"Lucida Grande",,"PG_FILE"
-_KEY_systemlink,"Microsoft Sans Serif",,"PG_FILE"
-_KEY_systemlink,"Tahoma",,"PG_FILE"
-_KEY_systemlink,"Verdana",,"PG_FILE"
+FontSubStr="Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes"
+FontSysLink="Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink"
+FontReplace="Software\Wine\Fonts\Replacements"
 
-_KEY_fontsubstitutes,"@MS Shell Dlg",,"@MS UI Gothic"
-_KEY_fontsubstitutes,"@標準ゴシック",,"@ＭＳ ゴシック"
-_KEY_fontsubstitutes,"@標準明朝",,"@ＭＳ 明朝"
-_KEY_fontsubstitutes,"Helvetica",,"Helvetica"
-_KEY_fontsubstitutes,"Lucida Console",,"Lucida Grande"
-_KEY_fontsubstitutes,"Lucida Sans Unicode",,"Lucida Grande"
-_KEY_fontsubstitutes,"MS Sans Serif",,"ＭＳ ゴシック"
-_KEY_fontsubstitutes,"MS Serif",,"ＭＳ 明朝"
-_KEY_fontsubstitutes,"ｺﾞｼｯｸ",,"ＭＳ ゴシック"
-_KEY_fontsubstitutes,"ゴシック",,"ＭＳ ゴシック"
-_KEY_fontsubstitutes,"標準ゴシック",,"ＭＳ ゴシック"
-_KEY_fontsubstitutes,"標準明朝",,"ＭＳ 明朝"
+HKCU,%FontReplace%,"@MS UI Gothic",,"@PG_NAME"
+HKCU,%FontReplace%,"@ＭＳ ゴシック",,"@PG_NAME"
+HKCU,%FontReplace%,"@ＭＳ Ｐゴシック",,"@PG_NAME"
+HKCU,%FontReplace%,"@ＭＳ 明朝",,"@ヒラギノ明朝 Pro W3"
+HKCU,%FontReplace%,"@ＭＳ Ｐ明朝",,"@ヒラギノ明朝 Pro W3"
+HKCU,%FontReplace%,"MS UI Gothic",,"PG_NAME"
+HKCU,%FontReplace%,"MS Gothic",,"MG_NAME"
+HKCU,%FontReplace%,"MS PGothic",,"PG_NAME"
+HKCU,%FontReplace%,"MS Mincho",,"MM_NAME"
+HKCU,%FontReplace%,"MS PMincho",,"PM_NAME"
+HKCU,%FontReplace%,"ＭＳ ゴシック",,"MG_NAME"
+HKCU,%FontReplace%,"ＭＳ Ｐゴシック",,"PG_NAME"
+HKCU,%FontReplace%,"ＭＳ 明朝",,"MM_NAME"
+HKCU,%FontReplace%,"ＭＳ Ｐ明朝",,"PM_NAME"
 
-_KEY_replacements,"@MS UI Gothic",,"@PG_NAME"
-_KEY_replacements,"@ＭＳ ゴシック",,"@PG_NAME"
-_KEY_replacements,"@ＭＳ Ｐゴシック",,"@PG_NAME"
-_KEY_replacements,"@ＭＳ 明朝",,"@ヒラギノ明朝 Pro W3"
-_KEY_replacements,"@ＭＳ Ｐ明朝",,"@ヒラギノ明朝 Pro W3"
-_KEY_replacements,"MS UI Gothic",,"PG_NAME"
-_KEY_replacements,"MS Gothic",,"MG_NAME"
-_KEY_replacements,"MS PGothic",,"PG_NAME"
-_KEY_replacements,"MS Mincho",,"MM_NAME"
-_KEY_replacements,"MS PMincho",,"PM_NAME"
-_KEY_replacements,"ＭＳ ゴシック",,"MG_NAME"
-_KEY_replacements,"ＭＳ Ｐゴシック",,"PG_NAME"
-_KEY_replacements,"ＭＳ 明朝",,"MM_NAME"
-_KEY_replacements,"ＭＳ Ｐ明朝",,"PM_NAME"
+HKLM,%FontSubStr%,"@MS Shell Dlg",,"@MS UI Gothic"
+HKLM,%FontSubStr%,"@標準ゴシック",,"@ＭＳ ゴシック"
+HKLM,%FontSubStr%,"@標準明朝",,"@ＭＳ 明朝"
+HKLM,%FontSubStr%,"Helvetica",,"Helvetica"
+HKLM,%FontSubStr%,"Lucida Console",,"Lucida Grande"
+HKLM,%FontSubStr%,"Lucida Sans Unicode",,"Lucida Grande"
+HKLM,%FontSubStr%,"MS Sans Serif",,"ＭＳ ゴシック"
+HKLM,%FontSubStr%,"MS Serif",,"ＭＳ 明朝"
+HKLM,%FontSubStr%,"ｺﾞｼｯｸ",,"ＭＳ ゴシック"
+HKLM,%FontSubStr%,"ゴシック",,"ＭＳ ゴシック"
+HKLM,%FontSubStr%,"標準ゴシック",,"ＭＳ ゴシック"
+HKLM,%FontSubStr%,"標準明朝",,"ＭＳ 明朝"
+
+HKLM,%FontSysLink%,"Helvetica",,"PG_FILE"
+HKLM,%FontSysLink%,"Lucida Grande",,"PG_FILE"
+HKLM,%FontSysLink%,"Microsoft Sans Serif",,"PG_FILE"
+HKLM,%FontSysLink%,"Tahoma",,"PG_FILE"
+HKLM,%FontSysLink%,"Verdana",,"PG_FILE"
 
 [Control Panel]
 HKCU,Control Panel\Desktop,"FontSmoothing",,"0"
@@ -72,16 +73,14 @@ HKCU,Control Panel\Mouse,"DoubleClickHeight",,"8"
 HKCU,Control Panel\Mouse,"DoubleClickWidth",,"8"
 
 [Favorites]
-dnl
-define(`_KEY_favorites',`HKCU,Software\Microsoft\Windows\CurrentVersion\Applets\Regedit\Favorites')dnl
-dnl
-_KEY_favorites,"デスクトップ",,"HKEY_CURRENT_USER\Control Panel\Desktop"
-_KEY_favorites,"フォント (FontSubstitutes)",,"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes"
-_KEY_favorites,"フォント (Replacements)",,"HKEY_CURRENT_USER\Software\Wine\Fonts\Replacements"
-_KEY_favorites,"フォント (SystemLink)",,"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink"
-_KEY_favorites,"マウス",,"HKEY_CURRENT_USER\Control Panel\Mouse"
-_KEY_favorites,"ユーザー環境変数",,"HKEY_CURRENT_USER\Environment"
-_KEY_favorites,"ライブラリオーバーライド",,"HKEY_CURRENT_USER\Software\Wine\DllOverrides"
+Favorites="Software\Microsoft\Windows\CurrentVersion\Applets\Regedit\Favorites"
+HKCU,%Favorites%,"デスクトップ",,"HKEY_CURRENT_USER\Control Panel\Desktop"
+HKCU,%Favorites%,"フォント (FontSubstitutes)",,"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes"
+HKCU,%Favorites%,"フォント (Replacements)",,"HKEY_CURRENT_USER\Software\Wine\Fonts\Replacements"
+HKCU,%Favorites%,"フォント (SystemLink)",,"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink"
+HKCU,%Favorites%,"マウス",,"HKEY_CURRENT_USER\Control Panel\Mouse"
+HKCU,%Favorites%,"ユーザー環境変数",,"HKEY_CURRENT_USER\Environment"
+HKCU,%Favorites%,"ライブラリオーバーライド",,"HKEY_CURRENT_USER\Software\Wine\DllOverrides"
 
 [Classes]
 dnl

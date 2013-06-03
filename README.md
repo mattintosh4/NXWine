@@ -41,7 +41,7 @@ $ /Applications/NXWine.app/Contents/Resources/bin/nxwinetricks [package]
 $ /Applications/NXWine.app/Contents/Resources/bin/winetricks [args]
 ```
 
-See more info, `winetricks -h` and [ Winetricks official page](winetricks.org).
+See more info, `winetricks -h` and [ Winetricks official page](http://winetricks.org).
 
 ### 7-Zip
 

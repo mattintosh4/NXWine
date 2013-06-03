@@ -29,7 +29,7 @@ end NXWineGetPath_
 on main(input)
     NXWineGetPath_()
     try
-        do shell script wineserver & wine & input
+        do shell script "export WINEDEBUG=-all;" & wineserver & wine & input
     end try
 end main
 

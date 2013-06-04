@@ -7,7 +7,7 @@ Other information and application bundle download page: http://mattintosh.hatena
 - New version: Run "NXWine Installer.app" from disk image.
 - Old version: Install "NXWine.app" to `/Applications` folder.
 
-Note: This application's startup location has been fixed to "/Application".
+Note: This application's startup location has been fixed to `/Applications/NXWine.app`.
 
 ## Command-line usage
 

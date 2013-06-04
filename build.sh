@@ -551,8 +551,11 @@ BuildDmg_ ()
     install -d ${wine_destroot}/share/doc/nxwine
     install -m 0644 ${proj_root}/COPYING $_
     
-    mv ${destroot} ${srcdir}
-    ln -s /Applications ${srcdir}
+    install -d ${srcdir}/.resources
+    mv ${destroot} $_
+
+    osacompile -xo ${srcdir}/"NXWine Installer".app ${proj_root}/scripts/installer.applescript
+    install -m 0644 ${proj_root}/nxwine.icns ${srcdir}/"NXWine Installer".app/Contents/Resources/applet.icns
     
     [ ! -f ${dmg} ] || rm ${dmg}
     hdiutil create -format UDBZ -srcdir ${srcdir} -volname ${proj_name} ${dmg}

@@ -2,6 +2,11 @@ NXWine is No X11 Wine for Mac OS X 10.6+. However, if you play game that needs g
 
 Other information and application bundle download page: http://mattintosh.hatenablog.com/entry/nxwine (Japanese)
 
+## Installation
+
+- New version: Run "NXWine Installer.app" from disk image.
+- Old version: Install "NXWine.app" to `/Application` folder.
+
 ## Command-line usage
 
 ### Wine

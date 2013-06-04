@@ -59,7 +59,7 @@ configure_args="\
 --disable-maintainer-mode \
 --disable-dependency-tracking \
 --without-x"
-make_args="-j $(($(sysctl -n hw.ncpu) + 2))"
+make_args="-j $(($(sysctl -n hw.ncpu) + 1))"
 
 # -------------------------------------- package source
 ## gnutools
@@ -427,10 +427,10 @@ BuildWine_ ()
         local fontdir=${wine_destroot}/share/wine/fonts
         
         # Konatu
-        /usr/bin/tar xf ${srcroot}/Konatu_ver_20121218.zip -C ${docdir}
+        unzip -od ${docdir} ${srcroot}/Konatu_ver_20121218.zip
         mv ${docdir}/Konatu_ver_20121218/*.ttf ${fontdir}
         # Sazanami
-        /usr/bin/tar xf ${srcroot}/sazanami-20040629.tar.bz2 -C ${docdir}
+        unzip -od ${docdir} ${srcroot}/sazanami-20040629.tar.bz2
         mv ${docdir}/sazanami-20040629/*.ttf ${fontdir}
         
         # remove duplicate fonts
@@ -458,6 +458,7 @@ BuildWine_ ()
     InstallNativedlls_ ()
     {
         local D=${workroot}/system32
+        
         install -d ${D}
         cd ${D}
         install -m 0644 ${srcroot}/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
@@ -483,6 +484,11 @@ d3dx9}_\*.dll
         # note: XAPOFX1_3.dll in Mar2009_XAudio_x86.cab is old
         ${sevenzip} x -y Aug2009_XAudio_x86.cab XAPOFX1_3.dll
         rm *.cab
+        
+        # hhctrl.ocx
+        ${sevenzip} x ${proj_root}/sources/nativedlls/htmlhelp.exe hhupd.exe
+        ${sevenzip} x hhupd.exe hhctrl.ocx
+        rm hhupd.exe
         
         ${sevenzip} a -sfx ${wine_destroot}/share/nxwine/nativedlls/nativedlls.exe ${D}
         cd -

@@ -6,7 +6,7 @@ set theMessage to "※使用許諾
 
 ※注意
 
-以前の NXWine.app は新しいものに置き換えられます。バックアップを行う場合は \"キャンセル\" を押して処理を中止して下さい。"
+以前の NXWine.app は新しいものに置き換えられます。バックアップを行う場合は \"キャンセル\" ボタンを押して処理を中止して下さい。"
 
 tell application "Finder"
     display alert theTitle message theMessage buttons {"キャンセル", "OK"} cancel button "キャンセル" as warning

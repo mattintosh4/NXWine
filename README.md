@@ -9,6 +9,15 @@ Other information and application bundle download page: http://mattintosh.hatena
 
 Note: This application's startup location has been fixed to `/Applications/NXWine.app`.
 
+### Uninstall
+
+```sh
+# NXWine
+rm -rf /Applications/NXWine.app ~/Library/Caches/com.github.mattintosh4.NXWine
+```
+
+Note: Wine and Winetricks use some directory. Refer to official guide about them.
+
 ## Command-line usage
 
 ### Wine

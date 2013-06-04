@@ -10,5 +10,7 @@ set myMessage to "※使用許諾
 
 tell application "Finder"
     display alert myTitle message myMessage buttons {"キャンセル", "OK"} cancel button "キャンセル" as warning
-    duplicate mySource to (path to applications folder) with replacing
+    with timeout of 600 seconds
+        duplicate mySource to (path to applications folder) with replacing
+    end timeout
 end tell

@@ -11,12 +11,15 @@ Note: This application's startup location has been fixed to `/Applications/NXWin
 
 ### Uninstall
 
-```sh
-# NXWine
-rm -rf /Applications/NXWine.app ~/Library/Caches/com.github.mattintosh4.NXWine
-```
+Delete following directories.
 
-Note: Wine and Winetricks use some directory. Refer to official guide about them.
+- `/Applications/NXWine.app`
+- `~/Library/Caches/com.github.mattintosh4.NXWine`
+
+Wine and Winetricks use some directory. Refer to official guide about them.
+
+- Wine: http://wiki.winehq.org/FAQ#head-ddc6f242056eb1a4fe566c9434d15fd8b64606aa
+- Wientricks: http://code.google.com/p/winetricks/wiki/FAQ
 
 ## Command-line usage
 

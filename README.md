@@ -29,6 +29,8 @@ Wine and Winetricks use some directory. Refer to official guide about them.
 $ /Applications/NXWine.app/Contents/Resources/bin/wine [args]
 ```
 
+Note: `Resources/bin/wine` is customized script. Original binary is `Resources/libexec/wine`.
+
 ### NXWinetricks
 
 NXWinetricks is plugin installation support script. (You need to connect to network)

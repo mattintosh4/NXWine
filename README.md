@@ -14,7 +14,7 @@ Note: This application's startup location has been fixed to `/Applications/NXWin
 Delete following directories.
 
 - `/Applications/NXWine.app`
-- `~/Library/Caches/com.github.mattintosh4.NXWine`
+- `~/Library/Caches/com.github.mattintosh4.NXWine` (If you have ever used nxwinetricks)
 
 Wine and Winetricks use some directory. Refer to official guide about them.
 

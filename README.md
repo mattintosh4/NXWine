@@ -37,10 +37,10 @@ NXWinetricks is plugin installation support script. (You need to connect to netw
 
 #### packages
 
-- RPG TKOOL 2000 RTP
-- RPG TKOOL 2003 RTP
-- RPG TKOOL XP RTP v103
-- RPG TKOOL VX RTP v202
+- `rpg2000`: RPG TKOOL 2000 RTP
+- `rpg2003`: RPG TKOOL 2003 RTP
+- `rpgxp`: RPG TKOOL XP RTP v103
+- `rpgvx`: RPG TKOOL VX RTP v202
 
 and some Windows free games. Cache files are saved into `/Users/yourname/Library/Caches/com.github.mattintosh4.NXWine/[package]`. See more info, `nxwinetricks --help`.
 

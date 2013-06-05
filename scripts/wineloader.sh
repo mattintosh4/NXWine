@@ -16,10 +16,6 @@ wine=${prefix}/libexec/wine
 export PATH=${prefix}/libexec:${prefix}/bin:$(dirname ${prefix})/SharedSupport/bin:/usr/bin:/bin:/usr/sbin:/sbin
 export LANG=${LANG:=ja_JP.UTF-8}
 
-# note: WINEPREFIX variable should be set for initializing.
-# ----> WINEPREFIX will not necessary when initializing because changed to Windows path. (2013-06-05)
-#export WINEPREFIX="${WINEPREFIX:=${HOME}/.wine}"
-
 # note: glu32.dll still needs Mesa libraries.
 export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib:/usr/X11/lib
 
@@ -69,7 +65,7 @@ quartz}.dll
 
 
 # ------------------------------------ begin standard run
-if ! ${prefix}/bin/wineserver &>/dev/null; then CreateWineprefix_; fi
+if [ ! -d "${WINEPREFIX:=$HOME/.wine}" ]; then CreateWineprefix_; fi
 
 set -x
 exec ${wine} "$@"

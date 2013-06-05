@@ -7,8 +7,8 @@ readonly proj_root="$(cd "$(dirname "$0")"; pwd)"
 readonly proj_version=$(date +%Y%m%d)
 readonly proj_domain=com.github.mattintosh4.${proj_name}
 
-readonly buildtoolbundle=${proj_root}/buildtool.sparsebundle
-readonly buildtoolprefix=/Volumes/${proj_uuid}
+readonly toolbundle=${proj_root}/tool.sparsebundle
+readonly toolprefix=/Volumes/${proj_uuid}
 
 readonly srcroot=${proj_root}/sources
 readonly workroot=/tmp/${proj_uuid}
@@ -37,7 +37,7 @@ SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/
 
 PATH=$(/usr/sbin/sysctl -n user.cs_path)
 PATH=$(dirname ${git}):$PATH
-PATH=${deps_destroot}/bin:${buildtoolprefix}/bin:$PATH
+PATH=${deps_destroot}/bin:${toolprefix}/bin:$PATH
 CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
 CFLAGS="-pipe -m32 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
@@ -123,7 +123,7 @@ BuildDeps_ ()
         m4-*|\
         autoconf-*|\
         automake-*)
-            ./configure ${configure_args/${deps_destroot}/${buildtoolprefix}} "$@"
+            ./configure ${configure_args/${deps_destroot}/${toolprefix}} "$@"
         ;;
         zlib-*)
             ./configure --prefix=${deps_destroot}
@@ -244,12 +244,12 @@ Bootstrap_ ()
     )
     
     # -------------------------------------- begin tools build
-    if [ -e ${buildtoolbundle} ]
+    if [ -e ${toolbundle} ]
     then
-        hdiutil attach ${buildtoolbundle}
+        hdiutil attach ${toolbundle}
     else
-        hdiutil create -type SPARSEBUNDLE -fs HFS+ -size 1g -volname ${proj_uuid} ${buildtoolbundle}
-        hdiutil attach ${buildtoolbundle}
+        hdiutil create -type SPARSEBUNDLE -fs HFS+ -size 1g -volname ${proj_uuid} ${toolbundle}
+        hdiutil attach ${toolbundle}
         
         {
             tar xf ${srcroot}/${pkgsrc_p7zip} -C ${workroot}
@@ -260,26 +260,26 @@ Bootstrap_ ()
                 s|^CC=cc|CC=${CC}|;
                 " makefile.macosx_64bits > makefile.machine
             make ${make_args} all3
-            make DEST_HOME=${buildtoolprefix} install
+            make DEST_HOME=${toolprefix} install
             cd -
         }
         
         BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
         {
-            cd ${buildtoolprefix}/bin
+            cd ${toolprefix}/bin
             ln -s {g,}readlink
             cd -
         }
         BuildDeps_  ${pkgsrc_m4} --program-prefix=g
         {
-            cd ${buildtoolprefix}/bin
+            cd ${toolprefix}/bin
             ln -s {g,}m4
             cd -
         }
         BuildDeps_  ${pkgsrc_autoconf}
         BuildDeps_  ${pkgsrc_automake}
     fi
-    trap "hdiutil detach ${buildtoolprefix}" EXIT
+    trap "hdiutil detach ${toolprefix}" EXIT
     
     # --------------------------------- begin build
     BuildGettext_ ()

@@ -137,7 +137,6 @@ BuildDeps_ ()
     esac
     make ${make_args}
     make install
-    cd -
 } # end BuildDeps_
 
 BuildDevel_ ()
@@ -220,7 +219,6 @@ BuildDevel_ ()
     make ${make_args}
     make install
     DocCopy_ $1
-    cd -
 } # end BuildDevel_
 
 Bootstrap_ ()
@@ -264,10 +262,9 @@ Bootstrap_ ()
                 s|^OPTFLAGS=-O|OPTFLAGS=-O2 -mtune=native|;
                 s|^CXX=c++|CXX=${CXX}|;
                 s|^CC=cc|CC=${CC}|;
-                " makefile.macosx_64bits > makefile.machine
+            " makefile.macosx_64bits > makefile.machine
             make ${make_args} all3
             make DEST_HOME=${toolprefix} install
-            cd -
         }
         
         BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
@@ -329,7 +326,6 @@ BuildStage1_ ()
         make ${make_args}
         make check
         make install
-        cd -
     }
     BuildDeps_  ${pkgsrc_libtasn1}
     BuildDeps_  ${pkgsrc_nettle}
@@ -477,7 +473,6 @@ BuildWine_ ()
     InstallNativedlls_ ()
     {
         local D=${workroot}/system32
-        
         install -d ${D}
         cd ${D}
         install -m 0644 ${srcroot}/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
@@ -510,6 +505,7 @@ d3dx9}_\*.dll
         rm hhupd.exe
         
         7z a -sfx ${wine_destroot}/share/nxwine/nativedlls/nativedlls.exe ${D}
+        
         cd -
     }
     InstallNativedlls_

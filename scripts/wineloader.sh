@@ -13,7 +13,7 @@ if [ "${WINEDEBUG+set}" != set ]; then export PS4="\[\e[33m\]DEBUG:\[\e[m\] "; s
 prefix=/Applications/NXWine.app/Contents/Resources
 wine=${prefix}/libexec/wine
 
-export PATH=${prefix}/libexec:${prefix}/bin:$(dirname ${prefix})/SharedSupport/bin:/usr/bin:/bin:/usr/sbin:/sbin
+export PATH=${prefix}/libexec:${prefix}/bin:${prefix/Resources/SharedSupport}/bin:/usr/bin:/bin:/usr/sbin:/sbin
 export LANG=${LANG:=ja_JP.UTF-8}
 
 # note: glu32.dll still needs Mesa libraries.

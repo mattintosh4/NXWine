@@ -7,8 +7,8 @@ readonly proj_root="$(cd "$(dirname "$0")"; pwd)"
 readonly proj_version=$(date +%Y%m%d)
 readonly proj_domain=com.github.mattintosh4.${proj_name}
 
-readonly gnutoolbundle=${proj_root}/gnu-tools.sparsebundle
-readonly gnuprefix=/Volumes/${proj_uuid}
+readonly buildtoolbundle=${proj_root}/buildtool.sparsebundle
+readonly buildtoolprefix=/Volumes/${proj_uuid}
 
 readonly srcroot=${proj_root}/sources
 readonly workroot=/tmp/${proj_uuid}
@@ -20,11 +20,9 @@ readonly deps_destroot=${destroot}/Contents/SharedSupport
 readonly ccache=/usr/local/bin/ccache
 readonly uconv=/usr/local/bin/uconv
 readonly git=/usr/local/git/bin/git
-readonly sevenzip=/usr/local/bin/7z
 test -x ${ccache}
 test -x ${uconv}
 test -x ${git}
-test -x ${sevenzip}
 
 if [ -x ${FONTFORGE=/opt/local/bin/fontforge} ]; then export FONTFORGE; fi
 
@@ -39,7 +37,7 @@ SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/
 
 PATH=$(/usr/sbin/sysctl -n user.cs_path)
 PATH=$(dirname ${git}):$PATH
-PATH=${deps_destroot}/bin:${gnuprefix}/bin:$PATH
+PATH=${deps_destroot}/bin:${buildtoolprefix}/bin:$PATH
 CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
 CXX="${ccache} $(xcrun -find i686-apple-darwin10-g++-4.2.1)"
 CFLAGS="-pipe -m32 -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
@@ -62,12 +60,13 @@ configure_args="\
 make_args="-j $(($(sysctl -n hw.ncpu) + 1))"
 
 # -------------------------------------- package source
-## gnutools
+## buildtools
 pkgsrc_autoconf=autoconf-2.69.tar.gz
 pkgsrc_automake=automake-1.13.2.tar.gz
 pkgsrc_coreutils=coreutils-8.21.tar.bz2
 pkgsrc_libtool=libtool-2.4.2.tar.gz
 pkgsrc_m4=m4-1.4.16.tar.bz2
+pkgsrc_p7zip=p7zip_9.20.1_src_all.tar.bz2
 ## bootstrap
 pkgsrc_gettext=gettext-0.18.2.tar.gz
 pkgsrc_libelf=libelf-0.8.13.tar.gz
@@ -100,6 +99,7 @@ pkgsrc_theora=libtheora-1.1.1.tar.bz2
 pkgsrc_vorbis=libvorbis-1.3.3.tar.gz
 ## stage 5
 pkgsrc_7z=7z920.exe
+pkgsrc_cabextract=cabextract-1.4.tar.gz
 
 # -------------------------------------- begin utilities functions
 DocCopy_ ()
@@ -119,7 +119,7 @@ BuildDeps_ ()
     test -n "$1" || { echo "Invalid argment."; exit 1; }
     local n=$1
     shift
-    $(which gnutar) xf ${srcroot}/${n} -C ${workroot}
+    7z x -so ${srcroot}/${n} | tar x - -C ${workroot}
     cd ${workroot}/$(echo ${n} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##')
     case ${n} in
         tar-*|\
@@ -127,10 +127,13 @@ BuildDeps_ ()
         m4-*|\
         autoconf-*|\
         automake-*)
-            ./configure ${configure_args/${deps_destroot}/${gnuprefix}} "$@"
+            ./configure ${configure_args/${deps_destroot}/${buildtoolprefix}} "$@"
         ;;
         zlib-*)
             ./configure --prefix=${deps_destroot}
+        ;;
+        cabextract-*)
+            ./configure ${configure_args/${deps_destroot}/${wine_destroot}}
         ;;
         *)
             ./configure ${configure_args} "$@"
@@ -151,8 +154,8 @@ BuildDevel_ ()
         echo "Invalid argment or directory does not exist."
         exit 1
     fi
-    ditto {${srcroot},${workroot}}/$1
-    cd $_
+    cp -RH ${srcroot}/$1 ${workroot}
+    cd ${workroot}/$1
     case $1 in
         fontconfig)
             git checkout -f master
@@ -233,35 +236,48 @@ Bootstrap_ ()
                 ${workroot}
     (
         cd ${deps_destroot}
-        ln -s ../Resources/lib lib
-        ln -s share/man man
+        ln -fhs ../Resources/lib lib
+        ln -fhs share/man man
     )
     
     # -------------------------------------- begin tools build
-    if [ -e ${gnutoolbundle} ]
+    if [ -e ${buildtoolbundle} ]
     then
-        hdiutil attach ${gnutoolbundle}
+        hdiutil attach ${buildtoolbundle}
     else
-        hdiutil create -type SPARSEBUNDLE -fs HFS+ -size 1g -volname ${proj_uuid} ${gnutoolbundle}
-        hdiutil attach ${gnutoolbundle}
+        hdiutil create -type SPARSEBUNDLE -fs HFS+ -size 1g -volname ${proj_uuid} ${buildtoolbundle}
+        hdiutil attach ${buildtoolbundle}
+        
+        {
+            tar xf ${srcroot}/${pkgsrc_p7zip} -C ${workroot}
+            cd ${workroot}/p7zip_9.20.1
+            sed "
+                s|^OPTFLAGS=-O|OPTFLAGS=-O3 -mtune=native|;
+                s|^CXX=c++|CXX=${CXX}|;
+                s|^CC=cc|CC=${CC}|;
+                " makefile.macosx_64bits > makefile.machine
+            make ${make_args} all3
+            make DEST_HOME=${buildtoolprefix} install
+            cd -
+        }
         
         BuildDeps_  ${pkgsrc_tar} --program-prefix=gnu --disable-nls
         BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
         {
-            cd ${gnuprefix}/bin
+            cd ${buildtoolprefix}/bin
             ln -s {g,}readlink
             cd -
         }
         BuildDeps_  ${pkgsrc_m4} --program-prefix=g
         {
-            cd ${gnuprefix}/bin
+            cd ${buildtoolprefix}/bin
             ln -s {g,}m4
             cd -
         }
         BuildDeps_  ${pkgsrc_autoconf}
         BuildDeps_  ${pkgsrc_automake}
     fi
-    trap "hdiutil detach ${gnuprefix}" EXIT
+    trap "hdiutil detach ${buildtoolprefix}" EXIT
     
     # --------------------------------- begin build
     BuildGettext_ ()
@@ -296,7 +312,7 @@ Bootstrap_ ()
 BuildStage1_ ()
 {
     {
-        ${sevenzip} x -y -o${workroot} ${srcroot}/${pkgsrc_gmp}
+        7z x -so ${srcroot}/${pkgsrc_gmp} | tar x - -C ${workroot}
         cd ${workroot}/${pkgsrc_gmp%.tar.*}
         CC=$( xcrun -find gcc-4.2) \
         CXX=$(xcrun -find g++-4.2) \
@@ -355,18 +371,12 @@ BuildStage4_ ()
 
 BuildStage5_ ()
 {
-    # -------------------------------------- begin cabextract
-    $(which gnutar) -xf ${srcroot}/cabextract-1.4.tar.gz -C ${workroot}
-    (
-        cd ${workroot}/cabextract-1.4
-        ./configure ${configure_args/${deps_destroot}/${wine_destroot}}
-        make ${make_args}
-        make install
-        install -d ${wine_destroot}/share/doc/cabextract-1.4
-        cp AUTHORS ChangeLog COPYING NEWS README TODO $_
-    )
+    # -------------------------------------- cabextract
+    BuildDeps_ ${pkgsrc_cabextract}
+    install -d ${wine_destroot}/share/doc/cabextract-1.4
+    cp AUTHORS ChangeLog COPYING NEWS README TODO $_
     
-    # -------------------------------------- begin winetricks
+    # -------------------------------------- winetricks
     InstallWinetricks_ ()
     {
         local bindir=${wine_destroot}/bin
@@ -383,7 +393,7 @@ BuildStage5_ ()
     InstallWinetricks_
     
     # ------------------------------------- 7-Zip
-    ${sevenzip} x -o${wine_destroot}/share/nxwine/programs/7-Zip -x'!$*' ${srcroot}/${pkgsrc_7z}
+    7z x -o${wine_destroot}/share/nxwine/programs/7-Zip -x'!$*' ${srcroot}/${pkgsrc_7z}
 } # end BuildStage5_
 
 BuildWine_ ()
@@ -462,8 +472,8 @@ BuildWine_ ()
         install -d ${D}
         cd ${D}
         install -m 0644 ${srcroot}/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
-        ${sevenzip} x ${srcroot}/nativedlls/directx_feb2010_redist.exe dxnt.cab
-        ${sevenzip} x dxnt.cab l3codecx.ax {\
+        7z x ${srcroot}/nativedlls/directx_feb2010_redist.exe dxnt.cab
+        7z x dxnt.cab l3codecx.ax {\
 amstream,\
 ddrawex,\
 dinput,\
@@ -472,25 +482,25 @@ dplayx,\
 mciqtz32,\
 quartz}.dll
         
-        ${sevenzip} x ${srcroot}/nativedlls/directx_Jun2010_redist.exe "*_x86.cab"
+        7z x ${srcroot}/nativedlls/directx_Jun2010_redist.exe "*_x86.cab"
         find ./*_x86.cab | while read
         do
-            ${sevenzip} x -y ${REPLY} {\
+            7z x -y ${REPLY} {\
 D3DCompiler,\
 XAPOFX1,\
 XAudio2,\
 d3dx9}_\*.dll
         done
         # note: XAPOFX1_3.dll in Mar2009_XAudio_x86.cab is old
-        ${sevenzip} x -y Aug2009_XAudio_x86.cab XAPOFX1_3.dll
+        7z x -y Aug2009_XAudio_x86.cab XAPOFX1_3.dll
         rm *.cab
         
         # hhctrl.ocx
-        ${sevenzip} x ${proj_root}/sources/nativedlls/htmlhelp.exe hhupd.exe
-        ${sevenzip} x hhupd.exe hhctrl.ocx
+        7z x ${proj_root}/sources/nativedlls/htmlhelp.exe hhupd.exe
+        7z x hhupd.exe hhctrl.ocx
         rm hhupd.exe
         
-        ${sevenzip} a -sfx ${wine_destroot}/share/nxwine/nativedlls/nativedlls.exe ${D}
+        7z a -sfx ${wine_destroot}/share/nxwine/nativedlls/nativedlls.exe ${D}
         cd -
     }
     InstallNativedlls_
@@ -540,7 +550,7 @@ Add :CFBundleDocumentTypes:${i}:CFBundleTypeIconFile string ${iconfile}
 Add :CFBundleDocumentTypes:${i}:CFBundleTypeName string ${x} Archive
 Add :CFBundleDocumentTypes:${i}:CFBundleTypeRole string Viewer
 __EOS1__
-        : $((i++))
+        ((i++))
     done
 )
 __EOS__

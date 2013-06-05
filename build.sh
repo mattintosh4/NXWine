@@ -250,7 +250,7 @@ Bootstrap_ ()
             tar xf ${srcroot}/${pkgsrc_p7zip} -C ${workroot}
             cd ${workroot}/p7zip_9.20.1
             sed "
-                s|^OPTFLAGS=-O|OPTFLAGS=-O3 -mtune=native|;
+                s|^OPTFLAGS=-O|OPTFLAGS=-O2 -mtune=native|;
                 s|^CXX=c++|CXX=${CXX}|;
                 s|^CC=cc|CC=${CC}|;
                 " makefile.macosx_64bits > makefile.machine
@@ -371,7 +371,7 @@ BuildStage5_ ()
     # -------------------------------------- cabextract
     BuildDeps_ ${pkgsrc_cabextract}
     install -d ${wine_destroot}/share/doc/cabextract-1.4
-    cp AUTHORS ChangeLog COPYING NEWS README TODO $_
+    cp ${workroot}/cabextract-1.4/{AUTHORS,ChangeLog,OPYING,NEWS,README,TODO} $_
     
     # -------------------------------------- winetricks
     InstallWinetricks_ ()

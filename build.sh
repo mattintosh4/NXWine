@@ -72,7 +72,6 @@ pkgsrc_gettext=gettext-0.18.2.tar.gz
 pkgsrc_libelf=libelf-0.8.13.tar.gz
 pkgsrc_ncurses=ncurses-5.9.tar.gz
 pkgsrc_readline=readline-master.tar.gz
-pkgsrc_tar=tar-1.26.tar.gz
 pkgsrc_xz=xz-5.0.4.tar.bz2
 pkgsrc_zlib=zlib-1.2.8.tar.gz
 ## stage 1
@@ -122,7 +121,6 @@ BuildDeps_ ()
     7z x -so ${srcroot}/${n} | tar x - -C ${workroot}
     cd ${workroot}/$(echo ${n} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##')
     case ${n} in
-        tar-*|\
         coreutils-*|\
         m4-*|\
         autoconf-*|\
@@ -261,7 +259,6 @@ Bootstrap_ ()
             cd -
         }
         
-        BuildDeps_  ${pkgsrc_tar} --program-prefix=gnu --disable-nls
         BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
         {
             cd ${buildtoolprefix}/bin

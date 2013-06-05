@@ -296,7 +296,7 @@ Bootstrap_ ()
 BuildStage1_ ()
 {
     {
-        $(which gnutar) xf ${srcroot}/${pkgsrc_gmp} -C ${workroot}
+        ${sevenzip} x -y -o${workroot} ${srcroot}/${pkgsrc_gmp}
         cd ${workroot}/${pkgsrc_gmp%.tar.*}
         CC=$( xcrun -find gcc-4.2) \
         CXX=$(xcrun -find g++-4.2) \

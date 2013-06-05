@@ -7,7 +7,7 @@
 #
 
 # note: some debug options is enabled because this script is incomplete yet.
-case ${WINEDEBUG-X} in X) export PS4="\[\e[33m\]DEBUG:\[\e[m\] " ; set -x ; export WINEDEBUG=+loaddll ;; esac
+if [ "${WINEDEBUG+set}" != set ]; then export PS4="\[\e[33m\]DEBUG:\[\e[m\] "; set -x; export WINEDEBUG=+loaddll; fi
 
 # ------------------------------------ begin preparing
 prefix=/Applications/NXWine.app/Contents/Resources
@@ -69,7 +69,7 @@ quartz}.dll
 
 
 # ------------------------------------ begin standard run
-if ! ${prefix}/bin/wineserver &>/dev/null ; then CreateWineprefix_ ; fi
+if ! ${prefix}/bin/wineserver &>/dev/null; then CreateWineprefix_; fi
 
 set -x
 exec ${wine} "$@"

@@ -434,10 +434,10 @@ BuildWine_ ()
         local fontdir=${wine_destroot}/share/wine/fonts
         
         # Konatu
-        unzip -od ${docdir} ${srcroot}/Konatu_ver_20121218.zip
+        7z x -o${docdir} ${srcroot}/Konatu_ver_20121218.zip
         mv ${docdir}/Konatu_ver_20121218/*.ttf ${fontdir}
         # Sazanami
-        unzip -od ${docdir} ${srcroot}/sazanami-20040629.tar.bz2
+        7z x -so ${srcroot}/sazanami-20040629.tar.bz2 | tar x - -C ${docdir}
         mv ${docdir}/sazanami-20040629/*.ttf ${fontdir}
         
         # remove duplicate fonts

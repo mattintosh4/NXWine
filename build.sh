@@ -101,22 +101,22 @@ pkgsrc_cabextract=cabextract-1.4.tar.gz
 # -------------------------------------- begin utilities functions
 DocCopy_ ()
 {
-    test -n "$1"
-    local d=${deps_destroot}/share/doc/$1
-    install -d ${d}
+    [ "$1" ]
+    local D=${deps_destroot}/share/doc/$1
+    install -d ${D}
     find -E ${workroot}/$1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)' | while read
     do
-        cp "${REPLY}" ${d}
+        cp "${REPLY}" ${D}
     done
 } # end DocCopy_
 
 # -------------------------------------- begin build processing functions
 BuildDeps_ ()
 {
-    test -n "$1" || { echo "Invalid argment."; exit 1; }
+    [ "$1" ] || { echo "Invalid argment."; exit 1; }
     local n=$1
     shift
-    7z x -so ${srcroot}/${n} | tar x - -C ${workroot}
+    7z x -y -so ${srcroot}/${n} | tar x - -C ${workroot}
     cd ${workroot}/$(echo ${n} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##')
     case ${n} in
         coreutils-*|\
@@ -143,8 +143,8 @@ BuildDeps_ ()
 BuildDevel_ ()
 {
     if
-        test -n "$1" &&
-        test -d ${srcroot}/$1
+        [ "$1" ] &&
+        [ -d ${srcroot}/$1 ]
     then :
     else
         echo "Invalid argment or directory does not exist."
@@ -201,14 +201,20 @@ BuildDevel_ ()
                                             --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
         ;;
         python) # Python 2.7
-            ./configure ${configure_args}
+            install -d build
+            cd $_
+            ../configure ${configure_args}
         ;;
-        SDL)
-            ./configure ${configure_args}
+        SDL) # mercurial repository must be separated a build directory.
+            install -d build
+            cd $_
+            ../configure ${configure_args}
         ;;
-        SDL_sound)
+        SDL_sound) # mercurial repository must be separated a build directory.
             ./bootstrap
-            ./configure ${configure_args}
+            install -d build
+            cd $_
+            ../configure ${configure_args}
         ;;
     esac
     make ${make_args}
@@ -368,7 +374,7 @@ BuildStage4_ ()
     BuildDevel_ SDL
     BuildDevel_ SDL_sound
     ## libtheora required SDL
-    BuildDeps_  ${pkgsrc_theora} --disable-{oggtest,vorbistest,examples,asm}
+    BuildDeps_  ${pkgsrc_theora} --disable-{oggtest,vorbistest,examples,asm} ac_cv_path_SDL_CONFIG=sdl2-config
 } # end BuildStage4_
 
 BuildStage5_ ()
@@ -395,7 +401,7 @@ BuildStage5_ ()
     InstallWinetricks_
     
     # ------------------------------------- 7-Zip
-    7z x -o${wine_destroot}/share/nxwine/programs/7-Zip -x'!$*' ${srcroot}/${pkgsrc_7z}
+    7z x -y -o${wine_destroot}/share/nxwine/programs/7-Zip -x'!$*' ${srcroot}/${pkgsrc_7z}
 } # end BuildStage5_
 
 BuildWine_ ()
@@ -439,7 +445,7 @@ BuildWine_ ()
         local fontdir=${wine_destroot}/share/wine/fonts
         
         # Konatu
-        7z x -o${docdir} ${srcroot}/Konatu_ver_20121218.zip
+        7z x -y -o${docdir} ${srcroot}/Konatu_ver_20121218.zip
         mv ${docdir}/Konatu_ver_20121218/*.ttf ${fontdir}
         # Sazanami
         7z x -so ${srcroot}/sazanami-20040629.tar.bz2 | tar x - -C ${docdir}

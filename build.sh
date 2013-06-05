@@ -92,8 +92,6 @@ pkgsrc_tiff=tiff-4.0.3.tar.gz
 ## stage 4
 pkgsrc_flac=flac-1.2.1.tar.gz
 pkgsrc_ogg=libogg-1.3.1.tar.xz
-pkgsrc_sdl=SDL-1.2.15.tar.gz
-pkgsrc_sdlsound=SDL_sound-1.0.3.tar.gz
 pkgsrc_theora=libtheora-1.1.1.tar.bz2
 pkgsrc_vorbis=libvorbis-1.3.3.tar.gz
 ## stage 5
@@ -203,6 +201,13 @@ BuildDevel_ ()
                                             --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
         ;;
         python) # Python 2.7
+            ./configure ${configure_args}
+        ;;
+        SDL)
+            ./configure ${configure_args}
+        ;;
+        SDL_sound)
+            ./bootstrap
             ./configure ${configure_args}
         ;;
     esac
@@ -360,8 +365,8 @@ BuildStage4_ ()
     BuildDeps_  ${pkgsrc_vorbis}
     BuildDeps_  ${pkgsrc_flac} --disable-{asm-optimizations,xmms-plugin}
     ## SDL required nasm
-    BuildDeps_  ${pkgsrc_sdl}
-    BuildDeps_  ${pkgsrc_sdlsound}
+    BuildDevel_ SDL
+    BuildDevel_ SDL_sound
     ## libtheora required SDL
     BuildDeps_  ${pkgsrc_theora} --disable-{oggtest,vorbistest,examples,asm}
 } # end BuildStage4_
@@ -452,6 +457,7 @@ BuildWine_ ()
     mv ${inf}{,.orig}
     m4 ${proj_root}/scripts/inf.m4 | cat ${inf}.orig /dev/fd/3 3<&0 > ${inftmp}
     ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf} ${inftmp}
+    rm ${inftmp}
     
     # -------------------------------------- executables
     install -d ${wine_destroot}/libexec

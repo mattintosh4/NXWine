@@ -17,7 +17,8 @@ export PATH=${prefix}/libexec:${prefix}/bin:$(dirname ${prefix})/SharedSupport/b
 export LANG=${LANG:=ja_JP.UTF-8}
 
 # note: WINEPREFIX variable should be set for initializing.
-export WINEPREFIX="${WINEPREFIX:=${HOME}/.wine}"
+# ----> WINEPREFIX will not necessary when initializing because changed to Windows path. (2013-06-05)
+#export WINEPREFIX="${WINEPREFIX:=${HOME}/.wine}"
 
 # note: glu32.dll still needs Mesa libraries.
 export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib:/usr/X11/lib
@@ -32,8 +33,9 @@ CreateWineprefix_ ()
 {
     set -e
     ${wine} wineboot.exe --init
-    ${prefix}/share/nxwine/nativedlls/nativedlls.exe x -y -o"${WINEPREFIX}"/drive_c/windows
-    cat <<__REGEDIT4__ | WINEDEBUG= ${wine} regedit -
+    _WINEDEBUG="${WINEDEBUG}" WINEDEBUG=
+    ${wine} 7z.exe x -y -o'C:\windows' ${prefix}/share/nxwine/nativedlls/nativedlls.exe
+    cat <<__REGEDIT4__ | ${wine} regedit -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
 $(printf '"*D3DCompiler_%d"="native"\n' {37..43})
 "*XAPOFX1_1"="native"
@@ -50,7 +52,7 @@ $(printf '"*d3dx9_%d"="native"\n' {24..43})
 "*quartz"="native"
 __REGEDIT4__
     
-    WINEDEBUG= ${wine} regsvr32.exe \
+    ${wine} regsvr32.exe \
         hhctrl.ocx \
         l3codecx.ax \
 {\
@@ -61,13 +63,13 @@ dinput,\
 dplayx,\
 quartz}.dll
     
+    WINEDEBUG="${_WINEDEBUG}"
     set +e
 } # end CreateWineprefix_
 
+
 # ------------------------------------ begin standard run
-if [ ! -d "${WINEPREFIX}" ]; then
-    CreateWineprefix_
-fi
+if ! ${prefix}/bin/wineserver &>/dev/null ; then CreateWineprefix_ ; fi
 
 set -x
 exec ${wine} "$@"

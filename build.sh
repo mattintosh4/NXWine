@@ -371,7 +371,7 @@ BuildStage5_ ()
     # -------------------------------------- cabextract
     BuildDeps_ ${pkgsrc_cabextract}
     install -d ${wine_destroot}/share/doc/cabextract-1.4
-    cp ${workroot}/cabextract-1.4/{AUTHORS,ChangeLog,OPYING,NEWS,README,TODO} $_
+    cp ${workroot}/cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $_
     
     # -------------------------------------- winetricks
     InstallWinetricks_ ()

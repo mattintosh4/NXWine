@@ -88,7 +88,6 @@ pkgsrc_glib=glib-2.37.1.tar.xz
 ## stage 3
 pkgsrc_icns=libicns-0.8.1.tar.gz
 pkgsrc_jasper=jasper-1.900.1.tar.bz2
-pkgsrc_nasm=nasm-2.10.07.tar.xz
 pkgsrc_odbc=unixODBC-2.3.1.tar.gz
 pkgsrc_tiff=tiff-4.0.3.tar.gz
 ## stage 4
@@ -179,7 +178,7 @@ BuildDevel_ ()
             ./configure ${configure_args} --with-jpeg8
         ;;
         libpng)
-            git checkout -f libpng15
+            git checkout -f libpng16
             autoreconf -i
             ./configure ${configure_args}
         ;;
@@ -190,6 +189,17 @@ BuildDevel_ ()
         libxslt)
             git checkout -f master
             ./autogen.sh ${configure_args}
+        ;;
+        nasm)
+            git checkout -f master
+            ./autogen.sh
+            ./configure ${configure_args}
+            # without asciidoc and xmlto
+            make -i ${make_args}
+            make -i install
+            [ -x ${deps_destroot}/bin/nasm ]
+            [ -x ${deps_destroot}/bin/ndisasm ]
+            return
         ;;
         orc)
             git checkout -f master
@@ -351,7 +361,7 @@ BuildStage3_ ()
     BuildDevel_ freetype
     [ -f ${deps_destroot}/lib/libfreetype.6.dylib ] # freetype required libpng
 #    BuildDevel_ fontconfig
-    BuildDeps_  ${pkgsrc_nasm}
+    BuildDevel_ nasm
     BuildDevel_ libjpeg-turbo
     {
         cd ${deps_destroot}/share/doc
@@ -581,9 +591,9 @@ BuildDmg_ ()
 } # end BuildDmg_
 
 # -------------------------------------- begin processing section
-Bootstrap_
-BuildStage1_
-BuildStage2_
+#Bootstrap_
+#BuildStage1_
+#BuildStage2_
 BuildStage3_
 BuildStage4_
 BuildStage5_

@@ -591,9 +591,9 @@ BuildDmg_ ()
 } # end BuildDmg_
 
 # -------------------------------------- begin processing section
-#Bootstrap_
-#BuildStage1_
-#BuildStage2_
+Bootstrap_
+BuildStage1_
+BuildStage2_
 BuildStage3_
 BuildStage4_
 BuildStage5_

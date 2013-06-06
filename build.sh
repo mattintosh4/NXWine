@@ -498,14 +498,10 @@ XAPOFX1,\
 XAudio2,\
 d3dx9}_\*.dll
         done
+        
         # note: XAPOFX1_3.dll in Mar2009_XAudio_x86.cab is old
         7z x -y Aug2009_XAudio_x86.cab XAPOFX1_3.dll
         rm *.cab
-        
-        # hhctrl.ocx
-        7z x ${proj_root}/sources/nativedlls/htmlhelp.exe hhupd.exe
-        7z x hhupd.exe hhctrl.ocx
-        rm hhupd.exe
         
         7z a -sfx ${wine_destroot}/share/nxwine/nativedlls/nativedlls.exe ${D}
         

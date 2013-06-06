@@ -55,14 +55,12 @@ $(printf '"*d3dx9_%d"="native"\n' {24..43})
 "*dinput8"="native"
 "*dplayx"="native"
 "*gdiplus"="builtin,native"
-"*hhctrl.ocx"="native"
 "*l3codecx"="native"
 "*mciqtz32"="native"
 "*quartz"="native"
 __REGEDIT4__
     
     ${wine} regsvr32.exe \
-        hhctrl.ocx \
         l3codecx.ax \
 {\
 XAudio2_{0..7},\

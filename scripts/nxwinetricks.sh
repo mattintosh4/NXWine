@@ -50,7 +50,6 @@ case $1 in
     ;;
 esac
 
-cachedir=/Users/$(whoami)/Library/Caches/com.github.mattintosh4.NXWine/$1
 prefix=/Applications/NXWine.app/Contents/Resources
 wine=${prefix}/bin/wine
 sevenzip=${prefix}/share/nxwine/programs/7-Zip/7z.exe
@@ -132,6 +131,5 @@ function install_yumenikki {
 # ------------------------------------- begin processing
 PS4=
 set -x
-install -d ${cachedir}
-cd ${cachedir}
+install -d /Users/$(whoami)/Library/Caches/com.github.mattintosh4.NXWine/$1 && cd $_
 install_$1

@@ -257,19 +257,18 @@ Bootstrap_ ()
     else
         hdiutil create -type SPARSEBUNDLE -fs HFS+ -size 1g -volname ${proj_uuid} ${toolbundle}
         hdiutil attach ${toolbundle}
-        
+        trap "hdiutil detach ${toolprefix}; rm -rf ${toolbundle}" EXIT
         {
             tar xf ${srcroot}/${pkgsrc_p7zip} -C ${workroot}
             cd ${workroot}/p7zip_9.20.1
             sed "
-                s|^OPTFLAGS=-O|OPTFLAGS=-O2 -mtune=native|;
+                s|^OPTFLAGS=-O|OPTFLAGS=-O3 -mtune=native|;
                 s|^CXX=c++|CXX=${CXX}|;
                 s|^CC=cc|CC=${CC}|;
             " makefile.macosx_64bits > makefile.machine
             make ${make_args} all3
             make DEST_HOME=${toolprefix} install
         }
-        
         BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
         {
             cd ${toolprefix}/bin
@@ -284,6 +283,7 @@ Bootstrap_ ()
         }
         BuildDeps_  ${pkgsrc_autoconf}
         BuildDeps_  ${pkgsrc_automake}
+        trap EXIT
     fi
     trap "hdiutil detach ${toolprefix}" EXIT
     
@@ -504,8 +504,6 @@ d3dx9}_\*.dll
         rm *.cab
         
         7z a -sfx ${wine_destroot}/share/nxwine/nativedlls/nativedlls.exe ${D}
-        
-        cd -
     }
     InstallNativedlls_
     

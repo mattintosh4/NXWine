@@ -1,11 +1,27 @@
 #!/bin/sh -e
 #
-# NXWinetricks - Plugin installation support script
+# NXWine - No X11 Wine for Mac OS X
 #
 # Created by mattintosh4 on @DATE@.
 # Copyright (C) 2013 mattintosh4, https://github.com/mattintosh4/NXWine
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-LANG=${LANG:=ja_JP.UTF-8}
+export LANG=${LANG:=ja_JP.UTF-8}
+
+# note: suppress wine debug messages.
+export WINEDEBUG=
 
 usage="\
 Usage:
@@ -35,13 +51,13 @@ case $1 in
 esac
 
 cachedir=/Users/$(whoami)/Library/Caches/com.github.mattintosh4.NXWine/$1
-printf "package... $1\n"
+prefix=/Applications/NXWine.app/Contents/Resources
+wine=${prefix}/bin/wine
+sevenzip=${prefix}/share/nxwine/programs/7-Zip/7z.exe
 
-wine=/Applications/NXWine.app/Contents/Resources/bin/wine
+printf "package... $1\n"
 printf "checking wine... "
 [ -x "${wine}" ] && printf "${wine}\n" || { echo no; exit 1; }
-
-sevenzip=/Applications/NXWine.app/Contents/Resources/share/nxwine/programs/7-Zip/7z.exe
 printf "checking 7z.exe... "
 [ -f "${sevenzip}" ] && printf "${sevenzip}\n" || { echo no; exit 1; }
 
@@ -114,8 +130,6 @@ function install_yumenikki {
 }
 
 # ------------------------------------- begin processing
-# note: suppress wine debug messages.
-export WINEDEBUG=
 PS4=
 set -x
 install -d ${cachedir}

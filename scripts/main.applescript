@@ -1,7 +1,8 @@
 -- 
--- NXWine.app - No X11 Wine for OS X
--- 
--- Copyright (C) 2013 mattintosh4 <mattintosh4@gmx.com>
+-- NXWine - No X11 Wine for Mac OS X
+--
+-- Created by mattintosh4 on @DATE@.
+-- Copyright (C) 2013 mattintosh4, https://github.com/mattintosh4/NXWine
 -- 
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -17,19 +18,16 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -- 
 
-property wine : missing value
-property wineserver : missing value
-
-on NXWineGetPath_()
-    set prefix to quoted form of POSIX path of (path to resource "bin")
-    set wine to prefix & "wine" & space
-    set wineserver to prefix & "wineserver -p0;"
-end NXWineGetPath_
+property LAUNCHWINE : "
+    export WINEDEBUG=-all
+    if [ -d \"${WINEPREFIX:=$HOME/.wine}\" ]; then
+        /Applications/NXWine.app/Contents/Resources/bin/wineserver -p0
+    fi
+    /Applications/NXWine.app/Contents/Resources/bin/wine"
 
 on main(input)
-    NXWineGetPath_()
     try
-        do shell script "export WINEDEBUG=-all;" & wineserver & wine & input
+        do shell script LAUNCHWINE & space & input
     end try
 end main
 

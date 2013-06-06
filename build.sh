@@ -20,9 +20,11 @@ readonly deps_destroot=${destroot}/Contents/SharedSupport
 readonly ccache=/usr/local/bin/ccache
 readonly uconv=/usr/local/bin/uconv
 readonly git=/usr/local/git/bin/git
-test -x ${ccache}
-test -x ${uconv}
-test -x ${git}
+readonly hg=/usr/local/bin/hg
+[ -x ${ccache} ]
+[ -x ${uconv} ]
+[ -x ${git} ]
+[ -x ${hg} ]
 
 if [ -x ${FONTFORGE=/opt/local/bin/fontforge} ]; then export FONTFORGE; fi
 
@@ -199,7 +201,8 @@ BuildDevel_ ()
                                             --with-internal-glib \
                                             --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
         ;;
-        python) # Python 2.7
+        python)
+            ${hg} checkout -C -r 83726 # Python 2.7.5
             install -d build
             cd $_
             ../configure ${configure_args}

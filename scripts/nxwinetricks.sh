@@ -20,8 +20,8 @@
 #
 export LANG=${LANG:=ja_JP.UTF-8}
 
-# note: suppress wine debug messages.
-export WINEDEBUG=
+# note: suppress wine debug messages if WINEDEBUG does not set.
+if [ "${WINEDEBUG+set}" != set ]; then export WINEDEBUG=""; fi
 
 usage="\
 Usage:

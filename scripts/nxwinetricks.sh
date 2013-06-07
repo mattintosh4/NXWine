@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 export LANG=${LANG:=ja_JP.UTF-8}
+export LESS="-e"
 
 # note: suppress wine debug messages if WINEDEBUG does not set.
 if [ "${WINEDEBUG+set}" != set ]; then export WINEDEBUG=""; fi
@@ -66,7 +67,7 @@ PathExtract="${wine} 7z.exe x -y"
 notepad="${wine} notepad"
 winepath="${wine} winepath --unix"
 function ConvLess_ {
-    iconv -f CP932 -t UTF-8 "$@" | less -e
+    iconv -f CP932 -t UTF-8 "$@" | less
 }
 
 # ------------------------------------- plugins
@@ -109,7 +110,7 @@ function install_aooni {
     [ -f $f ] || curl -O 'http://mygames888.info/zip/aooni.zip'
     unzip -o $f
     ${PathExtract} -o'c:\Program Files\aooni' $(basename $f .zip).exe
-    less -e "$(${winepath} 'c:\Program Files\aooni\README.txt')"
+    less "$(${winepath} 'c:\Program Files\aooni\README.txt')"
 }
 function install_ib {
     f=Ib_1.05.zip

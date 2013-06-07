@@ -178,7 +178,7 @@ BuildDevel_ ()
             ./configure ${configure_args} --with-jpeg8
         ;;
         libpng)
-            git checkout -f libpng16
+            git checkout -f libpng15
             autoreconf -i
             ./configure ${configure_args}
         ;;
@@ -199,6 +199,7 @@ BuildDevel_ ()
             make -i install
             [ -x ${deps_destroot}/bin/nasm ]
             [ -x ${deps_destroot}/bin/ndisasm ]
+            DocCopy_ nasm
             return
         ;;
         orc)

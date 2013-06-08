@@ -84,17 +84,10 @@ pkgsrc_nettle=nettle-2.7.tar.gz
 pkgsrc_usb=libusb-1.0.9.tar.bz2
 pkgsrc_usbcompat=libusb-compat-0.1.4.tar.bz2
 ## stage 2
-pkgsrc_glib=glib-2.37.1.tar.xz
 ## stage 3
-pkgsrc_icns=libicns-0.8.1.tar.gz
 pkgsrc_jasper=jasper-1.900.1.tar.bz2
 pkgsrc_odbc=unixODBC-2.3.1.tar.gz
-pkgsrc_tiff=tiff-4.0.3.tar.gz
 ## stage 4
-pkgsrc_flac=flac-1.2.1.tar.gz
-pkgsrc_ogg=libogg-1.3.1.tar.xz
-pkgsrc_theora=libtheora-1.1.1.tar.bz2
-pkgsrc_vorbis=libvorbis-1.3.3.tar.gz
 ## stage 5
 pkgsrc_7z=7z920.exe
 pkgsrc_cabextract=cabextract-1.4.tar.gz
@@ -159,6 +152,10 @@ BuildDevel_ ()
                                             --sysconfdir=/System/Library \
                                             --with-add-fonts=/Library/Fonts,~/Library/Fonts
         ;;
+        flac)
+            ./autogen.sh
+            ./configure ${configure_args} --disable-{asm-optimizations,xmms-plugin}
+        ;;
         freetype)
             git checkout -f master
             ./autogen.sh
@@ -166,20 +163,34 @@ BuildDevel_ ()
         ;;
         glib)
             git checkout -f glib-2-36
-            ./autogen.sh ${configure_args} --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr} --with-threads=posix --without-{html-dir,xml-catalog}
+            ./autogen.sh ${configure_args}  --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr} \
+                                            --with-threads=posix \
+                                            --without-{html-dir,xml-catalog}
         ;;
         libffi)
             git checkout -f master
+            ./configure ${configure_args}
+        ;;
+        libicns)
+            autoreconf -i
             ./configure ${configure_args}
         ;;
         libjpeg-turbo)
             git checkout -f master
             autoreconf -i
             ./configure ${configure_args} --with-jpeg8
+            make ${make_args}
+            make install
+            install -d ${deps_destroot}/share/doc/libjpeg-turbo
+            mv -f ${deps_destroot}/share/doc/{{libjpeg,README-turbo,structure,usage,wizard}.txt,example.c,README} $_
+            return
         ;;
         libpng)
             git checkout -f libpng15
             autoreconf -i
+            ./configure ${configure_args}
+        ;;
+        libtiff)
             ./configure ${configure_args}
         ;;
         libxml2)
@@ -194,13 +205,16 @@ BuildDevel_ ()
             git checkout -f master
             ./autogen.sh
             ./configure ${configure_args}
-            # without asciidoc and xmlto
+            # note: without asciidoc and xmlto
             make -i ${make_args}
             make -i install
             [ -x ${deps_destroot}/bin/nasm ]
             [ -x ${deps_destroot}/bin/ndisasm ]
             DocCopy_ nasm
             return
+        ;;
+        ogg)
+            ./autogen.sh ${configure_args}
         ;;
         orc)
             git checkout -f master
@@ -212,22 +226,38 @@ BuildDevel_ ()
                                             --with-internal-glib \
                                             --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
         ;;
-        python)
-            ${hg} checkout -C -r 83726 # Python 2.7.5
+        python) # python 2.7
+            ${hg} checkout -C v2.7.5
             install -d build
             cd $_
             ../configure ${configure_args}
         ;;
-        SDL) # mercurial repository must be separated a build directory.
+        SDL)
+            # note: mercurial repository must be separated a build directory.
             install -d build
             cd $_
             ../configure ${configure_args}
+            make ${make_args}
+            make install
+            DocCopy_ SDL
+            # note: theora will not find sdl2.pc.
+            cd ${deps_destroot}/lib/pkgconfig
+            ln -s sdl{2,}.pc
+            cd -
+            return
         ;;
-        SDL_sound) # mercurial repository must be separated a build directory.
+        SDL_sound)
             ./bootstrap
+            # note: mercurial repository must be separated a build directory.
             install -d build
             cd $_
             ../configure ${configure_args}
+        ;;
+        theora)
+            ./autogen.sh ${configure_args} --disable-{oggtest,vorbistest,examples,asm}
+        ;;
+        vorbis)
+            ./autogen.sh ${configure_args}
         ;;
     esac
     make ${make_args}
@@ -359,32 +389,24 @@ BuildStage3_ ()
     BuildDevel_ orc
     BuildDeps_  ${pkgsrc_odbc}
     BuildDevel_ libpng
-    BuildDevel_ freetype
-    [ -f ${deps_destroot}/lib/libfreetype.6.dylib ] # freetype required libpng
+    BuildDevel_ freetype                # freetype required libpng
+    [ -f ${deps_destroot}/lib/libfreetype.6.dylib ]
 #    BuildDevel_ fontconfig
     BuildDevel_ nasm
     BuildDevel_ libjpeg-turbo
-    {
-        cd ${deps_destroot}/share/doc
-        install -d libjpeg-turbo
-        mv -f {libjpeg,README-turbo,structure,usage,wizard}.txt example.c README libjpeg-turbo
-        cd -
-    }
-    BuildDeps_  ${pkgsrc_tiff}
+    BuildDevel_ libtiff
     BuildDeps_  ${pkgsrc_jasper} --disable-opengl --without-x
-    BuildDeps_  ${pkgsrc_icns}
+    BuildDevel_ libicns
 } # end BuildStage3_
 
 BuildStage4_ ()
 {
-    BuildDeps_  ${pkgsrc_ogg}
-    BuildDeps_  ${pkgsrc_vorbis}
-    BuildDeps_  ${pkgsrc_flac} --disable-{asm-optimizations,xmms-plugin}
-    ## SDL required nasm
-    BuildDevel_ SDL
+    BuildDevel_ ogg
+    BuildDevel_ vorbis
+    BuildDevel_ flac
+    BuildDevel_ SDL                     # SDL required nasm
     BuildDevel_ SDL_sound
-    ## libtheora required SDL
-    BuildDeps_  ${pkgsrc_theora} --disable-{oggtest,vorbistest,examples,asm} ac_cv_path_SDL_CONFIG=sdl2-config
+    BuildDevel_ theora                  # libtheora required SDL
 } # end BuildStage4_
 
 BuildStage5_ ()
@@ -455,10 +477,10 @@ BuildWine_ ()
         local fontdir=${wine_destroot}/share/wine/fonts
         
         # Konatu
-        7z x -y -o${docdir} ${srcroot}/Konatu_ver_20121218.zip
+        7z x -y -o${docdir} ${srcroot}/fonts/Konatu_ver_20121218.zip
         mv ${docdir}/Konatu_ver_20121218/*.ttf ${fontdir}
         # Sazanami
-        7z x -so ${srcroot}/sazanami-20040629.tar.bz2 | tar x - -C ${docdir}
+        7z x -so ${srcroot}/fonts/sazanami-20040629.tar.bz2 | tar x - -C ${docdir}
         mv ${docdir}/sazanami-20040629/*.ttf ${fontdir}
         
         # remove duplicate fonts

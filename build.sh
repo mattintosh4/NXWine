@@ -93,7 +93,7 @@ DocCopy_ ()
     [ "$1" ]
     local D=${deps_destroot}/share/doc/$1
     install -d ${D}
-    find -E ${workroot}/$1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)' | while read
+    find -E ${workroot}/$1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?' | while read
     do
         cp "${REPLY}" ${D}
     done
@@ -354,7 +354,7 @@ Bootstrap_ ()
         ln -fhs share/man man
     )
     
-    # -------------------------------------- begin tools build    
+    # -------------------------------------- begin tools build
     if [ -e ${toolbundle} ]
     then
         hdiutil attach ${toolbundle}

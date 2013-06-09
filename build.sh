@@ -91,12 +91,13 @@ pkgsrc_cabextract=cabextract-1.4.tar.gz
 DocCopy_ ()
 {
     [ "$1" ]
-    local D=${deps_destroot}/share/doc/$1
-    install -d ${D}
-    find -E ${workroot}/$1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?' | while read
-    do
-        cp "${REPLY}" ${D}
-    done
+    set $1 ${deps_destroot}/share/doc/$1
+    install -d $2
+    find -E ${workroot}/$2 \
+        -maxdepth 1 \
+        -type f \
+        -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?' \
+        | xargs -J % cp % $2
 } # end DocCopy_
 
 # -------------------------------------- begin build processing functions

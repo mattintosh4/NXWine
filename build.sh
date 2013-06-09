@@ -32,7 +32,7 @@ if [ -x ${FONTFORGE=/opt/local/bin/fontforge} ]; then export FONTFORGE; fi
 set -a
 MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f-2)
 DEVELOPER_DIR=$(xcode-select -print-path)
-SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/^Path: /{;s/^Path: //;p;}')
+SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed '/^Path: /{;s///;q;};d')
 [ -n "${MACOSX_DEPLOYMENT_TARGET}" ]
 [ -d "${DEVELOPER_DIR}" ]
 [ -d "${SDKROOT}" ]
@@ -56,8 +56,9 @@ configure_args="\
 --enable-shared \
 --enable-static \
 --disable-debug \
---disable-maintainer-mode \
 --disable-dependency-tracking \
+--disable-documentation \
+--disable-maintainer-mode \
 --without-x"
 make_args="-j $(($(sysctl -n hw.ncpu) + 1))"
 
@@ -73,16 +74,10 @@ pkgsrc_p7zip=p7zip_9.20.1_src_all.tar.bz2
 pkgsrc_gettext=gettext-0.18.2.tar.gz
 pkgsrc_libelf=libelf-0.8.13.tar.gz
 pkgsrc_ncurses=ncurses-5.9.tar.gz
-pkgsrc_readline=readline-master.tar.gz
-pkgsrc_xz=xz-5.0.4.tar.bz2
-pkgsrc_zlib=zlib-1.2.8.tar.gz
 ## stage 1
 pkgsrc_gmp=gmp-5.1.2.tar.xz
 pkgsrc_gnutls=gnutls-3.1.8.tar.xz
 pkgsrc_libtasn1=libtasn1-3.3.tar.gz
-pkgsrc_nettle=nettle-2.7.tar.gz
-pkgsrc_usb=libusb-1.0.9.tar.bz2
-pkgsrc_usbcompat=libusb-compat-0.1.4.tar.bz2
 ## stage 2
 ## stage 3
 pkgsrc_jasper=jasper-1.900.1.tar.bz2
@@ -113,14 +108,26 @@ BuildDeps_ ()
     7z x -y -so ${srcroot}/${n} | tar x - -C ${workroot}
     cd ${workroot}/$(echo ${n} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##')
     case ${n} in
-        coreutils-*|\
-        m4-*|\
-        autoconf-*|\
-        automake-*)
-            ./configure ${configure_args/${deps_destroot}/${toolprefix}} "$@"
+        coreutils-*)
+            ./configure --prefix=${toolprefix} --build=${triple} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
+            make ${make_args}
+            make install
+            cd ${toolprefix}/bin
+            ln -s {g,}readlink
+            cd -
+            return
         ;;
-        zlib-*)
-            ./configure --prefix=${deps_destroot}
+        m4-*)
+            ./configure --prefix=${toolprefix} --build=${triple} --program-prefix=g
+            make ${make_args}
+            make install
+            cd ${toolprefix}/bin
+            ln -s {g,}m4
+            cd -
+            return
+        ;;
+        autoconf-*|automake-*)
+            ./configure --prefix=${toolprefix} --build=${triple}
         ;;
         cabextract-*)
             ./configure ${configure_args/${deps_destroot}/${wine_destroot}}
@@ -143,7 +150,7 @@ BuildDevel_ ()
         echo "Invalid argment or directory does not exist."
         exit 1
     fi
-    cp -RH ${srcroot}/$1 ${workroot}
+    cp -RHf ${srcroot}/$1 ${workroot}
     cd ${workroot}/$1
     case $1 in
         fontconfig)
@@ -193,6 +200,9 @@ BuildDevel_ ()
         libtiff)
             ./configure ${configure_args}
         ;;
+        libusb|libusb-compat-0.1)
+            ./autogen.sh ${configure_args}
+        ;;
         libxml2)
             git checkout -f master
             ./autogen.sh ${configure_args}
@@ -213,6 +223,11 @@ BuildDevel_ ()
             DocCopy_ nasm
             return
         ;;
+        nettle)
+            git checkout -f nettle-2.7-fixes
+            ./.bootstrap
+            ./configure ${configure_args}
+        ;;
         ogg)
             ./autogen.sh ${configure_args}
         ;;
@@ -231,6 +246,9 @@ BuildDevel_ ()
             install -d build
             cd $_
             ../configure ${configure_args}
+        ;;
+        readline)
+            ./configure ${configure_args} --with-curses --enable-multibyte
         ;;
         SDL)
             # note: mercurial repository must be separated a build directory.
@@ -259,11 +277,56 @@ BuildDevel_ ()
         vorbis)
             ./autogen.sh ${configure_args}
         ;;
+        xz)
+            ./autogen.sh
+            ./configure ${configure_args}
+        ;;
+        zlib)
+            git checkout -f master
+            ./configure --prefix=${deps_destroot}
+        ;;
     esac
     make ${make_args}
     make install
     DocCopy_ $1
 } # end BuildDevel_
+
+# ------------------------------------- separate build
+BuildGettext_ ()
+{
+    [ "$1" ]
+    set $1 ${pkgsrc_gettext%.tar.*} "$(echo \
+--disable-{csharp,native-java,openmp} \
+--without-{cvs,emacs,git} \
+--with-included-{gettext,glib,libcroro,libunistring,libxml})"
+    
+    tar xf ${srcroot}/${pkgsrc_gettext} -C ${workroot}
+    install -d ${workroot}/$2/build_$1
+    cd $_
+    case $1 in
+        host)
+            ../configure --prefix=${toolprefix} --build=${triple} $3
+        ;;
+        target)
+            ../configure ${configure_args} $3
+        ;;
+    esac
+    make ${make_args}
+    make install
+}
+
+BuildSevenzip_ ()
+{
+    tar xf ${srcroot}/${pkgsrc_p7zip} -C ${workroot}
+    cd ${workroot}/p7zip_9.20.1
+    sed "
+        s|^OPTFLAGS=-O|OPTFLAGS=-O3 -mtune=native|;
+        s|^CXX=c++|CXX=${CXX}|;
+        s|^CC=cc|CC=${CC}|;
+    " makefile.macosx_64bits > makefile.machine
+    make ${make_args} all3
+    make DEST_HOME=${toolprefix} install
+}
 
 Bootstrap_ ()
 {
@@ -291,7 +354,7 @@ Bootstrap_ ()
         ln -fhs share/man man
     )
     
-    # -------------------------------------- begin tools build
+    # -------------------------------------- begin tools build    
     if [ -e ${toolbundle} ]
     then
         hdiutil attach ${toolbundle}
@@ -299,29 +362,10 @@ Bootstrap_ ()
         hdiutil create -type SPARSEBUNDLE -fs HFS+ -size 1g -volname ${proj_uuid} ${toolbundle}
         hdiutil attach ${toolbundle}
         trap "hdiutil detach ${toolprefix}; rm -rf ${toolbundle}" EXIT
-        {
-            tar xf ${srcroot}/${pkgsrc_p7zip} -C ${workroot}
-            cd ${workroot}/p7zip_9.20.1
-            sed "
-                s|^OPTFLAGS=-O|OPTFLAGS=-O3 -mtune=native|;
-                s|^CXX=c++|CXX=${CXX}|;
-                s|^CC=cc|CC=${CC}|;
-            " makefile.macosx_64bits > makefile.machine
-            make ${make_args} all3
-            make DEST_HOME=${toolprefix} install
-        }
-        BuildDeps_  ${pkgsrc_coreutils} --program-prefix=g --enable-threads=posix --disable-nls --without-gmp
-        {
-            cd ${toolprefix}/bin
-            ln -s {g,}readlink
-            cd -
-        }
-        BuildDeps_  ${pkgsrc_m4} --program-prefix=g
-        {
-            cd ${toolprefix}/bin
-            ln -s {g,}m4
-            cd -
-        }
+        BuildGettext_ host
+        BuildSevenzip_
+        BuildDeps_  ${pkgsrc_coreutils}
+        BuildDeps_  ${pkgsrc_m4}
         BuildDeps_  ${pkgsrc_autoconf}
         BuildDeps_  ${pkgsrc_automake}
         trap EXIT
@@ -329,13 +373,8 @@ Bootstrap_ ()
     trap "hdiutil detach ${toolprefix}" EXIT
     
     # --------------------------------- begin build
-    BuildGettext_ ()
-    {
-        BuildDeps_ ${pkgsrc_gettext}    --disable-{csharp,native-java,openmp} \
-                                        --without-{emacs,git,cvs} \
-                                        --with-included-{gettext,glib,libcroro,libunistring,libxml}
-    }
-    BuildGettext_
+    BuildGettext_ target
+    BuildDeps_  ${pkgsrc_libelf}
     BuildDeps_  ${pkgsrc_libtool} --program-prefix=g
     {
         cd ${deps_destroot}/bin
@@ -348,11 +387,10 @@ Bootstrap_ ()
                                     --disable-mixed-case \
                                     --with-shared \
                                     --without-{ada,debug,manpages,tests}
-    BuildDeps_  ${pkgsrc_readline} --with-curses --enable-multibyte
-    BuildDeps_  ${pkgsrc_zlib}
-    BuildGettext_
+    BuildDevel_ readline
+    BuildDevel_ zlib
     BuildDeps_  ${pkgsrc_libelf} --disable-compat
-    BuildDeps_  ${pkgsrc_xz}
+    BuildDevel_ xz
     BuildDevel_ python
     BuildDevel_ libxml2
     BuildDevel_ libxslt
@@ -371,11 +409,11 @@ BuildStage1_ ()
         make check
         make install
     }
-    BuildDeps_  ${pkgsrc_libtasn1}
-    BuildDeps_  ${pkgsrc_nettle}
+    BuildDeps_  ${pkgsrc_libtasn1} --disable-gtk-doc{,-{html,pdf}}
+    BuildDevel_ nettle
     BuildDeps_  ${pkgsrc_gnutls} --disable-guile --without-p11-kit
-    BuildDeps_  ${pkgsrc_usb}
-    BuildDeps_  ${pkgsrc_usbcompat}
+    BuildDevel_ libusb
+    BuildDevel_ libusb-compat-0.1
 } # end BuildStage1_
 
 BuildStage2_ ()
@@ -423,12 +461,13 @@ BuildStage5_ ()
         local docdir=${wine_destroot}/share/doc/winetricks
         local libexecdir=${wine_destroot}/libexec
         
-        install -d ${bindir}
-        install -m 0755 ${proj_root}/scripts/winetricksloader.sh ${bindir}/winetricks
         install -d ${libexecdir}
         install -m 0755 ${srcroot}/winetricks/src/winetricks ${libexecdir}
         install -d ${docdir}
         install -m 0644 ${srcroot}/winetricks/src/COPYING ${docdir}
+        # nxwinetricks
+        install -d ${bindir}
+        install -m 0755 ${proj_root}/scripts/winetricksloader.sh ${bindir}/winetricks
     } # end InstallWinetricks_
     InstallWinetricks_
     
@@ -438,8 +477,9 @@ BuildStage5_ ()
 
 BuildWine_ ()
 {
-    install -d ${workroot}/wine
-    cd $_
+    set ${workroot}/wine
+    install -d $1
+    cd $1
     export PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig:/opt/X11/share/pkgconfig
     ${srcroot}/wine/configure   --prefix=${wine_destroot} \
                                 --build=${triple} \
@@ -449,58 +489,59 @@ BuildWine_ ()
                                 LDFLAGS="${LDFLAGS} -L/opt/X11/lib"
     make ${make_args}
     make install
+} # end BuildWine_
+
+BuildStage6_ ()
+{
+    local bindir=${wine_destroot}/bin
+    local libdir=${wine_destroot}/lib
+    local datadir=${wine_destroot}/share
+    local docdir=${wine_destroot}/share/doc
     
-#    wine_version=$(GIT_DIR=${srcroot}/wine/.git git describe HEAD 2>/dev/null || echo "wine-$(cat ${srcroot}/wine/VERSION | cut -d' ' -f3)")
-    wine_version=$(${wine_destroot}/bin/wine --version)
-    [ "${wine_version}" ]
-    
-    ### remove unnecessary files ###
-    rm -r ${wine_destroot}/share/applications
-    find ${wine_destroot}/lib -maxdepth 1 -name "*.a" -o -name "*.la" | xargs rm
-    
-    ### install name ###
-    install_name_tool -add_rpath /usr/lib ${wine_destroot}/bin/wine
-    install_name_tool -add_rpath /usr/lib ${wine_destroot}/bin/wineserver
-    install_name_tool -add_rpath /usr/lib ${wine_destroot}/lib/libwine.1.0.dylib
-    
-    ### mono and gecko ###
-    ditto {${srcroot},${wine_destroot}/share/wine/mono}/wine-mono-0.0.8.msi
-    ditto {${srcroot},${wine_destroot}/share/wine/gecko}/wine_gecko-2.21-x86.msi
-    
-    ### docs ###
-    install -d ${wine_destroot}/share/doc/wine
+    # install name
+    install_name_tool -add_rpath /usr/lib ${bindir}/wine
+    install_name_tool -add_rpath /usr/lib ${bindir}/wineserver
+    install_name_tool -add_rpath /usr/lib ${libdir}/libwine.1.0.dylib
+    # gecko
+    install -d ${datadir}/wine/gecko
+    cp ${srcroot}/wine_gecko-2.21-x86.msi $_
+    # mono
+    install -d ${datadir}/wine/mono
+    cp ${srcroot}/wine-mono-0.0.8.msi $_
+    # docs
+    install -d ${docdir}/wine
     cp ${srcroot}/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $_
     
+    # -------------------------------------- fonts
     InstallFonts_ ()
     {
-        local docdir=${wine_destroot}/share/doc
-        local fontdir=${wine_destroot}/share/wine/fonts
-        
-        # Konatu
-        7z x -y -o${docdir} ${srcroot}/fonts/Konatu_ver_20121218.zip
-        mv ${docdir}/Konatu_ver_20121218/*.ttf ${fontdir}
-        # Sazanami
-        7z x -so ${srcroot}/fonts/sazanami-20040629.tar.bz2 | tar x - -C ${docdir}
-        mv ${docdir}/sazanami-20040629/*.ttf ${fontdir}
+        set ${datadir}/wine/fonts
         
         # remove duplicate fonts
-        rm ${fontdir}/{symbol,tahoma,tahomabd,wingding}.ttf
-        
-    } # end InstallJPFonts_
+        rm ${1:?}/{symbol,tahoma,tahomabd,wingding}.ttf
+        # Konatu
+        7z x -y -o${docdir} ${srcroot}/fonts/Konatu_ver_20121218.zip
+        mv ${docdir}/Konatu_ver_20121218/*.ttf $1
+        # Sazanami
+        7z x -so ${srcroot}/fonts/sazanami-20040629.tar.bz2 | tar x - -C ${docdir}
+        mv ${docdir}/sazanami-20040629/*.ttf $1
+    }
     InstallFonts_
     
-    ### inf ###
-    local inf=${wine_destroot}/share/wine/wine.inf
-    local inftmp=$(mktemp -t XXXXXX)
-    mv ${inf}{,.orig}
-    m4 ${proj_root}/scripts/inf.m4 | cat ${inf}.orig /dev/fd/3 3<&0 > ${inftmp}
-    ${uconv} -f UTF-8 -t UTF-8 --add-signature -o ${inf} ${inftmp}
-    rm ${inftmp}
+    # -------------------------------------- inf
+    ModifyInf_ ()
+    {
+        set /tmp/$$$LINENO.\$\$
+        
+        m4 ${proj_root}/scripts/inf.m4 >> ${datadir}/wine/wine.inf
+        ${uconv} -f UTF-8 -t UTF-8 --add-signature -o $1 ${datadir}/wine/wine.inf
+        mv -f $1 ${datadir}/wine/wine.inf
+    }
+    ModifyInf_
     
     # -------------------------------------- executables
     install -d ${wine_destroot}/libexec
     mv ${wine_destroot}/{bin,libexec}/wine
-    
     install -m 0755 ${proj_root}/scripts/wineloader.sh ${wine_destroot}/bin/wine
     install -m 0755 ${proj_root}/scripts/nxwinetricks.sh ${wine_destroot}/bin/nxwinetricks
     sed -i "" "s|@DATE@|$(date +%F)|g" ${wine_destroot}/bin/{wine,nxwinetricks}
@@ -508,9 +549,9 @@ BuildWine_ ()
     # ------------------------------------- native dlls
     InstallNativedlls_ ()
     {
-        local D=${workroot}/system32
-        install -d ${D}
-        cd ${D}
+        set ${workroot}/system32
+        install -d $1
+        cd $1
         install -m 0644 ${srcroot}/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
         7z x ${srcroot}/nativedlls/directx_feb2010_redist.exe dxnt.cab
         7z x dxnt.cab l3codecx.ax {\
@@ -536,11 +577,13 @@ d3dx9}_\*.dll
         7z x -y Aug2009_XAudio_x86.cab XAPOFX1_3.dll
         rm *.cab
         
-        7z a -sfx ${wine_destroot}/share/nxwine/nativedlls/nativedlls.exe ${D}
+        7z a -sfx ${datadir}/nxwine/nativedlls/nativedlls.exe $1
     }
     InstallNativedlls_
     
     # ------------------------------------- plist
+    wine_version=$(GIT_DIR=${srcroot}/wine/.git git describe HEAD 2>/dev/null)
+    [ "${wine_version}" ]
     iconfile=droplet
     
     while read
@@ -589,28 +632,28 @@ __EOS1__
     done
 )
 __EOS__
-
-} # end BuildWine_
+    
+    # faenza icon theme
+    7z x -o${docdir}/faenza-icon-theme_1.3 ${srcroot}/faenza-icon-theme_1.3.zip AUTHORS ChangeLog COPYING README
+    
+    install -d ${docdir}/nxwine
+    install -m 0644 ${proj_root}/COPYING $_
+    
+    # remove unnecessary files
+    rm -rf  ${libdir:?}/*.{a,la} \
+            ${datadir:?}/applications
+} # end BuildStage6_
 
 BuildDmg_ ()
 {
-    local dmg=${proj_root}/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
-    local srcdir=$(mktemp -dt XXXXXX)
-    
-    unzip -o -d ${wine_destroot}/share/doc/Faenza ${srcroot}/faenza-icon-theme_1.3.zip AUTHORS ChangeLog COPYING README
-    
-    install -d ${wine_destroot}/share/doc/nxwine
-    install -m 0644 ${proj_root}/COPYING $_
-    
-    install -d ${srcdir}/.resources
+    set /tmp/$$$LINENO.\$\$ ${proj_root}/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
+    install -d $1/.resources
     mv ${destroot} $_
-
-    osacompile -xo ${srcdir}/"NXWine Installer".app ${proj_root}/scripts/installer.applescript
-    install -m 0644 ${proj_root}/nxwine.icns ${srcdir}/"NXWine Installer".app/Contents/Resources/applet.icns
-    
-    [ ! -f ${dmg} ] || rm ${dmg}
-    hdiutil create -format UDBZ -srcdir ${srcdir} -volname ${proj_name} ${dmg}
-    rm -rf ${srcdir}
+    osacompile -xo $1/"NXWine Installer".app ${proj_root}/scripts/installer.applescript
+    install -m 0644 ${proj_root}/nxwine.icns $1/"NXWine Installer".app/Contents/Resources/applet.icns
+    [ ! -f $2 ] || rm $2
+    hdiutil create -format UDBZ -srcdir $1 -volname ${proj_name} $2
+    rm -rf $1
 } # end BuildDmg_
 
 # -------------------------------------- begin processing section
@@ -621,6 +664,7 @@ BuildStage3_
 BuildStage4_
 BuildStage5_
 BuildWine_
+BuildStage6_
 BuildDmg_
 
 # -------------------------------------- end processing section

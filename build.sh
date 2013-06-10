@@ -65,6 +65,9 @@ configure_args="\
 --without-x"
 make_args="-j $(($(sysctl -n hw.ncpu) + 1))"
 
+readonly wine_version=$(GIT_DIR=${srcroot}/wine/.git git describe HEAD 2>/dev/null)
+: ${wine_version:?}
+
 # -------------------------------------- package source
 ## buildtools
 pkgsrc_autoconf=autoconf-2.69.tar.gz
@@ -132,6 +135,16 @@ BuildDeps_ ()
         autoconf-*|automake-*)
             ./configure --prefix=${toolprefix} --build=${triple}
         ;;
+        libtool-*)
+            ./configure ${configure_args} --program-prefix=g
+            make ${make_args}
+            make install
+            cd ${deps_destroot}/bin
+            ln -s {g,}libtool
+            ln -s {g,}libtoolize
+            cd -
+            return
+        ;;
         cabextract-*)
             ./configure ${configure_args/${deps_destroot}/${wine_destroot}}
         ;;
@@ -145,15 +158,7 @@ BuildDeps_ ()
 
 BuildDevel_ ()
 {
-    if
-        [ "$1" ] &&
-        [ -d ${srcroot}/$1 ]
-    then :
-    else
-        echo "Invalid argment or directory does not exist."
-        exit 1
-    fi
-    cp -RHf ${srcroot}/$1 ${workroot}
+    cp -RHf ${srcroot}/${1:?} ${workroot}
     cd ${workroot}/$1
     case $1 in
         fontconfig)
@@ -315,7 +320,7 @@ BuildGettext_ ()
     esac
     make ${make_args}
     make install
-}
+} # end BuildGettext_
 
 BuildSevenzip_ ()
 {
@@ -328,16 +333,30 @@ BuildSevenzip_ ()
     " makefile.macosx_64bits > makefile.machine
     make ${make_args} all3
     make DEST_HOME=${toolprefix} install
-}
+} # end BuildSevenzip_
 
+BuildGmp_ ()
+{
+    7z x -so ${srcroot}/${pkgsrc_gmp} | tar x - -C ${workroot}
+    cd ${workroot}/${pkgsrc_gmp%.tar.*}
+    CC=$( xcrun -find gcc-4.2) \
+    CXX=$(xcrun -find g++-4.2) \
+    ABI=32 \
+    ./configure --prefix=${deps_destroot} --build=${triple} --enable-cxx
+    make ${make_args}
+    make check
+    make install
+} # end BuildGmp_
+
+# -------------------------------------
 Bootstrap_ ()
 {
     # -------------------------------------- begin preparing
     ### source check ###
     for x in ${!pkgsrc_*}
     do
-        echo -n "checking ${!x} ... "
-        [ -f ${srcroot}/${!x} ] && echo "yes" || { echo "no"; exit 1; }
+        printf "checking ${!x} ... "
+        [ -f ${srcroot}/${!x} ] && printf "yes\n" || { printf "no\n"; exit 1; }
     done
     
     ### clean up ###
@@ -377,13 +396,7 @@ Bootstrap_ ()
     # --------------------------------- begin build
     BuildGettext_ target
     BuildDeps_  ${pkgsrc_libelf}
-    BuildDeps_  ${pkgsrc_libtool} --program-prefix=g
-    {
-        cd ${deps_destroot}/bin
-        ln -s {g,}libtool
-        ln -s {g,}libtoolize
-        cd -
-    }
+    BuildDeps_  ${pkgsrc_libtool}
     BuildDevel_ pkg-config
     BuildDeps_  ${pkgsrc_ncurses}   --enable-{pc-files,sigwinch} \
                                     --disable-mixed-case \
@@ -400,17 +413,7 @@ Bootstrap_ ()
 
 BuildStage1_ ()
 {
-    {
-        7z x -so ${srcroot}/${pkgsrc_gmp} | tar x - -C ${workroot}
-        cd ${workroot}/${pkgsrc_gmp%.tar.*}
-        CC=$( xcrun -find gcc-4.2) \
-        CXX=$(xcrun -find g++-4.2) \
-        ABI=32 \
-        ./configure --prefix=${deps_destroot} --build=${triple} --enable-cxx
-        make ${make_args}
-        make check
-        make install
-    }
+    BuildGmp_
     BuildDeps_  ${pkgsrc_libtasn1} --disable-gtk-doc{,-{html,pdf}}
     BuildDevel_ nettle
     BuildDeps_  ${pkgsrc_gnutls} --disable-guile --without-p11-kit
@@ -585,55 +588,36 @@ d3dx9}_\*.dll
     InstallNativedlls_
     
     # ------------------------------------- plist
-    wine_version=$(GIT_DIR=${srcroot}/wine/.git git describe HEAD 2>/dev/null)
-    : ${wine_version:?}
-    iconfile=droplet
-    
-    while read
-    do
-        /usr/libexec/PlistBuddy -c "${REPLY}" ${destroot}/Contents/Info.plist
-    done <<__EOS__
-Set :CFBundleIconFile ${iconfile}
-Add :NSHumanReadableCopyright string ${wine_version}, Copyright © 2013 mattintosh4, https://github.com/mattintosh4/NXWine
-Add :CFBundleVersion string ${proj_version}
-Add :CFBundleIdentifier string ${proj_domain}
-Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions array
-Add :CFBundleDocumentTypes:1:CFBundleTypeExtensions:0 string exe
-Add :CFBundleDocumentTypes:1:CFBundleTypeIconFile string ${iconfile}
-Add :CFBundleDocumentTypes:1:CFBundleTypeName string Windows Executable File
-Add :CFBundleDocumentTypes:1:CFBundleTypeRole string Viewer
-Add :CFBundleDocumentTypes:2:CFBundleTypeExtensions array
-Add :CFBundleDocumentTypes:2:CFBundleTypeExtensions:0 string msi
-Add :CFBundleDocumentTypes:2:CFBundleTypeIconFile string ${iconfile}
-Add :CFBundleDocumentTypes:2:CFBundleTypeName string Microsoft Windows Installer
-Add :CFBundleDocumentTypes:2:CFBundleTypeRole string Viewer
-Add :CFBundleDocumentTypes:3:CFBundleTypeExtensions array
-Add :CFBundleDocumentTypes:3:CFBundleTypeExtensions:0 string lnk
-Add :CFBundleDocumentTypes:3:CFBundleTypeIconFile string ${iconfile}
-Add :CFBundleDocumentTypes:3:CFBundleTypeName string Windows Shortcut File
-Add :CFBundleDocumentTypes:3:CFBundleTypeRole string Viewer
-$(
-    i=4
-    for x in \
-        7z \
-        cab \
-        lha \
-        lzh \
-        lzma \
-        rar \
-        xz \
-        zip
-    do
-        cat <<__EOS1__
-Add :CFBundleDocumentTypes:${i}:CFBundleTypeExtensions array
-Add :CFBundleDocumentTypes:${i}:CFBundleTypeExtensions:0 string ${x}
-Add :CFBundleDocumentTypes:${i}:CFBundleTypeIconFile string ${iconfile}
-Add :CFBundleDocumentTypes:${i}:CFBundleTypeName string ${x} Archive
-Add :CFBundleDocumentTypes:${i}:CFBundleTypeRole string Viewer
-__EOS1__
-        ((i++))
-    done
-)
+    m4  -D _PLIST=${destroot}/Contents/Info.plist \
+        -D _WINE_VERSION=${wine_version} \
+        -D _PROJ_VERSION=${proj_version} \
+        -D _PROJ_DOMAIN=${proj_domain} \
+<<'__EOS__' | sh -x
+changequote([, ])dnl
+define([_PB], [/usr/libexec/PlistBuddy -c "$1" _PLIST])dnl
+define([_DT], [dnl
+_PB(Add :CFBundleDocumentTypes:$1:CFBundleTypeExtensions array)
+_PB(Add :CFBundleDocumentTypes:$1:CFBundleTypeExtensions:0 string $2)
+_PB(Add :CFBundleDocumentTypes:$1:CFBundleTypeIconFile string droplet)
+_PB(Add :CFBundleDocumentTypes:$1:CFBundleTypeName string $3)
+_PB(Add :CFBundleDocumentTypes:$1:CFBundleTypeRole string Viewer)])dnl
+dnl
+dnl
+_PB([Set :CFBundleIconFile droplet])
+_PB([Add :NSHumanReadableCopyright string _WINE_VERSION, Copyright © 2013 mattintosh4, https://github.com/mattintosh4/NXWine])
+_PB([Add :CFBundleVersion string _PROJ_VERSION])
+_PB([Add :CFBundleIdentifier string _PROJ_DOMAIN])
+_DT(1,  exe,    Windows Executable File)
+_DT(2,  msi,    Microsoft Windows Installer)
+_DT(3,  lnk,    Windows Shortcut File)
+_DT(4,  7z,     7z Archive)
+_DT(5,  cab,    cab Archive)
+_DT(6,  lha,    lha Archive)
+_DT(7,  lzh,    lzh Archive)
+_DT(8,  lzma,   lzma Archive)
+_DT(9,  rar,    rar Archive)
+_DT(10, xz,     xz Archive)
+_DT(11, zip,    zip Archive)
 __EOS__
     
     # faenza icon theme

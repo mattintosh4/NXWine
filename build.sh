@@ -93,9 +93,10 @@ pkgsrc_cabextract=cabextract-1.4.tar.gz
 # -------------------------------------- begin utilities functions
 DocCopy_ ()
 {
-    set ${1:?} ${deps_destroot}/share/doc/${1:?}
+    set ${1:?} ${deps_destroot}/share/doc/$1
+    
     install -d $2
-    find -E ${workroot}/$2 \
+    find -E ${workroot}/$1 \
         -maxdepth 1 \
         -type f \
         -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?' \

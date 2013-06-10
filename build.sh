@@ -479,6 +479,7 @@ BuildStage5_ ()
 BuildWine_ ()
 {
     set ${workroot}/wine
+    
     install -d $1
     cd $1
     export PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig:/opt/X11/share/pkgconfig

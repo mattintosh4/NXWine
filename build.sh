@@ -1,5 +1,8 @@
-#!/usr/bin/env - LC_ALL=C SHELL=/bin/bash TERM=xterm-color HOME=/tmp /bin/bash -ex
+#!/usr/bin/env - LC_ALL=C SHELL=/bin/bash TERM=xterm-color /bin/bash -eux
 PS4='\[\e[31m\]+\[\e[m\] '
+
+export TMPDIR=$(getconf DARWIN_USER_TEMP_DIR)
+export HOME=${TMPDIR:?}
 
 readonly proj_name=NXWine
 readonly proj_uuid=E43FF9C9-669C-4319-8351-FF99AFF3230C
@@ -11,7 +14,7 @@ readonly toolbundle=${proj_root}/tool.sparsebundle
 readonly toolprefix=/Volumes/${proj_uuid}
 
 readonly srcroot=${proj_root}/sources
-readonly workroot=/tmp/${proj_uuid}
+readonly workroot=$TMPDIR/${proj_uuid}
 readonly destroot=/Applications/${proj_name}.app
 readonly wine_destroot=${destroot}/Contents/Resources
 readonly deps_destroot=${destroot}/Contents/SharedSupport
@@ -37,7 +40,7 @@ SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/
 [ -d "${DEVELOPER_DIR}" ]
 [ -d "${SDKROOT}" ]
 
-PATH=$(/usr/sbin/sysctl -n user.cs_path)
+PATH=$(getconf PATH)
 PATH=$(dirname ${git}):$PATH
 PATH=${deps_destroot}/bin:${toolprefix}/bin:$PATH
 CC="${ccache} $( xcrun -find i686-apple-darwin10-gcc-4.2.1)"
@@ -90,8 +93,7 @@ pkgsrc_cabextract=cabextract-1.4.tar.gz
 # -------------------------------------- begin utilities functions
 DocCopy_ ()
 {
-    [ "$1" ]
-    set $1 ${deps_destroot}/share/doc/$1
+    set ${1:?} ${deps_destroot}/share/doc/${1:?}
     install -d $2
     find -E ${workroot}/$2 \
         -maxdepth 1 \
@@ -103,8 +105,7 @@ DocCopy_ ()
 # -------------------------------------- begin build processing functions
 BuildDeps_ ()
 {
-    [ "$1" ] || { echo "Invalid argment."; exit 1; }
-    local n=$1
+    local n=${1:?}
     shift
     7z x -y -so ${srcroot}/${n} | tar x - -C ${workroot}
     cd ${workroot}/$(echo ${n} | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##')
@@ -162,7 +163,7 @@ BuildDevel_ ()
         ;;
         flac)
             ./autogen.sh
-            ./configure ${configure_args} --disable-{asm-optimizations,xmms-plugin}
+            ./configure ${configure_args}   --disable-{asm-optimizations,xmms-plugin}
         ;;
         freetype)
             git checkout -f master
@@ -531,7 +532,7 @@ BuildStage6_ ()
     # -------------------------------------- inf
     ModifyInf_ ()
     {
-        set /tmp/$$$LINENO.\$\$
+        set $TMPDIR/$$$LINENO.\$\$
         
         m4 ${proj_root}/scripts/inf.m4 >> ${datadir}/wine/wine.inf
         ${uconv} -f UTF-8 -t UTF-8 --add-signature -o $1 ${datadir}/wine/wine.inf
@@ -646,7 +647,7 @@ __EOS__
 
 BuildDmg_ ()
 {
-    set /tmp/$$$LINENO.\$\$ ${proj_root}/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
+    set $TMPDIR/$$$LINENO.\$\$ ${proj_root}/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
     
     install -d $1/.resources
     mv ${destroot} $_

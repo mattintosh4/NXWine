@@ -32,7 +32,7 @@ if [ -x ${FONTFORGE=/opt/local/bin/fontforge} ]; then export FONTFORGE; fi
 set -a
 MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f-2)
 DEVELOPER_DIR=$(xcode-select -print-path)
-SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed '/^Path: /{;s///;q;};d')
+SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/^Path: /s///p')
 [ -n "${MACOSX_DEPLOYMENT_TARGET}" ]
 [ -d "${DEVELOPER_DIR}" ]
 [ -d "${SDKROOT}" ]
@@ -295,8 +295,7 @@ BuildDevel_ ()
 # ------------------------------------- separate build
 BuildGettext_ ()
 {
-    [ "$1" ]
-    set $1 ${pkgsrc_gettext%.tar.*} "$(echo \
+    set ${1:?} ${pkgsrc_gettext%.tar.*} "$(echo \
 --disable-{csharp,native-java,openmp} \
 --without-{cvs,emacs,git} \
 --with-included-{gettext,glib,libcroro,libunistring,libxml})"
@@ -321,9 +320,9 @@ BuildSevenzip_ ()
     tar xf ${srcroot}/${pkgsrc_p7zip} -C ${workroot}
     cd ${workroot}/p7zip_9.20.1
     sed "
-        s|^OPTFLAGS=-O|OPTFLAGS=-O3 -mtune=native|;
-        s|^CXX=c++|CXX=${CXX}|;
-        s|^CC=cc|CC=${CC}|;
+        s#^OPTFLAGS=-O#OPTFLAGS=-O3 -mtune=native#
+        s#^CXX=c++#CXX=${CXX}#
+        s#^CC=cc#CC=${CC}#
     " makefile.macosx_64bits > makefile.machine
     make ${make_args} all3
     make DEST_HOME=${toolprefix} install
@@ -584,7 +583,7 @@ d3dx9}_\*.dll
     
     # ------------------------------------- plist
     wine_version=$(GIT_DIR=${srcroot}/wine/.git git describe HEAD 2>/dev/null)
-    [ "${wine_version}" ]
+    : ${wine_version:?}
     iconfile=droplet
     
     while read
@@ -648,6 +647,7 @@ __EOS__
 BuildDmg_ ()
 {
     set /tmp/$$$LINENO.\$\$ ${proj_root}/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
+    
     install -d $1/.resources
     mv ${destroot} $_
     osacompile -xo $1/"NXWine Installer".app ${proj_root}/scripts/installer.applescript

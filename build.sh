@@ -1,4 +1,4 @@
-#!/usr/bin/env - LC_ALL=C SHELL=/bin/bash TERM=xterm-color /bin/bash -eux
+#!/usr/bin/env - LC_ALL=C SHELL=/bin/bash TERM=xterm-color COMMAND_MODE=unix2003 /bin/bash -eux
 PS4='\[\e[31m\]+\[\e[m\] '
 
 export TMPDIR=$(getconf DARWIN_USER_TEMP_DIR)
@@ -53,9 +53,9 @@ ACLOCAL_PATH=${deps_destroot}/share/aclocal
 set +a
 
 triple=i686-apple-darwin$(uname -r)
+configure_default_args="--prefix=${deps_destroot} --build=${triple}"
 configure_args="\
---prefix=${deps_destroot} \
---build=${triple} \
+${configure_default_args} \
 --enable-shared \
 --enable-static \
 --disable-debug \
@@ -64,6 +64,7 @@ configure_args="\
 --disable-maintainer-mode \
 --without-x"
 make_args="-j $(($(sysctl -n hw.ncpu) + 1))"
+autoreconf_args="--force --install --no-recursive --verbose"
 
 readonly wine_version=$(GIT_DIR=${srcroot}/wine/.git git describe HEAD 2>/dev/null)
 : ${wine_version:?}
@@ -73,17 +74,14 @@ readonly wine_version=$(GIT_DIR=${srcroot}/wine/.git git describe HEAD 2>/dev/nu
 pkgsrc_autoconf=autoconf-2.69.tar.gz
 pkgsrc_automake=automake-1.13.2.tar.gz
 pkgsrc_coreutils=coreutils-8.21.tar.bz2
+pkgsrc_gettext=gettext-0.18.2.tar.gz
 pkgsrc_libtool=libtool-2.4.2.tar.gz
 pkgsrc_m4=m4-1.4.16.tar.bz2
 pkgsrc_p7zip=p7zip_9.20.1_src_all.tar.bz2
 ## bootstrap
-pkgsrc_gettext=gettext-0.18.2.tar.gz
 pkgsrc_libelf=libelf-0.8.13.tar.gz
-pkgsrc_ncurses=ncurses-5.9.tar.gz
 ## stage 1
-pkgsrc_gmp=gmp-5.1.2.tar.xz
 pkgsrc_gnutls=gnutls-3.1.8.tar.xz
-pkgsrc_libtasn1=libtasn1-3.3.tar.gz
 ## stage 2
 ## stage 3
 pkgsrc_jasper=jasper-1.900.1.tar.bz2
@@ -94,17 +92,13 @@ pkgsrc_7z=7z920.exe
 pkgsrc_cabextract=cabextract-1.4.tar.gz
 
 # -------------------------------------- begin utilities functions
-DocCopy_ ()
+DocCompress_ ()
 {
-    set ${1:?} ${deps_destroot}/share/doc/$1
-    
-    install -d $2
-    find -E ${workroot}/$1 \
-        -maxdepth 1 \
-        -type f \
-        -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?' \
-        | xargs -J % cp % $2
-} # end DocCopy_
+    local n=${1:?}
+    set -- $(cd ${workroot} && find -E $1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?')
+    [ $# == 0 ] && return || :
+    tar vcjf ${deps_destroot}/share/doc/doc_${n}.tar.bz2 -C ${workroot} $@
+} # end DocCompress_
 
 # -------------------------------------- begin build processing functions
 BuildDeps_ ()
@@ -133,6 +127,9 @@ BuildDeps_ ()
             return
         ;;
         autoconf-*|automake-*)
+            ./configure --prefix=${toolprefix} --build=${triple}
+        ;;
+        help2man-*)
             ./configure --prefix=${toolprefix} --build=${triple}
         ;;
         libtool-*)
@@ -175,12 +172,30 @@ BuildDevel_ ()
             git checkout -f master
             ./autogen.sh
             ./configure ${configure_args}
+            make ${make_args}
+            make install
+            [ -f ${deps_destroot}/lib/libfreetype.6.dylib ]
+            DocCompress_ freetype
+            return
         ;;
         glib)
             git checkout -f glib-2-36
             ./autogen.sh ${configure_args}  --disable-{gtk-doc{,-html,-pdf},selinux,fam,xattr} \
                                             --with-threads=posix \
                                             --without-{html-dir,xml-catalog}
+        ;;
+        gmp)
+            ./.bootstrap
+            autoreconf ${autoreconf_args}
+            install -d build
+            cd $_
+            ../configure ${configure_default_args}  --enable-cxx \
+                                                    CC=$( xcrun -find gcc-4.2) \
+                                                    CXX=$(xcrun -find g++-4.2) \
+                                                    ABI=32
+            make ${make_args}
+            make check
+            make install
         ;;
         libffi)
             git checkout -f master
@@ -205,6 +220,14 @@ BuildDevel_ ()
             autoreconf -i
             ./configure ${configure_args}
         ;;
+        libtasn1)
+            git checkout -f master
+            touch ChangeLog # dummy file
+            autoreconf -i
+            install -d build
+            cd $_
+            ../configure ${configure_default_args} --disable-{gcc-warnings,gtk-doc{,-{html,pdf}},valgrind-tests}
+        ;;
         libtiff)
             ./configure ${configure_args}
         ;;
@@ -228,7 +251,7 @@ BuildDevel_ ()
             make -i install
             [ -x ${deps_destroot}/bin/nasm ]
             [ -x ${deps_destroot}/bin/ndisasm ]
-            DocCopy_ nasm
+            DocCompress_ nasm
             return
         ;;
         nettle)
@@ -250,7 +273,7 @@ BuildDevel_ ()
                                             --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
         ;;
         python) # python 2.7
-            ${hg} checkout -C v2.7.5
+            ${hg} checkout -C 2.7
             install -d build
             cd $_
             ../configure ${configure_args}
@@ -265,7 +288,7 @@ BuildDevel_ ()
             ../configure ${configure_args}
             make ${make_args}
             make install
-            DocCopy_ SDL
+            DocCompress_ SDL
             # note: theora will not find sdl2.pc.
             cd ${deps_destroot}/lib/pkgconfig
             ln -s sdl{2,}.pc
@@ -278,6 +301,13 @@ BuildDevel_ ()
             install -d build
             cd $_
             ../configure ${configure_args}
+        ;;
+        texinfo) # texinfo required from libtasn1-devel
+            ./autogen.sh
+            ./configure --prefix=${toolprefix} --build=${triple}
+            make ${make_args}
+            make install
+            return
         ;;
         theora)
             ./autogen.sh ${configure_args} --disable-{oggtest,vorbistest,examples,asm}
@@ -296,26 +326,25 @@ BuildDevel_ ()
     esac
     make ${make_args}
     make install
-    DocCopy_ $1
+    DocCompress_ $1
 } # end BuildDevel_
 
 # ------------------------------------- separate build
 BuildGettext_ ()
 {
-    set ${1:?} ${pkgsrc_gettext%.tar.*} "$(echo \
---disable-{csharp,native-java,openmp} \
---without-{cvs,emacs,git} \
---with-included-{gettext,glib,libcroro,libunistring,libxml})"
-    
+    local n=${1:?}
+    set --  --disable-{csharp,native-java,openmp} \
+            --without-{cvs,emacs,git} \
+            --with-included-{gettext,glib,libcroro,libunistring,libxml}
     tar xf ${srcroot}/${pkgsrc_gettext} -C ${workroot}
-    install -d ${workroot}/$2/build_$1
+    install -d ${workroot}/${pkgsrc_gettext%.tar.*}/build_${n}
     cd $_
-    case $1 in
-        host)
-            ../configure --prefix=${toolprefix} --build=${triple} $3
+    case ${n} in
+        pre)
+            ../configure --prefix=${toolprefix} --build=${triple} $@
         ;;
-        target)
-            ../configure ${configure_args} $3
+        post)
+            ../configure ${configure_default_args} $@
         ;;
     esac
     make ${make_args}
@@ -334,19 +363,6 @@ BuildSevenzip_ ()
     make ${make_args} all3
     make DEST_HOME=${toolprefix} install
 } # end BuildSevenzip_
-
-BuildGmp_ ()
-{
-    7z x -so ${srcroot}/${pkgsrc_gmp} | tar x - -C ${workroot}
-    cd ${workroot}/${pkgsrc_gmp%.tar.*}
-    CC=$( xcrun -find gcc-4.2) \
-    CXX=$(xcrun -find g++-4.2) \
-    ABI=32 \
-    ./configure --prefix=${deps_destroot} --build=${triple} --enable-cxx
-    make ${make_args}
-    make check
-    make install
-} # end BuildGmp_
 
 # -------------------------------------
 Bootstrap_ ()
@@ -383,28 +399,25 @@ Bootstrap_ ()
         hdiutil create -type SPARSEBUNDLE -fs HFS+ -size 1g -volname ${proj_uuid} ${toolbundle}
         hdiutil attach ${toolbundle}
         trap "hdiutil detach ${toolprefix}; rm -rf ${toolbundle}" EXIT
-        BuildGettext_ host
+        BuildGettext_ pre
         BuildSevenzip_
         BuildDeps_  ${pkgsrc_coreutils}
         BuildDeps_  ${pkgsrc_m4}
         BuildDeps_  ${pkgsrc_autoconf}
         BuildDeps_  ${pkgsrc_automake}
+        BuildDeps_  help2man-1.41.2.tar.gz
+        BuildDevel_ texinfo
         trap EXIT
     fi
     trap "hdiutil detach ${toolprefix}" EXIT
     
     # --------------------------------- begin build
-    BuildGettext_ target
-    BuildDeps_  ${pkgsrc_libelf}
+    BuildGettext_ post
+    BuildDeps_  ${pkgsrc_libelf} --disable-compat
     BuildDeps_  ${pkgsrc_libtool}
     BuildDevel_ pkg-config
-    BuildDeps_  ${pkgsrc_ncurses}   --enable-{pc-files,sigwinch} \
-                                    --disable-mixed-case \
-                                    --with-shared \
-                                    --without-{ada,debug,manpages,tests}
     BuildDevel_ readline
     BuildDevel_ zlib
-    BuildDeps_  ${pkgsrc_libelf} --disable-compat
     BuildDevel_ xz
     BuildDevel_ python
     BuildDevel_ libxml2
@@ -413,8 +426,8 @@ Bootstrap_ ()
 
 BuildStage1_ ()
 {
-    BuildGmp_
-    BuildDeps_  ${pkgsrc_libtasn1} --disable-gtk-doc{,-{html,pdf}}
+    BuildDevel_ gmp
+    BuildDevel_ libtasn1
     BuildDevel_ nettle
     BuildDeps_  ${pkgsrc_gnutls} --disable-guile --without-p11-kit
     BuildDevel_ libusb
@@ -433,7 +446,6 @@ BuildStage3_ ()
     BuildDeps_  ${pkgsrc_odbc}
     BuildDevel_ libpng
     BuildDevel_ freetype                # freetype required libpng
-    [ -f ${deps_destroot}/lib/libfreetype.6.dylib ]
 #    BuildDevel_ fontconfig
     BuildDevel_ nasm
     BuildDevel_ libjpeg-turbo
@@ -482,7 +494,7 @@ BuildStage5_ ()
 
 BuildWine_ ()
 {
-    set ${workroot}/wine
+    set -- ${workroot}/wine
     
     install -d $1
     cd $1
@@ -521,7 +533,7 @@ BuildStage6_ ()
     # -------------------------------------- fonts
     InstallFonts_ ()
     {
-        set ${datadir}/wine/fonts
+        set -- ${datadir}/wine/fonts
         
         # remove duplicate fonts
         rm ${1:?}/{symbol,tahoma,tahomabd,wingding}.ttf
@@ -537,7 +549,7 @@ BuildStage6_ ()
     # -------------------------------------- inf
     ModifyInf_ ()
     {
-        set $TMPDIR/$$$LINENO.\$\$
+        set -- $TMPDIR/$$$LINENO.\$\$
         
         m4 ${proj_root}/scripts/inf.m4 >> ${datadir}/wine/wine.inf
         ${uconv} -f UTF-8 -t UTF-8 --add-signature -o $1 ${datadir}/wine/wine.inf
@@ -555,7 +567,7 @@ BuildStage6_ ()
     # ------------------------------------- native dlls
     InstallNativedlls_ ()
     {
-        set ${workroot}/system32
+        set -- ${workroot}/system32
         install -d $1
         cd $1
         install -m 0644 ${srcroot}/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
@@ -633,7 +645,7 @@ __EOS__
 
 BuildDmg_ ()
 {
-    set $TMPDIR/$$$LINENO.\$\$ ${proj_root}/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
+    set -- $TMPDIR/$$$LINENO.\$\$ ${proj_root}/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
     
     install -d $1/.resources
     mv ${destroot} $_

@@ -44,7 +44,7 @@ CreateWineprefix_ ()
     ${wine} wineboot.exe --init
     _WINEDEBUG="${WINEDEBUG}" WINEDEBUG=
     ${wine} 7z.exe x -y -o'C:\windows' ${prefix}/share/nxwine/nativedlls/nativedlls.exe
-    cat <<__REGEDIT4__ | ${wine} regedit -
+    cat <<@REGEDIT4 | ${wine} regedit -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
 $(printf '"*D3DCompiler_%d"="native"\n' {37..43})
 "*XAPOFX1_1"="native"
@@ -58,7 +58,7 @@ $(printf '"*d3dx9_%d"="native"\n' {24..43})
 "*l3codecx"="native"
 "*mciqtz32"="native"
 "*quartz"="native"
-__REGEDIT4__
+@REGEDIT4
     
     ${wine} regsvr32.exe \
         l3codecx.ax \

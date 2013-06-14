@@ -18,11 +18,9 @@ readonly deps_destroot=${destroot}/Contents/SharedSupport
 
 # -------------------------------------- local tools
 readonly ccache=/usr/local/bin/ccache
-readonly uconv=/usr/local/bin/uconv
 readonly git=/usr/local/git/bin/git
 readonly hg=/usr/local/bin/hg
 [ -x ${ccache} ]
-[ -x ${uconv} ]
 [ -x ${git} ]
 [ -x ${hg} ]
 if [ -x ${FONTFORGE=/opt/local/bin/fontforge} ]; then export FONTFORGE; fi
@@ -183,7 +181,7 @@ BuildDevel_ ()
     ;;
     libjpeg-turbo)
       git checkout -f master
-      $"patch_libjpeg-turbo"
+      $"patch_libjpeg"
       autoreconf -i
       ./configure ${configure_args} --with-jpeg8
     ;;
@@ -270,7 +268,7 @@ BuildDevel_ ()
       ../configure ${configure_args}
     ;;
     theora)
-      ./autogen.sh  ${configure_args} --disable-{oggtest,vorbistest,examples,asm}
+      ./autogen.sh ${configure_args} --disable-{oggtest,vorbistest,examples,asm}
     ;;
     vorbis)
       ./autogen.sh ${configure_args}
@@ -293,40 +291,38 @@ BuildDevel_ ()
 BuildTools_ ()
 {
   set -- \
-    gettext \
-    m4 \
-    autoconf \
-    automake \
-    libtool  \
+    gettext   \
+    m4        \
+    autoconf  \
+    automake  \
+    libtool   \
     coreutils \
-    help2man \
-    texinfo \
+    help2man  \
+    texinfo   \
     p7zip
     
   local CPPFLAGS="$CPPFLAGS -I$toolprefix/include"
   local LDFLAGS="$LDFLAGS -L$toolprefix/lib"
   local configure_args="${configure_args/$deps_destroot/$toolprefix}"
-    
-  install -d $workroot/tools
+  
   for x in $@
   do
-    cd $workroot/tools
     case $x in
       texinfo) # texinfo required from libtasn1-devel
-        cp -RHf ${srcroot}/texinfo .
-        cd texinfo
+        cp -RHf $srcroot/texinfo $workroot
+        cd $workroot/texinfo
         ./autogen.sh
         ./configure $configure_args
       ;;
       *)
         local pkg=pkgsrc_$x; pkg=${!pkg}
-        tar xf $srcroot/$pkg
+        tar xf $srcroot/$pkg -C $workroot
         case $x in
           p7zip)
-            cd p7zip_9.20.1
+            cd $workroot/${pkg%_src_*}
           ;;
           *)
-            cd ${pkg%.tar.*}
+            cd $workroot/${pkg%.tar.*}
           ;;
         esac
       ;;
@@ -348,10 +344,11 @@ BuildTools_ ()
         continue
       ;;
       gettext)
-        ./configure $configure_args \
-                    --disable-{csharp,native-java,openmp} \
-                    --without-{cvs,emacs,git} \
-                    --with-included-{gettext,glib,libcroro,libunistring,libxml}
+        $"mkdircd prebuild"
+        ../configure  $configure_args \
+                      --disable-{csharp,native-java,openmp} \
+                      --without-{cvs,emacs,git} \
+                      --with-included-{gettext,glib,libcroro,libunistring,libxml}
       ;;
       help2man) # help2man required from texinfo
         ./configure $configure_args
@@ -478,7 +475,10 @@ BuildStage5_ ()
   set -- $wine_destroot
   
   # -------------------------------------- cabextract
-  BuildDeps_ $pkgsrc_cabextract
+  tar xf $pkgsrc_cabextract -C $workroot
+  cd $workroot/${pkgsrc_cabextract%.tar.*}
+  ./configure $configure_args
+  $"makeallin"
   cp $workroot/cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $(vmkdir $1/share/doc/cabextract-1.4)
   
   # -------------------------------------- winetricks
@@ -516,62 +516,35 @@ BuildStage6_ ()
   local libdir=$wine_destroot/lib
   local datadir=$wine_destroot/share
   local docdir=$datadir/doc
-    
-  # gecko
-  cp $srcroot/$pkgsrc_gecko $(vmkdir $datadir/wine/gecko)
-  # mono
-  cp $srcroot/$pkgsrc_mono $(vmkdir $datadir/wine/mono)
-  # docs
-  cp $srcroot/wine/{\
-ANNOUNCE,\
-AUTHORS,\
-COPYING.LIB,\
-LICENSE,\
-README,\
-VERSION} $(vmkdir $datadir/wine)
-    
-    # -------------------------------------- fonts
-    InstallFonts_ ()
-    {
-        set -- ${datadir}/wine/fonts
-        
-        # remove duplicate fonts
-        rm ${1:?}/{symbol,tahoma,tahomabd,wingding}.ttf
-        # Konatu
-        7z x -y -o${docdir} ${srcroot}/fonts/Konatu_ver_20121218.zip
-        mv ${docdir}/Konatu_ver_20121218/*.ttf $1
-        # Sazanami
-        7z x -so ${srcroot}/fonts/sazanami-20040629.tar.bz2 | tar x - -C ${docdir}
-        mv ${docdir}/sazanami-20040629/*.ttf $1
-    }
-    InstallFonts_
-    
-    # -------------------------------------- inf
-    ModifyInf_ ()
-    {
-        set -- $TMPDIR/$$$LINENO.\$\$
-        
-        m4 ${proj_root}/scripts/inf.m4 >> ${datadir}/wine/wine.inf
-        ${uconv} -f UTF-8 -t UTF-8 --add-signature -o $1 ${datadir}/wine/wine.inf
-        mv -f $1 ${datadir}/wine/wine.inf
-    }
-    ModifyInf_
-    
-    # -------------------------------------- executables
-    mkdir -p ${wine_destroot}/libexec
-    mv ${wine_destroot}/{bin,libexec}/wine
-    install -m 0755 ${proj_root}/scripts/wineloader.sh ${wine_destroot}/bin/wine
-    install -m 0755 ${proj_root}/scripts/nxwinetricks.sh ${wine_destroot}/bin/nxwinetricks
-    sed -i "" "s|@DATE@|$(date +%F)|g" ${wine_destroot}/bin/{wine,nxwinetricks}
-    
-    # ------------------------------------- native dlls
-    InstallNativedlls_ ()
-    {
-        set -- ${workroot}/system32
-        $"mkdircd" $1
-        install -m 0644 ${srcroot}/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
-        7z x ${srcroot}/nativedlls/directx_feb2010_redist.exe dxnt.cab
-        7z x dxnt.cab l3codecx.ax {\
+  
+  (set -- $datadir/wine/gecko && mkdir -p $1 && install -m 0644 $srcroot/$pkgsrc_gecko  $1) || false
+  (set -- $datadir/wine/mono  && mkdir -p $1 && install -m 0644 $srcroot/$pkgsrc_mono   $1) || false
+  (set -- $doc/wine           && mkdir -p $1 && install -m 0644 $srcroot/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $1) || false
+  
+  # ------------------------------------- fonts
+  # note: some fonts are duplicated with system fonts
+  rm ${datadir:?}/wine/fonts/{symbol,tahoma,tahomabd,wingding}.ttf
+  tar xf $srcroot/fonts/Konatu_ver_20121218.zip   -C $docdir
+  tar xf $srcroot/fonts/sazanami-20040629.tar.bz2 -C $docdir
+  mv $docdir/*/*.ttf $datadir/wine/fonts
+  
+  # ------------------------------------- inf
+  (set -- $datadir/wine/wine.inf && m4 $proj_root/scripts/inf.m4 | cat $1 /dev/fd/3 3<&0 | tee | uconv -f UTF-8 -t UTF-8 --add-signature -o $1) || false
+  
+  # ------------------------------------- executables
+  mv $bindir/wine $(vmkdir $wine_destroot/libexec)
+  install -m 0755 ${proj_root}/scripts/wineloader.sh    $bindir/wine
+  install -m 0755 ${proj_root}/scripts/nxwinetricks.sh  $bindir/nxwinetricks
+  sed -i "" "s|@DATE@|$(date +%F)|g" $bindir/{wine,nxwinetricks}
+  
+  # ------------------------------------- native dlls
+  InstallNativedlls_ ()
+  {
+    set -- $workroot/system32
+    $"mkdircd" $1
+    install -m 0644 $srcroot/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
+    7z x $srcroot/nativedlls/directx_feb2010_redist.exe dxnt.cab
+    7z x dxnt.cab l3codecx.ax {\
 amstream,\
 ddrawex,\
 dinput,\
@@ -579,30 +552,29 @@ dinput8,\
 dplayx,\
 mciqtz32,\
 quartz}.dll
-        
-        7z x ${srcroot}/nativedlls/directx_Jun2010_redist.exe "*_x86.cab"
-        find ./*_x86.cab | while read
-        do
-            7z x -y ${REPLY} {\
+    
+    7z x $srcroot/nativedlls/directx_Jun2010_redist.exe \*_x86.cab
+    find ./*_x86.cab | while read
+    do
+      7z x -y $REPLY {\
 D3DCompiler,\
 XAPOFX1,\
 XAudio2,\
 d3dx9}_\*.dll
-        done
-        
-        # note: XAPOFX1_3.dll in Mar2009_XAudio_x86.cab is old
-        7z x -y Aug2009_XAudio_x86.cab XAPOFX1_3.dll
-        rm *.cab
-        
-        7z a -sfx ${datadir}/nxwine/nativedlls/nativedlls.exe $1
-    }
-    InstallNativedlls_
+    done
+    # note: XAPOFX1_3.dll in Mar2009_XAudio_x86.cab is old
+    7z x -y Aug2009_XAudio_x86.cab XAPOFX1_3.dll
+    rm *.cab
     
-    # ------------------------------------- plist
-    m4  -D_PLIST=${destroot}/Contents/Info.plist \
-        -D_WINE_VERSION=${wine_version} \
-        -D_PROJ_VERSION=${proj_version} \
-        -D_PROJ_DOMAIN=${proj_domain} \
+    7z a -sfx $datadir/nxwine/nativedlls/nativedlls.exe $1
+  }
+  InstallNativedlls_
+    
+  # ------------------------------------- plist
+  m4  -D_PLIST=$destroot/Contents/Info.plist \
+      -D_PROJ_VERSION=$proj_version \
+      -D_PROJ_DOMAIN=$proj_domain \
+      -D_WINE_VERSION=$wine_version \
 <<\@EOS | sh -x
 changequote([, ])dnl
 define([_PB], [/usr/libexec/PlistBuddy -c "$1" _PLIST])dnl
@@ -630,31 +602,30 @@ _DT(9,  rar,    rar Archive)
 _DT(10, xz,     xz Archive)
 _DT(11, zip,    zip Archive)
 @EOS
-    
-    # faenza icon theme
-    7z x -o${docdir}/faenza-icon-theme_1.3 ${srcroot}/faenza-icon-theme_1.3.zip AUTHORS ChangeLog COPYING README
-    
-    install -m 0644 $proj_root/COPYING $(mkdir -p $docdir/nxwine && cd $_ && pwd)
-    
-    # remove unnecessary files
-    rm -rf  ${libdir:?}/*.{a,la} \
-            ${datadir:?}/applications
+  
+  # faenza icon theme
+  (set -- faenza-icon-theme_1.3 && unzip -od $docdir/$1 $srcroot/$1.zip AUTHORS ChangeLog COPYING README) || false
+  (set -- $docdir/nxwine && mkdir -p $1 && install -m 0644 $proj_root/COPYING $1) || false
+  
+  # remove unnecessary files
+  rm -f ${libdir:?}/*.{a,la}
+  rm -rf ${datadir:?}/applications
 } # end BuildStage6_
 
 BuildDmg_ ()
 {
-    set -- $TMPDIR/$$$LINENO.\$\$ ${proj_root}/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
-    
-    install -d $1/.resources
-    mv ${destroot} $_
-    osacompile -xo $1/"NXWine Installer".app ${proj_root}/scripts/installer.applescript
-    install -m 0644 ${proj_root}/nxwine.icns $1/"NXWine Installer".app/Contents/Resources/applet.icns
-    hdiutil create -ov -format UDBZ -srcdir $1 -volname ${proj_name} $2
-    rm -rf $1
+  set -- $TMPDIR/$$$LINENO.\$\$
+  
+  mkdir -p $1/.resources
+  mv $destroot $_
+  osacompile -xo $1/"NXWine Installer".app $proj_root/scripts/installer.applescript
+  install -m 0644 $proj_root/nxwine.icns $1/"NXWine Installer".app/Contents/Resources/applet.icns
+  hdiutil create -ov -format UDBZ -srcdir $1 -volname $proj_name $proj_root/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
+  rm -rf $1
 } # end BuildDmg_
 
 # -------------------------------------- patch
-patch_libjpeg-turbo (){ patch -Np1 <<\@EOS
+patch_libjpeg (){ patch -Np1 <<\@EOS
 diff --git a/Makefile.am b/Makefile.am
 index 67ac7c1..2a8efdc 100644
 --- a/Makefile.am

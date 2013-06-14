@@ -44,14 +44,12 @@ $(getconf PATH)
 @EOS); PATH=${PATH%?}
 CC="${ccache} $( xcrun -find gcc-4.2)"
 CXX="${ccache} $(xcrun -find g++-4.2)"
-CFLAGS="-m32 -arch i386 -pipe -O3 -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
-CXXFLAGS="${CFLAGS} -ffast-math -fomit-frame-pointer"
+CFLAGS="-pipe -O3 -m32 -arch i386 -ffast-math -fomit-frame-pointer -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
+CXXFLAGS="$CFLAGS"
 CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
 LDFLAGS="-Wl,-arch,i386 -Wl,-search_paths_first -Wl,-headerpad_max_install_names -Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
 ACLOCAL_PATH=$deps_destroot/share/aclocal:$toolprefix/share/aclocal
-LANG=ja_JP.UTF-8
-LC_ALL=$LANG
-gt_cv_local_ja=$LANG
+LANG=ja_JP.UTF-8; LC_ALL=$LANG; gt_cv_local_ja=$LANG
 set +a
 
 triple=i686-apple-darwin$(uname -r)
@@ -69,9 +67,6 @@ ${configure_pre_args} \
 --without-x"
 make_args="-j $(($(sysctl -n hw.ncpu) + 1))"
 
-readonly wine_version=$(GIT_DIR=${srcroot}/wine/.git git describe HEAD 2>/dev/null)
-: ${wine_version:?}
-
 # -------------------------------------- package source
 for pkg in \
   ${pkgsrc_7z=7z920.exe} \
@@ -79,20 +74,23 @@ for pkg in \
   ${pkgsrc_automake=automake-1.13.2.tar.gz} \
   ${pkgsrc_cabextract=cabextract-1.4.tar.gz} \
   ${pkgsrc_coreutils=coreutils-8.21.tar.bz2} \
+  ${pkgsrc_gecko=wine_gecko-2.21-x86.msi} \
   ${pkgsrc_gettext=gettext-0.18.2.tar.gz} \
   ${pkgsrc_help2man=help2man-1.41.2.tar.gz} \
   ${pkgsrc_jasper=jasper-1.900.1.tar.bz2} \
   ${pkgsrc_libelf=libelf-0.8.13.tar.gz} \
+  ${pkgsrc_libtasn1=libtasn1-3.3.tar.gz} \
   ${pkgsrc_libtool=libtool-2.4.2.tar.gz} \
   ${pkgsrc_m4=m4-1.4.16.tar.bz2} \
+  ${pkgsrc_mono=wine-mono-0.0.8.msi} \
   ${pkgsrc_odbc=unixODBC-2.3.1.tar.gz} \
   ${pkgsrc_p7zip=p7zip_9.20.1_src_all.tar.bz2} \
-  ${pkgsrc_libtasn1=libtasn1-3.3.tar.gz} \
 ; do [ -f $srcroot/$pkg ]; done
 
 # -------------------------------------- begin utilities functions
-mkdircd (){ install -d ${1:?} && cd $1; }
 makeallin (){ make ${make_args} && make install; }
+mkdircd (){ mkdir -p "${@:?}" && cd $_; }
+vmkdir (){ mkdir -p "${@:?}" && cd $_ && pwd; }
 DocCompress_ ()
 {
     set -- "tar vcjf ${deps_destroot}/share/doc/doc_${1:?}.tar.bz2 -C ${workroot}" $(cd ${workroot} && find -E $1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?')
@@ -129,14 +127,14 @@ BuildDevel_ ()
   cd ${workroot}/$1
   case $1 in
     flac)
-      sh autogen.sh
-      sh configure  ${configure_args} \
-                    --disable-{asm-optimizations,xmms-plugin}
+      ./autogen.sh
+      ./configure ${configure_args} \
+                  --disable-{asm-optimizations,xmms-plugin}
     ;;
     freetype)
       git checkout -f master
-      sh autogen.sh
-      sh configure ${configure_args}
+      ./autogen.sh
+      ./configure ${configure_args}
       $"makeallin"
       [ -f ${deps_destroot}/lib/libfreetype.6.dylib ]
       DocCompress_ freetype
@@ -144,19 +142,19 @@ BuildDevel_ ()
     ;;
     glib)
       git checkout -f glib-2-36
-      sh autogen.sh ${configure_args} \
+      ./autogen.sh  ${configure_args} \
                     --disable-{selinux,fam,xattr} \
                     --with-threads=posix \
                     --without-{html-dir,xml-catalog}
     ;;
     gmp-5.1)
-      sh .bootstrap
+      ./.bootstrap
       autoreconf -i
       $"mkdircd" build
-      sh ../configure ${configure_pre_args} \
-                      CC=$( xcrun -find gcc-4.2) \
-                      CXX=$(xcrun -find g++-4.2) \
-                      ABI=32
+      ../configure  ${configure_pre_args} \
+                    CC=$( xcrun -find gcc-4.2) \
+                    CXX=$(xcrun -find g++-4.2) \
+                    ABI=32
       make ${make_args}
       make check
       make install
@@ -168,78 +166,77 @@ BuildDevel_ ()
     ;;
     guile)
       git checkout -f stable-2.0
-      sh autogen.sh
-      sh configure $configure_args
+      ./autogen.sh
+      ./configure $configure_args
     ;;
     icu)
       cd source
-      $"patch_icu"
-      sh configure ${configure_args} --with-library-bits=32
+      ./configure ${configure_args} --enable-rpath --with-library-bits=32
     ;;
     libffi)
       git checkout -f master
-      sh configure ${configure_args}
+      ./configure ${configure_args}
     ;;
     libicns)
       autoreconf -i
-      sh configure ${configure_args}
+      ./configure ${configure_args}
     ;;
     libjpeg-turbo)
       git checkout -f master
       $"patch_libjpeg-turbo"
       autoreconf -i
-      sh configure ${configure_args} --with-jpeg8
+      ./configure ${configure_args} --with-jpeg8
     ;;
     libpng)
       git checkout -f libpng16
       autoreconf -i
-      sh configure ${configure_args}
+      ./configure ${configure_args}
     ;;
     libtasn1)
       git checkout -f master
       git log --date=short --pretty=format:"%ad %an <%ae>%n%n"$'\t'"%s%n%b" > ChangeLog
       autoreconf -i
-      sh configure ${configure_args} --disable-silent-rules
+      ./configure ${configure_args} --disable-silent-rules
     ;;
     libtiff)
-      sh configure ${configure_args}
+      ./configure ${configure_args}
       $"makeallin"
       return
     ;;
     libusb|libusb-compat-0.1)
-      sh autogen.sh ${configure_args}
+      ./autogen.sh ${configure_args}
     ;;
     libxml2)
       git checkout -f master
-      sh autogen.sh ${configure_args} --with-icu
+      ./autogen.sh ${configure_args} --with-icu
     ;;
     libxslt)
       git checkout -f master
-      sh autogen.sh ${configure_args}
+      ./autogen.sh ${configure_args}
     ;;
     nasm)
       git checkout -f master
       $"patch_nasm"
-      sh autogen.sh
-      sh configure ${configure_args}
+      ./autogen.sh
+      ./configure ${configure_args}
     ;;
     nettle)
       git checkout -f nettle-2.7-fixes
-      sh .bootstrap
-      sh configure ${configure_args}
+      ./.bootstrap
+      ./configure ${configure_args}
     ;;
     ogg)
-      sh autogen.sh ${configure_args}
+      ./autogen.sh ${configure_args}
     ;;
     orc)
       git checkout -f master
-      sh autogen.sh ${configure_args} \
+      ./autogen.sh  ${configure_args} \
                     --disable-gtk-doc{,-html,-pdf} \
                     --without-html-dir
     ;;
     pkg-config)
       git checkout -f master
-      sh autogen.sh ${configure_args} \
+      ./autogen.sh  ${configure_args} \
                     --disable-host-tool \
                     --with-internal-glib \
                     --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
@@ -247,17 +244,17 @@ BuildDevel_ ()
     python) # python 2.7
       ${hg} checkout -C 2.7
       $"mkdircd" build
-      sh ../configure ${configure_args}
+      ../configure ${configure_args}
     ;;
     readline)
       git checkout -f master
       $"patch_readline"
-      sh configure ${configure_args} --with-curses --enable-multibyte
+      ./configure ${configure_args} --enable-multibyte --with-curses
     ;;
     SDL)
       # note: mercurial repository must be separated a build directory.
       $"mkdircd" build
-      sh ../configure ${configure_args}
+      ../configure ${configure_args}
       $"makeallin"
       # note: theora will not find sdl2.pc.
       cd ${deps_destroot}/lib/pkgconfig
@@ -267,27 +264,26 @@ BuildDevel_ ()
       return
     ;;
     SDL_sound)
-      sh bootstrap
+      ./bootstrap
       # note: mercurial repository must be separated a build directory.
       $"mkdircd" build
-      sh ../configure ${configure_args}
+      ../configure ${configure_args}
     ;;
     theora)
-      sh autogen.sh ${configure_args} \
-                    --disable-{oggtest,vorbistest,examples,asm}
+      ./autogen.sh  ${configure_args} --disable-{oggtest,vorbistest,examples,asm}
     ;;
     vorbis)
-      sh autogen.sh ${configure_args}
+      ./autogen.sh ${configure_args}
     ;;
     xz)
-      sh autogen.sh
-      sh configure ${configure_args}
+      ./autogen.sh
+      ./configure ${configure_args}
       $"makeallin"
       return
     ;;
     zlib)
       git checkout -f master
-      sh configure --prefix=${deps_destroot}
+      ./configure --prefix=${deps_destroot}
     ;;
   esac
   $"makeallin"
@@ -319,8 +315,8 @@ BuildTools_ ()
       texinfo) # texinfo required from libtasn1-devel
         cp -RHf ${srcroot}/texinfo .
         cd texinfo
-        sh autogen.sh
-        sh configure $configure_args
+        ./autogen.sh
+        ./configure $configure_args
       ;;
       *)
         local pkg=pkgsrc_$x; pkg=${!pkg}
@@ -338,30 +334,30 @@ BuildTools_ ()
     
     case $x in
       autoconf|automake)
-        sh configure  $configure_args
+        ./configure  $configure_args
       ;;
       coreutils)
-        sh configure  $configure_args \
-                      --program-prefix=g \
-                      --enable-threads=posix \
-                      --without-gmp \
-                      FORCE_UNSAFE_CONFIGURE=1
+        ./configure $configure_args \
+                    --program-prefix=g \
+                    --enable-threads=posix \
+                    --without-gmp \
+                    FORCE_UNSAFE_CONFIGURE=1
         $"makeallin"
         cd $toolprefix/bin
         ln -fs {g,}readlink
         continue
       ;;
       gettext)
-        sh configure  $configure_args \
-                      --disable-{csharp,native-java,openmp} \
-                      --without-{cvs,emacs,git} \
-                      --with-included-{gettext,glib,libcroro,libunistring,libxml}
+        ./configure $configure_args \
+                    --disable-{csharp,native-java,openmp} \
+                    --without-{cvs,emacs,git} \
+                    --with-included-{gettext,glib,libcroro,libunistring,libxml}
       ;;
       help2man) # help2man required from texinfo
-        sh configure  $configure_args
+        ./configure $configure_args
       ;;
       libtool)
-        sh configure  $configure_args --program-prefix=g
+        ./configure $configure_args --program-prefix=g
         $"makeallin"
         cd $toolprefix/bin
         ln -sf {g,}libtool
@@ -369,10 +365,10 @@ BuildTools_ ()
         continue
       ;;
       m4)
-        sh configure  $configure_args \
-                      --enable-c++ \
-                      --disable-gcc-warnings \
-                      --with-syscmd-shell
+        ./configure $configure_args \
+                    --enable-c++ \
+                    --disable-gcc-warnings \
+                    --with-syscmd-shell
         $"makeallin"
         cd $toolprefix/bin
         ln -sf {g,}m4
@@ -479,30 +475,19 @@ BuildStage4_ ()
 
 BuildStage5_ ()
 {
-  local bindir=${wine_destroot}/bin
-  local docdir=${wine_destroot}/share/doc/winetricks
-  local libexecdir=${wine_destroot}/libexec
-
+  set -- $wine_destroot
+  
   # -------------------------------------- cabextract
-  BuildDeps_ ${pkgsrc_cabextract}
-  install -d ${docdir}/cabextract-1.4
-  cp ${workroot}/cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $_
+  BuildDeps_ $pkgsrc_cabextract
+  cp $workroot/cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $(vmkdir $1/share/doc/cabextract-1.4)
   
   # -------------------------------------- winetricks
-  InstallWinetricks_ ()
-  {
-    install -d ${libexecdir}
-    install -m 0755 ${srcroot}/winetricks/src/winetricks ${libexecdir}
-    install -d ${docdir}
-    install -m 0644 ${srcroot}/winetricks/src/COPYING ${docdir}
-    # nxwinetricks
-    install -d ${bindir}
-    install -m 0755 ${proj_root}/scripts/winetricksloader.sh ${bindir}/winetricks
-  } # end InstallWinetricks_
-  InstallWinetricks_
+  install -m 0755 $srcroot/winetricks/src/winetricks      $(vmkdir $1/libexec)
+  install -m 0644 $srcroot/winetricks/src/COPYING         $(vmkdir $1/share/doc/winetricks)
+  install -m 0755 $proj_root/scripts/winetricksloader.sh  $(vmkdir $1/bin)/winetricks
   
   # ------------------------------------- 7-Zip
-  7z x -y -o${datadir}/nxwine/programs/7-Zip -x'!$*' ${srcroot}/${pkgsrc_7z}
+  7z x -y -o$1/share/nxwine/programs/7-Zip -x'!$*' $srcroot/$pkgsrc_7z
 } # end BuildStage5_
 
 BuildWine_ ()
@@ -515,28 +500,35 @@ BuildWine_ ()
                             --x-includes=/opt/X11/include \
                             --x-libraries=/opt/X11/lib
   $"makeallin"
+  
+  wine_version=$($wine_destroot/bin/wine --version)
+  : ${wine_version:?}
+  
+  set -- install_name_tool -add_rpath /usr/lib $wine_destroot
+  $@/bin/wine
+  $@/bin/wineserver
+  $@/lib/libwine.1.0.dylib
 } # end BuildWine_
 
 BuildStage6_ ()
 {
-    local bindir=${wine_destroot}/bin
-    local libdir=${wine_destroot}/lib
-    local datadir=${wine_destroot}/share
-    local docdir=${wine_destroot}/share/doc
+  local bindir=$wine_destroot/bin
+  local libdir=$wine_destroot/lib
+  local datadir=$wine_destroot/share
+  local docdir=$datadir/doc
     
-    # install name
-    install_name_tool -add_rpath /usr/lib ${bindir}/wine
-    install_name_tool -add_rpath /usr/lib ${bindir}/wineserver
-    install_name_tool -add_rpath /usr/lib ${libdir}/libwine.1.0.dylib
-    # gecko
-    install -d ${datadir}/wine/gecko
-    cp ${srcroot}/wine_gecko-2.21-x86.msi $_
-    # mono
-    install -d ${datadir}/wine/mono
-    cp ${srcroot}/wine-mono-0.0.8.msi $_
-    # docs
-    install -d ${docdir}/wine
-    cp ${srcroot}/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $_
+  # gecko
+  cp $srcroot/$pkgsrc_gecko $(vmkdir $datadir/wine/gecko)
+  # mono
+  cp $srcroot/$pkgsrc_mono $(vmkdir $datadir/wine/mono)
+  # docs
+  cp $srcroot/wine/{\
+ANNOUNCE,\
+AUTHORS,\
+COPYING.LIB,\
+LICENSE,\
+README,\
+VERSION} $(vmkdir $datadir/wine)
     
     # -------------------------------------- fonts
     InstallFonts_ ()
@@ -566,7 +558,7 @@ BuildStage6_ ()
     ModifyInf_
     
     # -------------------------------------- executables
-    install -d ${wine_destroot}/libexec
+    mkdir -p ${wine_destroot}/libexec
     mv ${wine_destroot}/{bin,libexec}/wine
     install -m 0755 ${proj_root}/scripts/wineloader.sh ${wine_destroot}/bin/wine
     install -m 0755 ${proj_root}/scripts/nxwinetricks.sh ${wine_destroot}/bin/nxwinetricks
@@ -642,8 +634,7 @@ _DT(11, zip,    zip Archive)
     # faenza icon theme
     7z x -o${docdir}/faenza-icon-theme_1.3 ${srcroot}/faenza-icon-theme_1.3.zip AUTHORS ChangeLog COPYING README
     
-    install -d ${docdir}/nxwine
-    install -m 0644 ${proj_root}/COPYING $_
+    install -m 0644 $proj_root/COPYING $(mkdir -p $docdir/nxwine && cd $_ && pwd)
     
     # remove unnecessary files
     rm -rf  ${libdir:?}/*.{a,la} \
@@ -663,18 +654,54 @@ BuildDmg_ ()
 } # end BuildDmg_
 
 # -------------------------------------- patch
-patch_icu (){ m4 -D_PREFIX=${deps_destroot} <<\@EOS | patch -Np1
---- a/config/mh-darwin
-+++ a/config/mh-darwin
-@@ -31,7 +31,7 @@
- ifeq ($(ENABLE_RPATH),YES)
- LD_SONAME = -Wl,-compatibility_version -Wl,$(SO_TARGET_VERSION_MAJOR) -Wl,-current_version -Wl,$(SO_TARGET_VERSION) -install_name $(libdir)/$(notdir $(MIDDLE_SO_TARGET))
- else
--LD_SONAME = -Wl,-compatibility_version -Wl,$(SO_TARGET_VERSION_MAJOR) -Wl,-current_version -Wl,$(SO_TARGET_VERSION) -install_name $(notdir $(MIDDLE_SO_TARGET))
-+LD_SONAME = -Wl,-compatibility_version -Wl,$(SO_TARGET_VERSION_MAJOR) -Wl,-current_version -Wl,$(SO_TARGET_VERSION) -install_name _PREFIX/lib/$(notdir $(MIDDLE_SO_TARGET))
- endif
+patch_libjpeg-turbo (){ patch -Np1 <<\@EOS
+diff --git a/Makefile.am b/Makefile.am
+index 67ac7c1..2a8efdc 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -144,11 +144,11 @@ dist_man1_MANS = cjpeg.1 djpeg.1 jpegtran.1 rdjpgcom.1 wrjpgcom.1
+ DOCS= coderules.txt jconfig.txt change.log rdrle.c wrrle.c BUILDING.txt \
+ 	ChangeLog.txt
  
- ## Compiler switch to embed a runtime search path
+-docdir = $(datadir)/doc
++docdir = $(datadir)/doc/libjpeg-turbo
+ dist_doc_DATA = README README-turbo.txt libjpeg.txt structure.txt usage.txt \
+ 	wizard.txt 
+ 
+-exampledir = $(datadir)/doc
++exampledir = $(datadir)/doc/libjpeg-turbo
+ dist_example_DATA = example.c
+ 
+ 
+@EOS
+}
+
+patch_nasm (){ patch -Np1 <<\@EOS
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -64,10 +64,10 @@ endif
+ 	$(CC) -E $(ALL_CFLAGS) -o $@ $<
+ 
+ .txt.xml:
+-	$(ASCIIDOC) -b docbook -d manpage -o $@ $<
++	: -b docbook -d manpage -o $@ $<
+ 
+ .xml.1:
+-	$(XMLTO) man --skip-validation $< 2>/dev/null
++	: man --skip-validation $< 2>/dev/null
+ 
+ 
+ #-- Begin File Lists --#
+@@ -191,9 +191,6 @@ install: nasm$(X) ndisasm$(X)
+ 	$(MKDIR) -p $(INSTALLROOT)$(bindir)
+ 	$(INSTALL_PROGRAM) nasm$(X) $(INSTALLROOT)$(bindir)/nasm$(X)
+ 	$(INSTALL_PROGRAM) ndisasm$(X) $(INSTALLROOT)$(bindir)/ndisasm$(X)
+-	$(MKDIR) -p $(INSTALLROOT)$(mandir)/man1
+-	$(INSTALL_DATA) $(srcdir)/nasm.1 $(INSTALLROOT)$(mandir)/man1/nasm.1
+-	$(INSTALL_DATA) $(srcdir)/ndisasm.1 $(INSTALLROOT)$(mandir)/man1/ndisasm.1
+ 
+ clean:
+ 	$(RM) -f *.$(O) *.s *.i
 @EOS
 }
 
@@ -719,57 +746,6 @@ patch_readline (){ patch -Np1 <<\@EOS
 +			SHLIB_XLDFLAGS='-install_name $(libdir)/$@ -current_version $(SHLIB_MAJOR)$(SHLIB_MINOR) -compatibility_version $(SHLIB_MAJOR) -v'
  			;;
  	esac
- 
-@EOS
-}
-
-patch_nasm (){ patch -Np1 <<\@EOS
---- a/Makefile.in
-+++ b/Makefile.in
-@@ -64,10 +64,10 @@ endif
- 	$(CC) -E $(ALL_CFLAGS) -o $@ $<
- 
- .txt.xml:
--	$(ASCIIDOC) -b docbook -d manpage -o $@ $<
-+	: -b docbook -d manpage -o $@ $<
- 
- .xml.1:
--	$(XMLTO) man --skip-validation $< 2>/dev/null
-+	: man --skip-validation $< 2>/dev/null
- 
- 
- #-- Begin File Lists --#
-@@ -191,9 +191,6 @@ install: nasm$(X) ndisasm$(X)
- 	$(MKDIR) -p $(INSTALLROOT)$(bindir)
- 	$(INSTALL_PROGRAM) nasm$(X) $(INSTALLROOT)$(bindir)/nasm$(X)
- 	$(INSTALL_PROGRAM) ndisasm$(X) $(INSTALLROOT)$(bindir)/ndisasm$(X)
--	$(MKDIR) -p $(INSTALLROOT)$(mandir)/man1
--	$(INSTALL_DATA) $(srcdir)/nasm.1 $(INSTALLROOT)$(mandir)/man1/nasm.1
--	$(INSTALL_DATA) $(srcdir)/ndisasm.1 $(INSTALLROOT)$(mandir)/man1/ndisasm.1
- 
- clean:
- 	$(RM) -f *.$(O) *.s *.i
-@EOS
-}
-
-patch_libjpeg-turbo (){ patch -Np1 <<\@EOS
-diff --git a/Makefile.am b/Makefile.am
-index 67ac7c1..2a8efdc 100644
---- a/Makefile.am
-+++ b/Makefile.am
-@@ -144,11 +144,11 @@ dist_man1_MANS = cjpeg.1 djpeg.1 jpegtran.1 rdjpgcom.1 wrjpgcom.1
- DOCS= coderules.txt jconfig.txt change.log rdrle.c wrrle.c BUILDING.txt \
- 	ChangeLog.txt
- 
--docdir = $(datadir)/doc
-+docdir = $(datadir)/doc/libjpeg-turbo
- dist_doc_DATA = README README-turbo.txt libjpeg.txt structure.txt usage.txt \
- 	wizard.txt 
- 
--exampledir = $(datadir)/doc
-+exampledir = $(datadir)/doc/libjpeg-turbo
- dist_example_DATA = example.c
- 
  
 @EOS
 }

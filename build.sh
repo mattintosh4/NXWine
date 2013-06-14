@@ -775,8 +775,8 @@ index 67ac7c1..2a8efdc 100644
 }
 
 # -------------------------------------- begin processing section
-#Bootstrap_
-#BuildStage1_
+Bootstrap_
+BuildStage1_
 BuildStage2_
 BuildStage3_
 BuildStage4_

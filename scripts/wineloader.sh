@@ -17,32 +17,37 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-# 
-
-# note: some debug options is enabled because this script is incomplete yet.
-if ! [ "${WINEDEBUG+set}" = set ]; then export PS4="\[\e[33m\]DEBUG:\[\e[m\] "; set -x; export WINEDEBUG=+loaddll; fi
-
-# ------------------------------------ begin preparing
-prefix=/Applications/NXWine.app/Contents/Resources
-abswine=${prefix}/libexec/wine
-export PATH=${prefix}/libexec:${prefix}/bin:${prefix/Resources/SharedSupport}/bin:/usr/bin:/bin:/usr/sbin:/sbin
-export LANG=${LANG:=ja_JP.UTF-8}
-
-# note: glu32.dll still needs Mesa libraries.
-export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib:/usr/X11/lib
-
-# special Windows applications path
-#export WINEPATH=
+#
+set -- ${prefix:=/Applications/NXWine.app/Contents/Resources}/libexec/wine "$@"
 
 # note: usage options and non-arguments have to be processed before standard run.
-case $1 in (--help|--version|"") exec ${abswine} $1 ;; esac
+case $2 in (--help|--version|"") exec "$@";; esac
+
+SetEnv_ ()
+{
+  export PATH=${prefix}/libexec:${prefix}/bin:${prefix/Resources/SharedSupport}/bin:/usr/bin:/bin:/usr/sbin:/sbin
+  export LANG=${LANG:=ja_JP.UTF-8}
+  
+  # note: glu32.dll still needs Mesa libraries.
+  export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib
+  
+  # special Windows applications path
+  #export WINEPATH=
+}
+
+SetDebug_ ()
+{
+  export PS4="\[\e[33m\]DEBUG:\[\e[m\] "
+  set -x
+  export WINEDEBUG=+loaddll
+}
 
 CreateWP_ ()
 {
-  local WINEDEBUG=
-  ${abswine} wineboot.exe --init
-  ${abswine} 7z.exe x -y -o'C:\windows' ${prefix}/share/nxwine/nativedlls/nativedlls.exe
-  cat <<@REGEDIT4 | ${abswine} regedit -
+  local WINEDEBUG
+  $1 wineboot.exe --init
+  $1 7z.exe x -y -o'C:\windows' ${prefix}/share/nxwine/nativedlls/nativedlls.exe
+  cat <<@REGEDIT4 | $1 regedit.exe -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
 $(printf '"*D3DCompiler_%d"="native"\n' {37..43})
 "*XAPOFX1_1"="native"
@@ -58,18 +63,18 @@ $(printf '"*d3dx9_%d"="native"\n' {24..43})
 "*quartz"="native"
 @REGEDIT4
   
-  ${abswine} regsvr32.exe l3codecx.ax {\
+  $1 regsvr32.exe l3codecx.ax {\
 XAudio2_{0..7},\
 amstream,\
 ddrawex,\
 dinput,\
 dplayx,\
 quartz}.dll
-} # end CreateWineprefix_
+}
 
-
-# ------------------------------------ begin standard run
-if [ ! -d "${WINEPREFIX:=$HOME/.wine}" ]; then CreateWP_; fi
-
-set -x
-exec ${abswine} "$@"
+# -------------------------------------
+SetEnv_
+# note: some debug options is enabled because this script is incomplete yet.
+if ! [ "${WINEDEBUG+set}" ]; then SetDebug_; fi
+if ! [ -d "${WINEPREFIX:=$HOME/.wine}" ]; then CreateWP_ $1; fi
+exec "$@"

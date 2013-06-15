@@ -19,10 +19,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 export LANG=${LANG:=ja_JP.UTF-8}
-export LESS="-e"
 
 # note: suppress wine debug messages if WINEDEBUG does not set.
-if [ "${WINEDEBUG+set}" != set ]; then export WINEDEBUG=""; fi
+if ! [ "${WINEDEBUG+set}" ] ; then export WINEDEBUG=; fi
 
 usage="\
 Usage:

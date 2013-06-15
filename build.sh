@@ -87,7 +87,7 @@ for pkg in \
 
 # -------------------------------------- begin utilities functions
 makeallins (){ make $make_args && make install; }
-mkdircd (){ mkdir -p "${@:?}" && shift $(($# - 1)) && cd "$@"; }
+mkdircd (){ mkdir -p "${@:?}" && cd "$_"; }
 DocCompress_ ()
 {
     set -- "tar vcjf ${deps_destroot}/share/doc/doc_${1:?}.tar.bz2 -C ${workroot}" $(cd ${workroot} && find -E $1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?')
@@ -97,25 +97,24 @@ DocCompress_ ()
 # -------------------------------------- begin build processing functions
 BuildDeps_ ()
 {
-    : ${1:?}
-    7z x -y -so $srcroot/$1 | tar x - -C ${workroot}
-    cd ${workroot}/$(echo $1 | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##')
-    case $1 in
-        cabextract-*)
-            ./configure ${configure_args/${deps_destroot}/${wine_destroot}}
-        ;;
-        gettext-*)
-            ./configure ${configure_pre_args} \
-                        --disable-{csharp,native-java,openmp} \
-                        --without-{cvs,emacs,git} \
-                        --with-included-{gettext,glib,libcroro,libunistring,libxml}
-        ;;
-        *)
-            shift
-            ./configure ${configure_args} "$@"
-        ;;
-    esac
-    $"makeallins"
+  7z x -y -so $srcroot/${1:?} | tar x - -C $workroot
+  cd $workroot/$(echo $1 | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##')
+  case $1 in
+    cabextract-*)
+      ./configure ${configure_args/${deps_destroot}/${wine_destroot}}
+    ;;
+    gettext-*)
+      ./configure $configure_args \
+                  --disable-{csharp,native-java,openmp} \
+                  --without-{cvs,emacs,git} \
+                  --with-included-{gettext,glib,libcroro,libunistring,libxml}
+    ;;
+    *)
+      shift
+      ./configure ${configure_args} "$@"
+    ;;
+  esac
+  $"makeallins"
 } # end BuildDeps_
 
 BuildDevel_ ()
@@ -186,6 +185,8 @@ BuildDevel_ ()
       sed -i .orig '/$(datadir)\/doc/s/$/\/libjpeg-turbo/' Makefile.am
       autoreconf -i
       ./configure ${configure_args} --with-jpeg8
+      $"makeallins"
+      return
     ;;
     libpng)
       git checkout -f libpng16
@@ -242,7 +243,7 @@ BuildDevel_ ()
                     --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
     ;;
     python) # python 2.7
-      ${hg} checkout -C 2.7
+      ${hg} checkout -C v2.7.5
       $"mkdircd" build
       ../configure ${configure_args}
     ;;
@@ -332,21 +333,20 @@ BuildTools_ ()
     
     case $x in
       autoconf|automake)
-        ./configure  $configure_args
+        ./configure $configure_args
       ;;
       coreutils)
         ./configure $configure_args \
                     --program-prefix=g \
                     --enable-threads=posix \
-                    --without-gmp \
-                    FORCE_UNSAFE_CONFIGURE=1
+                    --without-gmp
         $"makeallins"
         cd $toolprefix/bin
         ln -fs {g,}readlink
         continue
       ;;
       gettext)
-        $"mkdircd prebuild"
+        $"mkdircd" prebuild
         ../configure  $configure_args \
                       --disable-{csharp,native-java,openmp} \
                       --without-{cvs,emacs,git} \
@@ -375,10 +375,9 @@ BuildTools_ ()
       ;;
       p7zip)
         sed "
-          s#^OPTFLAGS=-O#OPTFLAGS=-O3 -mtune=native#
           s#^CXX=c++#CXX=$CXX#
           s#^CC=cc#CC=$CC#
-        " makefile.macosx_64bits > makefile.machine
+        " makefile.macosx_32bits > makefile.machine
         make $make_args all3
         make DEST_HOME=$toolprefix install
         continue
@@ -527,8 +526,8 @@ BuildStage6_ ()
   (set -- $datadir/wine/wine.inf && mv $1 $1.orig && m4 $proj_root/scripts/inf.m4 | cat $1.orig /dev/fd/3 3<&0 | uconv -f UTF-8 -t UTF-8 --add-signature -o $1) || false
   
   # ------------------------------------- executables
-  install -m 0755 ${proj_root}/scripts/wineloader.sh    $bindir/wine
-  install -m 0755 ${proj_root}/scripts/nxwinetricks.sh  $bindir/nxwinetricks
+  install -m 0755 $proj_root/scripts/wineloader.sh    $bindir/wine
+  install -m 0755 $proj_root/scripts/nxwinetricks.sh  $bindir/nxwinetricks
   sed -i "" "s|@DATE@|$(date +%F)|g" $bindir/{wine,nxwinetricks}
   
   # ------------------------------------- native dlls

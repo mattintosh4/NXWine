@@ -42,12 +42,12 @@ $(getconf PATH)
 @EOS); PATH=${PATH%?}
 CC="${ccache} $( xcrun -find gcc-4.2)"
 CXX="${ccache} $(xcrun -find g++-4.2)"
-CFLAGS="-pipe -O3 -m32 -arch i386 -ffast-math -fomit-frame-pointer -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
+CFLAGS="-pipe -O3 -m32 -arch i386 -ffast-math -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
 CXXFLAGS="$CFLAGS"
 CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
 LDFLAGS="-Wl,-arch,i386 -Wl,-search_paths_first -Wl,-headerpad_max_install_names -Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
 ACLOCAL_PATH=$deps_destroot/share/aclocal:$toolprefix/share/aclocal
-LANG=ja_JP.UTF-8; LC_ALL=$LANG; gt_cv_local_ja=$LANG
+LANG=ja_JP.UTF-8; LC_ALL=$LANG; gt_cv_locale_ja=$LANG
 set +a
 
 triple=i686-apple-darwin$(uname -r)
@@ -86,13 +86,12 @@ for pkg in \
 ; do [ -f $srcroot/$pkg ]; done
 
 # -------------------------------------- begin utilities functions
-makeallin (){ make ${make_args} && make install; }
-mkdircd (){ mkdir -p "${@:?}" && cd $_; }
-vmkdir (){ mkdir -p "${@:?}" && cd $_ && pwd; }
+makeallins (){ make $make_args && make install; }
+mkdircd (){ mkdir -p "${@:?}" && shift $(($# - 1)) && cd "$@"; }
 DocCompress_ ()
 {
     set -- "tar vcjf ${deps_destroot}/share/doc/doc_${1:?}.tar.bz2 -C ${workroot}" $(cd ${workroot} && find -E $1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?')
-    [ $# == 1 ] && return || $@
+    [ $# = 1 ] && return || $@
 } # end DocCompress_
 
 # -------------------------------------- begin build processing functions
@@ -116,7 +115,7 @@ BuildDeps_ ()
             ./configure ${configure_args} "$@"
         ;;
     esac
-    $"makeallin"
+    $"makeallins"
 } # end BuildDeps_
 
 BuildDevel_ ()
@@ -133,7 +132,7 @@ BuildDevel_ ()
       git checkout -f master
       ./autogen.sh
       ./configure ${configure_args}
-      $"makeallin"
+      $"makeallins"
       [ -f ${deps_destroot}/lib/libfreetype.6.dylib ]
       DocCompress_ freetype
       return
@@ -167,9 +166,12 @@ BuildDevel_ ()
       ./autogen.sh
       ./configure $configure_args
     ;;
-    icu)
+    icu) # rev 33743, release-51-2
       cd source
       ./configure ${configure_args} --enable-rpath --with-library-bits=32
+      $"makeallins"
+      tar vcjf $deps_destroot/share/doc/icu.tar.bz2 -C $workroot icu/{license,readme}.html
+      return
     ;;
     libffi)
       git checkout -f master
@@ -181,7 +183,7 @@ BuildDevel_ ()
     ;;
     libjpeg-turbo)
       git checkout -f master
-      $"patch_libjpeg"
+      sed -i .orig '/$(datadir)\/doc/s/$/\/libjpeg-turbo/' Makefile.am
       autoreconf -i
       ./configure ${configure_args} --with-jpeg8
     ;;
@@ -198,7 +200,7 @@ BuildDevel_ ()
     ;;
     libtiff)
       ./configure ${configure_args}
-      $"makeallin"
+      $"makeallins"
       return
     ;;
     libusb|libusb-compat-0.1)
@@ -253,7 +255,7 @@ BuildDevel_ ()
       # note: mercurial repository must be separated a build directory.
       $"mkdircd" build
       ../configure ${configure_args}
-      $"makeallin"
+      $"makeallins"
       # note: theora will not find sdl2.pc.
       cd ${deps_destroot}/lib/pkgconfig
       ln -s sdl{2,}.pc
@@ -276,7 +278,7 @@ BuildDevel_ ()
     xz)
       ./autogen.sh
       ./configure ${configure_args}
-      $"makeallin"
+      $"makeallins"
       return
     ;;
     zlib)
@@ -284,7 +286,7 @@ BuildDevel_ ()
       ./configure --prefix=${deps_destroot}
     ;;
   esac
-  $"makeallin"
+  $"makeallins"
   DocCompress_ $1
 } # end BuildDevel_
 
@@ -338,7 +340,7 @@ BuildTools_ ()
                     --enable-threads=posix \
                     --without-gmp \
                     FORCE_UNSAFE_CONFIGURE=1
-        $"makeallin"
+        $"makeallins"
         cd $toolprefix/bin
         ln -fs {g,}readlink
         continue
@@ -355,7 +357,7 @@ BuildTools_ ()
       ;;
       libtool)
         ./configure $configure_args --program-prefix=g
-        $"makeallin"
+        $"makeallins"
         cd $toolprefix/bin
         ln -sf {g,}libtool
         ln -sf {g,}libtoolize
@@ -366,7 +368,7 @@ BuildTools_ ()
                     --enable-c++ \
                     --disable-gcc-warnings \
                     --with-syscmd-shell
-        $"makeallin"
+        $"makeallins"
         cd $toolprefix/bin
         ln -sf {g,}m4
         continue
@@ -382,7 +384,7 @@ BuildTools_ ()
         continue
       ;;
     esac
-    $"makeallin"
+    $"makeallins"
     continue
   done
   unset x
@@ -439,7 +441,6 @@ BuildStage1_ ()
 
 BuildStage2_ ()
 {
-#  BuildDevel_ guile
   BuildDeps_  ${pkgsrc_libtasn1}
   BuildDevel_ nettle
   BuildDevel_ gnutls
@@ -473,41 +474,35 @@ BuildStage4_ ()
 BuildStage5_ ()
 {
   set -- $wine_destroot
-  
   # -------------------------------------- cabextract
-  tar xf $pkgsrc_cabextract -C $workroot
-  cd $workroot/${pkgsrc_cabextract%.tar.*}
-  ./configure $configure_args
-  $"makeallin"
-  cp $workroot/cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $(vmkdir $1/share/doc/cabextract-1.4)
-  
+  BuildDeps_ $pkgsrc_cabextract
+  (set -- $1/share/doc/cabextract-1.4 && mkdir -p $1 && install -m 0644 $workroot/cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $1) || false
   # -------------------------------------- winetricks
-  install -m 0755 $srcroot/winetricks/src/winetricks      $(vmkdir $1/libexec)
-  install -m 0644 $srcroot/winetricks/src/COPYING         $(vmkdir $1/share/doc/winetricks)
-  install -m 0755 $proj_root/scripts/winetricksloader.sh  $(vmkdir $1/bin)/winetricks
+  (set -- $1/bin                      && mkdir -p $1 && install -m 0755 $proj_root/scripts/winetricksloader.sh  $1/winetricks) || false
+  (set -- $1/libexec                  && mkdir -p $1 && install -m 0755 $srcroot/winetricks/src/winetricks      $1) || false
+  (set -- $1/share/doc/winetricks     && mkdir -p $1 && install -m 0644 $srcroot/winetricks/src/COPYING         $1) || false
   
   # ------------------------------------- 7-Zip
-  7z x -y -o$1/share/nxwine/programs/7-Zip -x'!$*' $srcroot/$pkgsrc_7z
+  7z x -y -o$1/share/nxwine/programs/7-Zip -x\!\$\* $srcroot/$pkgsrc_7z
 } # end BuildStage5_
 
 BuildWine_ ()
 {
-  $"mkdircd" ${workroot}/wine
-  ${srcroot}/wine/configure --prefix=${wine_destroot} \
-                            --build=${triple} \
-                            --with-opengl \
-                            --without-{capi,cms,gphoto,gsm,oss,sane,v4l} \
-                            --x-includes=/opt/X11/include \
-                            --x-libraries=/opt/X11/lib
-  $"makeallin"
-  
-  wine_version=$($wine_destroot/bin/wine --version)
-  : ${wine_version:?}
+  $"mkdircd" $workroot/wine
+  $srcroot/wine/configure --prefix=$wine_destroot \
+                          --build=$triple \
+                          --with-opengl \
+                          --without-{capi,cms,gphoto,gsm,oss,sane,v4l} \
+                          --x-includes=/opt/X11/include \
+                          --x-libraries=/opt/X11/lib
+  $"makeallins"
   
   set -- install_name_tool -add_rpath /usr/lib $wine_destroot
   $@/bin/wine
   $@/bin/wineserver
   $@/lib/libwine.1.0.dylib
+  
+  (set -- $wine_destroot/libexec && mkdir -p $1 && mv $wine_destroot/bin/wine $1) || false
 } # end BuildWine_
 
 BuildStage6_ ()
@@ -519,20 +514,19 @@ BuildStage6_ ()
   
   (set -- $datadir/wine/gecko && mkdir -p $1 && install -m 0644 $srcroot/$pkgsrc_gecko  $1) || false
   (set -- $datadir/wine/mono  && mkdir -p $1 && install -m 0644 $srcroot/$pkgsrc_mono   $1) || false
-  (set -- $doc/wine           && mkdir -p $1 && install -m 0644 $srcroot/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $1) || false
+  (set -- $docdir/wine        && mkdir -p $1 && install -m 0644 $srcroot/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $1) || false
   
   # ------------------------------------- fonts
-  # note: some fonts are duplicated with system fonts
-  rm ${datadir:?}/wine/fonts/{symbol,tahoma,tahomabd,wingding}.ttf
+  # note: some fonts are duplicated with system fonts. using 'rm' command only is not useful.
+  find $datadir/wine/fonts -name "*.ttf" | egrep "(symbol|tahoma(bd)?|wingding).ttf" | xargs rm
   tar xf $srcroot/fonts/Konatu_ver_20121218.zip   -C $docdir
   tar xf $srcroot/fonts/sazanami-20040629.tar.bz2 -C $docdir
   mv $docdir/*/*.ttf $datadir/wine/fonts
   
   # ------------------------------------- inf
-  (set -- $datadir/wine/wine.inf && m4 $proj_root/scripts/inf.m4 | cat $1 /dev/fd/3 3<&0 | tee | uconv -f UTF-8 -t UTF-8 --add-signature -o $1) || false
+  (set -- $datadir/wine/wine.inf && mv $1 $1.orig && m4 $proj_root/scripts/inf.m4 | cat $1.orig /dev/fd/3 3<&0 | uconv -f UTF-8 -t UTF-8 --add-signature -o $1) || false
   
   # ------------------------------------- executables
-  mv $bindir/wine $(vmkdir $wine_destroot/libexec)
   install -m 0755 ${proj_root}/scripts/wineloader.sh    $bindir/wine
   install -m 0755 ${proj_root}/scripts/nxwinetricks.sh  $bindir/nxwinetricks
   sed -i "" "s|@DATE@|$(date +%F)|g" $bindir/{wine,nxwinetricks}
@@ -543,8 +537,8 @@ BuildStage6_ ()
     set -- $workroot/system32
     $"mkdircd" $1
     install -m 0644 $srcroot/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
-    7z x $srcroot/nativedlls/directx_feb2010_redist.exe dxnt.cab
-    7z x dxnt.cab l3codecx.ax {\
+    7z x -y $srcroot/nativedlls/directx_feb2010_redist.exe dxnt.cab
+    7z x -y dxnt.cab l3codecx.ax {\
 amstream,\
 ddrawex,\
 dinput,\
@@ -553,7 +547,7 @@ dplayx,\
 mciqtz32,\
 quartz}.dll
     
-    7z x $srcroot/nativedlls/directx_Jun2010_redist.exe \*_x86.cab
+    7z x -y $srcroot/nativedlls/directx_Jun2010_redist.exe \*_x86.cab
     find ./*_x86.cab | while read
     do
       7z x -y $REPLY {\
@@ -571,9 +565,12 @@ d3dx9}_\*.dll
   InstallNativedlls_
     
   # ------------------------------------- plist
+  wine_version=$(GIT_DIR=${srcroot}/wine/.git git describe HEAD 2>/dev/null)
+  : ${wine_version:?}
+  
   m4  -D_PLIST=$destroot/Contents/Info.plist \
-      -D_PROJ_VERSION=$proj_version \
       -D_PROJ_DOMAIN=$proj_domain \
+      -D_PROJ_VERSION=$proj_version \
       -D_WINE_VERSION=$wine_version \
 <<\@EOS | sh -x
 changequote([, ])dnl
@@ -590,17 +587,17 @@ _PB([Set :CFBundleIconFile droplet])
 _PB([Add :NSHumanReadableCopyright string _WINE_VERSION, Copyright © 2013 mattintosh4, https://github.com/mattintosh4/NXWine])
 _PB([Add :CFBundleVersion string _PROJ_VERSION])
 _PB([Add :CFBundleIdentifier string _PROJ_DOMAIN])
-_DT(1,  exe,    Windows Executable File)
-_DT(2,  msi,    Microsoft Windows Installer)
-_DT(3,  lnk,    Windows Shortcut File)
-_DT(4,  7z,     7z Archive)
-_DT(5,  cab,    cab Archive)
-_DT(6,  lha,    lha Archive)
-_DT(7,  lzh,    lzh Archive)
-_DT(8,  lzma,   lzma Archive)
-_DT(9,  rar,    rar Archive)
-_DT(10, xz,     xz Archive)
-_DT(11, zip,    zip Archive)
+_DT(1,  exe,  Windows Executable File)
+_DT(2,  msi,  Microsoft Windows Installer)
+_DT(3,  lnk,  Windows Shortcut File)
+_DT(4,  7z,   7z Archive)
+_DT(5,  cab,  cab Archive)
+_DT(6,  lha,  lha Archive)
+_DT(7,  lzh,  lzh Archive)
+_DT(8,  lzma, lzma Archive)
+_DT(9,  rar,  rar Archive)
+_DT(10, xz,   xz Archive)
+_DT(11, zip,  zip Archive)
 @EOS
   
   # faenza icon theme
@@ -615,38 +612,17 @@ _DT(11, zip,    zip Archive)
 BuildDmg_ ()
 {
   set -- $TMPDIR/$$$LINENO.\$\$
-  
-  mkdir -p $1/.resources
-  mv $destroot $_
-  osacompile -xo $1/"NXWine Installer".app $proj_root/scripts/installer.applescript
-  install -m 0644 $proj_root/nxwine.icns $1/"NXWine Installer".app/Contents/Resources/applet.icns
-  hdiutil create -ov -format UDBZ -srcdir $1 -volname $proj_name $proj_root/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
+  (set -- $1/.resources && mkdir -p $1 && mv $destroot $1) || false
+  (set -- $1/NXWineInstaller.app && osacompile -xo $1 $proj_root/scripts/installer.applescript && install -m 0644 $proj_root/nxwine.icns $1/Contents/Resources/applet.icns) || false
+  hdiutil create  -ov \
+                  -format UDBZ \
+                  -srcdir $1 \
+                  -volname $proj_name \
+                  $proj_root/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
   rm -rf $1
 } # end BuildDmg_
 
 # -------------------------------------- patch
-patch_libjpeg (){ patch -Np1 <<\@EOS
-diff --git a/Makefile.am b/Makefile.am
-index 67ac7c1..2a8efdc 100644
---- a/Makefile.am
-+++ b/Makefile.am
-@@ -144,11 +144,11 @@ dist_man1_MANS = cjpeg.1 djpeg.1 jpegtran.1 rdjpgcom.1 wrjpgcom.1
- DOCS= coderules.txt jconfig.txt change.log rdrle.c wrrle.c BUILDING.txt \
- 	ChangeLog.txt
- 
--docdir = $(datadir)/doc
-+docdir = $(datadir)/doc/libjpeg-turbo
- dist_doc_DATA = README README-turbo.txt libjpeg.txt structure.txt usage.txt \
- 	wizard.txt 
- 
--exampledir = $(datadir)/doc
-+exampledir = $(datadir)/doc/libjpeg-turbo
- dist_example_DATA = example.c
- 
- 
-@EOS
-}
-
 patch_nasm (){ patch -Np1 <<\@EOS
 --- a/Makefile.in
 +++ b/Makefile.in

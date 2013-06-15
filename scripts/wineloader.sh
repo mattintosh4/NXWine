@@ -20,12 +20,11 @@
 # 
 
 # note: some debug options is enabled because this script is incomplete yet.
-if [ "${WINEDEBUG+set}" != set ]; then export PS4="\[\e[33m\]DEBUG:\[\e[m\] "; set -x; export WINEDEBUG=+loaddll; fi
+if ! [ "${WINEDEBUG+set}" = set ]; then export PS4="\[\e[33m\]DEBUG:\[\e[m\] "; set -x; export WINEDEBUG=+loaddll; fi
 
 # ------------------------------------ begin preparing
 prefix=/Applications/NXWine.app/Contents/Resources
-wine=${prefix}/libexec/wine
-
+abswine=${prefix}/libexec/wine
 export PATH=${prefix}/libexec:${prefix}/bin:${prefix/Resources/SharedSupport}/bin:/usr/bin:/bin:/usr/sbin:/sbin
 export LANG=${LANG:=ja_JP.UTF-8}
 
@@ -36,15 +35,14 @@ export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib:/usr/X11/lib
 #export WINEPATH=
 
 # note: usage options and non-arguments have to be processed before standard run.
-case $1 in (--help|--version|"") exec ${wine} $1 ;; esac
+case $1 in (--help|--version|"") exec ${abswine} $1 ;; esac
 
-CreateWineprefix_ ()
+CreateWP_ ()
 {
-    set -e
-    ${wine} wineboot.exe --init
-    _WINEDEBUG="${WINEDEBUG}" WINEDEBUG=
-    ${wine} 7z.exe x -y -o'C:\windows' ${prefix}/share/nxwine/nativedlls/nativedlls.exe
-    cat <<@REGEDIT4 | ${wine} regedit -
+  local WINEDEBUG=
+  ${abswine} wineboot.exe --init
+  ${abswine} 7z.exe x -y -o'C:\windows' ${prefix}/share/nxwine/nativedlls/nativedlls.exe
+  cat <<@REGEDIT4 | ${abswine} regedit -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
 $(printf '"*D3DCompiler_%d"="native"\n' {37..43})
 "*XAPOFX1_1"="native"
@@ -59,24 +57,19 @@ $(printf '"*d3dx9_%d"="native"\n' {24..43})
 "*mciqtz32"="native"
 "*quartz"="native"
 @REGEDIT4
-    
-    ${wine} regsvr32.exe \
-        l3codecx.ax \
-{\
+  
+  ${abswine} regsvr32.exe l3codecx.ax {\
 XAudio2_{0..7},\
 amstream,\
 ddrawex,\
 dinput,\
 dplayx,\
 quartz}.dll
-    
-    WINEDEBUG="${_WINEDEBUG}"
-    set +e
 } # end CreateWineprefix_
 
 
 # ------------------------------------ begin standard run
-if [ ! -d "${WINEPREFIX:=$HOME/.wine}" ]; then CreateWineprefix_; fi
+if [ ! -d "${WINEPREFIX:=$HOME/.wine}" ]; then CreateWP_; fi
 
 set -x
-exec ${wine} "$@"
+exec ${abswine} "$@"

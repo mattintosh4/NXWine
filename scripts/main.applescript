@@ -18,16 +18,13 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -- 
 
-property LAUNCHWINE : "
-    export WINEDEBUG=-all
-    if [ -d \"${WINEPREFIX:=$HOME/.wine}\" ]; then
-        /Applications/NXWine.app/Contents/Resources/bin/wineserver -p0
-    fi
-    /Applications/NXWine.app/Contents/Resources/bin/wine"
-
 on main(input)
     try
-        do shell script LAUNCHWINE & space & input
+        do shell script "
+            set -- /Applications/NXWine.app/Contents/Resources/bin
+            export WINEDEBUG=-all
+            if [ -d \"${WINEPREFIX:=$HOME/.wine}\" ]; then $1/wineserver -p0; fi
+            $1/wine" & space & input
     end try
 end main
 

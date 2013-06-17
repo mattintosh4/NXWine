@@ -483,14 +483,15 @@ BuildStage4_ ()
 BuildStage5_ ()
 {
   set -- $wine_destroot
-  # -------------------------------------- cabextract
+  # ------------------------------------- cabextract
   BuildDeps_ $pkgsrc_cabextract
   (set -- $1/share/doc/cabextract-1.4 && mkdir -p $1 && install -m 0644 $workroot/cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $1) || false
-  # -------------------------------------- winetricks
-  (set -- $1/bin                      && mkdir -p $1 && install -m 0755 $proj_root/scripts/winetricksloader.sh  $1/winetricks) || false
+  # ------------------------------------- winetricks
   (set -- $1/libexec                  && mkdir -p $1 && install -m 0755 $srcroot/winetricks/src/winetricks      $1) || false
+  (set -- $1/share/man/man1           && mkdir -p $1 && install -m 0644 $srcroot/winetricks/src/winetricks.1    $1) || false
   (set -- $1/share/doc/winetricks     && mkdir -p $1 && install -m 0644 $srcroot/winetricks/src/COPYING         $1) || false
-  
+  # ------------------------------------- nxwinetricks
+  (set -- $1/bin                      && mkdir -p $1 && install -m 0755 $proj_root/scripts/winetricksloader.sh  $1/winetricks) || false
   # ------------------------------------- 7-Zip
   7z x -y -o$1/share/nxwine/programs/7-Zip -x\!\$\* $srcroot/$pkgsrc_7z
 } # end BuildStage5_

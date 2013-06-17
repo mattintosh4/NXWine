@@ -301,14 +301,15 @@ BuildDevel_ ()
 BuildTools_ ()
 {
   set -- \
-    gettext   \
-    m4        \
-    autoconf  \
-    automake  \
-    libtool   \
-    coreutils \
-    help2man  \
-    texinfo   \
+    gettext     \
+    m4          \
+    autoconf    \
+    automake    \
+    libtool     \
+    coreutils   \
+    help2man    \
+    texinfo     \
+    pkg-config  \
     p7zip
     
   local CPPFLAGS="${CPPFLAGS/$deps_destroot/$toolprefix}"
@@ -324,6 +325,15 @@ BuildTools_ ()
         cd $workroot/texinfo
         ./autogen.sh
         ./configure $configure_args
+      ;;
+      pkg-config)
+        cp -RHf $srcroot/pkg-config $workroot
+        cd $workroot/pkg-config
+        git checkout -f master
+        ./autogen.sh  $configure_args \
+                      --disable-host-tool \
+                      --with-internal-glib \
+                      --with-pc-path=$deps_destroot/lib/pkgconfig:$deps_destroot/share/pkgconfig:/usr/lib/pkgconfig
       ;;
       *)
         local pkg=pkgsrc_$1; pkg=${!pkg}
@@ -409,7 +419,7 @@ Bootstrap_ ()
   BuildDeps_  ${pkgsrc_gettext}
   BuildDeps_  ${pkgsrc_libelf} --disable-compat
   BuildDeps_  ${pkgsrc_libtool}
-  BuildDevel_ pkg-config
+#  BuildDevel_ pkg-config
   BuildDevel_ readline
   BuildDevel_ zlib
   BuildDevel_ xz

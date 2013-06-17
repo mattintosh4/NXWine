@@ -215,6 +215,10 @@ BuildDevel_ ()
       git checkout -f master
       ./autogen.sh ${configure_args}
     ;;
+    mpg123)
+      autoreconf -i
+      ./configure ${configure_args}
+    ;;
     nasm)
       git checkout -f master
       $"patch_nasm"
@@ -468,6 +472,7 @@ BuildStage4_ ()
   BuildDevel_ SDL                     # SDL required nasm
   BuildDevel_ SDL_sound
   BuildDevel_ theora                  # libtheora required SDL
+  BuildDevel_ mpg123                  # mpg123 required SDL
 } # end BuildStage4_
 
 BuildStage5_ ()

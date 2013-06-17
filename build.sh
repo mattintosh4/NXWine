@@ -345,6 +345,18 @@ BuildTools_ ()
         case $1 in
           p7zip)
             cd $workroot/${pkg%_src_*}
+            sed "
+              s#^CXX=c++#CXX=$CXX#
+              s#^CC=cc#CC=$CC#
+            " makefile.macosx_32bits > makefile.machine
+            sed -i "" "
+              s#444#644#g
+              s#555#755#g
+              s#777#755#g
+            " install.sh
+            make $make_args all3
+            make DEST_HOME=$toolprefix install
+            continue
           ;;
           *)
             cd $workroot/${pkg%.tar.*}

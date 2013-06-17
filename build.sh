@@ -187,6 +187,10 @@ BuildDevel_ ()
       $"makeallins"
       return
     ;;
+    libmodplug)
+      autoreconf -i
+      ./configure $configure_args
+    ;;
     libpng)
       git checkout -f libpng16
       autoreconf -i
@@ -459,6 +463,7 @@ BuildStage3_ ()
 
 BuildStage4_ ()
 {
+  BuildDevel_ libmodplug
   BuildDevel_ ogg
   BuildDevel_ vorbis
   BuildDevel_ flac

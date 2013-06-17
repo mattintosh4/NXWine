@@ -37,9 +37,9 @@ SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/
 [ -d "${SDKROOT}" ]
 
 PATH=$(tr '\n' ':' <<@EOS
-${deps_destroot}/bin
-${toolprefix}/bin
-$(dirname ${git})
+$deps_destroot/bin
+$toolprefix/bin
+$(dirname $git)
 $(getconf PATH)
 @EOS); PATH=${PATH%?}
 CC="${ccache} $( xcrun -find gcc-4.2)"
@@ -48,9 +48,6 @@ CFLAGS="-pipe -O3 -m32 -arch i386 -ffast-math -march=core2 -mtune=core2 -mmacosx
 CXXFLAGS="$CFLAGS"
 CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
 LDFLAGS="-arch i386 -Wl,-search_paths_first -Wl,-headerpad_max_install_names -Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
-M4=m4
-LIBTOOL=libtool
-LIBTOOLIZE=libtoolize
 ACLOCAL_PATH=$deps_destroot/share/aclocal:$toolprefix/share/aclocal
 LANG=ja_JP.UTF-8; LC_ALL=$LANG; gt_cv_locale_ja=$LANG
 set +a
@@ -70,7 +67,7 @@ ${configure_pre_args} \
 --without-x"
 make_args="-j $(($(sysctl -n hw.ncpu) + 1))"
 
-# ------------------------------------- package source
+# ------------------------------------- package sources
 for pkg in \
   ${pkgsrc_7z=7z920.exe} \
   ${pkgsrc_autoconf=autoconf-2.69.tar.gz} \
@@ -90,20 +87,20 @@ for pkg in \
   ${pkgsrc_p7zip=p7zip_9.20.1_src_all.tar.bz2} \
 ; do [ -f $srcroot/$pkg ]; done
 
-# ------------------------------------- begin utilities functions
+# ------------------------------------- utilities functions
 makeallins (){ make $make_args && make install; }
 mkdircd (){ mkdir -p "${@:?}" && cd "$_"; }
 DocCompress_ ()
 {
-    set -- "tar vcjf ${deps_destroot}/share/doc/doc_${1:?}.tar.bz2 -C ${workroot}" $(cd ${workroot} && find -E $1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?')
-    [ $# = 1 ] && return || $@
+  set -- "tar vcjf ${deps_destroot}/share/doc/doc_${1:?}.tar.bz2 -C ${workroot}" $(cd ${workroot} && find -E $1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?')
+  [ $# = 1 ] && return || $@
 } # end DocCompress_
 
-# ------------------------------------- begin build processing functions
+# ------------------------------------- build processing functions
 BuildDeps_ ()
 {
   7z x -y -so $srcroot/${1:?} | tar x - -C $workroot
-  cd $workroot/$(echo $1 | sed -E 's#\.(zip|tbz2?|tgz|tar\..*)$##')
+  cd $workroot/${1%%-*}*
   case $1 in
     cabextract-*)
       ./configure ${configure_args/${deps_destroot}/${wine_destroot}}
@@ -212,7 +209,7 @@ BuildDevel_ ()
     ;;
     libxml2)
       git checkout -f master
-      ./autogen.sh ${configure_args} --with-icu
+      ./autogen.sh ${configure_args} --with-icu --with-python=$deps_destroot
     ;;
     libxslt)
       git checkout -f master
@@ -313,9 +310,9 @@ BuildTools_ ()
     
   local CPPFLAGS="${CPPFLAGS/$deps_destroot/$toolprefix}"
   local LDFLAGS="${LDFLAGS/$deps_destroot/$toolprefix}"
-  local configure_args="--prefix=$toolprefix --build=$triple"
+  local configure_args="${configure_pre_args/$deps_destroot/$toolprefix}"
   
-  set -- - "$@"
+  set -- dummy "$@"
   while shift && [ "$1" ]
   do
     case $1 in
@@ -332,14 +329,46 @@ BuildTools_ ()
         ./autogen.sh  $configure_args \
                       --disable-host-tool \
                       --with-internal-glib \
-                      --with-pc-path=$deps_destroot/lib/pkgconfig:$deps_destroot/share/pkgconfig:/usr/lib/pkgconfig
+                      --with-pc-path=$(set -- {$deps_destroot/{lib,share},/usr/lib}/pkgconfig; IFS=:; echo "$*")
       ;;
       *)
-        local pkg=pkgsrc_$1; pkg=${!pkg}
-        tar xf $srcroot/$pkg -C $workroot
+        eval tar xf $srcroot/\$pkgsrc_$1 -C $workroot
+        cd $workroot/$1*
+        
         case $1 in
+          coreutils)
+            ./configure $configure_args \
+                        --program-prefix=g \
+                        --enable-threads=posix \
+                        --without-gmp
+            $"makeallins"
+            cd $toolprefix/bin
+            ln -fs {g,}readlink
+            continue
+          ;;
+          gettext)
+            $"mkdircd" prebuild
+            ../configure $configure_args
+          ;;
+          help2man) # help2man required from texinfo
+            ./configure $configure_args
+          ;;
+          libtool)
+            ./configure $configure_args --program-prefix=g
+            $"makeallins"
+            cd $toolprefix/bin
+            ln -fs {g,}libtool
+            ln -fs {g,}libtoolize
+            continue
+          ;;
+          m4)
+            ./configure $configure_args --program-prefix=g
+            $"makeallins"
+            cd $toolprefix/bin
+            ln -fs {g,}m4
+            continue
+          ;;
           p7zip)
-            cd $workroot/${pkg%_src_*}
             sed "
               s#^CXX=c++#CXX=$CXX#
               s#^CC=cc#CC=$CC#
@@ -354,46 +383,9 @@ BuildTools_ ()
             continue
           ;;
           *)
-            cd $workroot/${pkg%.tar.*}
+            ./configure $configure_args
           ;;
         esac
-      ;;
-    esac
-    
-    case $1 in
-      coreutils)
-        ./configure $configure_args \
-                    --program-prefix=g \
-                    --enable-threads=posix \
-                    --without-gmp
-        $"makeallins"
-        cd $toolprefix/bin
-        ln -fs {g,}readlink
-        continue
-      ;;
-      gettext)
-        $"mkdircd" prebuild
-        ../configure  $configure_args
-      ;;
-      help2man) # help2man required from texinfo
-        ./configure $configure_args
-      ;;
-      p7zip)
-        sed "
-          s#^CXX=c++#CXX=$CXX#
-          s#^CC=cc#CC=$CC#
-        " makefile.macosx_32bits > makefile.machine
-        sed -i "" "
-          s#444#644#g
-          s#555#755#g
-          s#777#755#g
-        " install.sh
-        make $make_args all3
-        make DEST_HOME=$toolprefix install
-        continue
-      ;;
-      *)
-        ./configure $configure_args
       ;;
     esac
     $"makeallins"

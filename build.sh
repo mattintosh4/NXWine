@@ -231,12 +231,9 @@ BuildDevel_ ()
       ./configure ${configure_args}
     ;;
     ogg)
-      # strip configure command
-      sed -i '' '$d' autogen.sh
-      ./autogen.sh
-      # strip default optimize flag
-      sed -i '' 's/-O4 //' configure
-      ./configure ${configure_args}
+      sed -i '' 's/--enable-maintainer-mode //' autogen.sh
+      sed -i '' 's/-O4 //' configure.ac
+      ./autogen.sh $configure_args
     ;;
     orc)
       git checkout -f master
@@ -283,7 +280,9 @@ BuildDevel_ ()
       ./autogen.sh ${configure_args} --disable-{oggtest,vorbistest,examples,asm}
     ;;
     vorbis)
-      ./autogen.sh ${configure_args}
+      sed -i '' 's/--enable-maintainer-mode //' autogen.sh
+      sed -i '' 's/-O4 //' configure.ac
+      ./autogen.sh $configure_args
     ;;
     xz)
       ./autogen.sh

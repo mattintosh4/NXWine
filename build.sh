@@ -262,16 +262,11 @@ BuildDevel_ ()
       ./configure ${configure_args} --enable-multibyte --with-curses
     ;;
     SDL)
+      $hg checkout -C SDL-1.2
+      ./autogen.sh
       # note: mercurial repository must be separated a build directory.
       $"mkdircd" build
       ../configure ${configure_args}
-      $"makeallins"
-      # note: theora will not find sdl2.pc.
-      cd ${deps_destroot}/lib/pkgconfig
-      ln -s sdl{2,}.pc
-      cd -
-      DocCompress_ SDL
-      return
     ;;
     SDL_sound)
       ./bootstrap

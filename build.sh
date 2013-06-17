@@ -103,12 +103,6 @@ BuildDeps_ ()
     cabextract-*)
       ./configure ${configure_args/${deps_destroot}/${wine_destroot}}
     ;;
-    gettext-*)
-      ./configure $configure_args \
-                  --disable-{csharp,native-java,openmp} \
-                  --without-{cvs,emacs,git} \
-                  --with-included-{gettext,glib,libcroro,libunistring,libxml}
-    ;;
     *)
       shift
       ./configure ${configure_args} "$@"

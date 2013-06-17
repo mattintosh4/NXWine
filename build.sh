@@ -7,25 +7,27 @@ readonly proj_uuid=E43FF9C9-669C-4319-8351-FF99AFF3230C
 readonly proj_root="$(cd "$(dirname "$0")"; pwd)"
 readonly proj_version=$(date +%Y%m%d)
 readonly proj_domain=com.github.mattintosh4.${proj_name}
-readonly toolbundle=${proj_root}/tool.sparsebundle
-readonly toolprefix=/Volumes/${proj_uuid}
 
 readonly srcroot=${proj_root}/sources
 readonly workroot=$TMPDIR/${proj_uuid}
 readonly destroot=/Applications/${proj_name}.app
 readonly wine_destroot=${destroot}/Contents/Resources
 readonly deps_destroot=${destroot}/Contents/SharedSupport
+readonly toolprefix=$deps_destroot/local
+readonly toolbundle=$proj_root/tools.tar.bz2
 
-# -------------------------------------- local tools
+# ------------------------------------- local tools
 readonly ccache=/usr/local/bin/ccache
 readonly git=/usr/local/git/bin/git
 readonly hg=/usr/local/bin/hg
 [ -x ${ccache} ]
 [ -x ${git} ]
 [ -x ${hg} ]
+
+# ------------------------------------- extra tools
 if [ -x ${FONTFORGE=/opt/local/bin/fontforge} ]; then export FONTFORGE; fi
 
-# -------------------------------------- environment variables
+# ------------------------------------- environment variables
 set -a
 MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f-2)
 DEVELOPER_DIR=$(xcode-select -print-path)
@@ -45,7 +47,10 @@ CXX="${ccache} $(xcrun -find g++-4.2)"
 CFLAGS="-pipe -O3 -m32 -arch i386 -ffast-math -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
 CXXFLAGS="$CFLAGS"
 CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
-LDFLAGS="-Wl,-arch,i386 -Wl,-search_paths_first -Wl,-headerpad_max_install_names -Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
+LDFLAGS="-arch i386 -Wl,-search_paths_first -Wl,-headerpad_max_install_names -Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
+M4=m4
+LIBTOOL=libtool
+LIBTOOLIZE=libtoolize
 ACLOCAL_PATH=$deps_destroot/share/aclocal:$toolprefix/share/aclocal
 LANG=ja_JP.UTF-8; LC_ALL=$LANG; gt_cv_locale_ja=$LANG
 set +a
@@ -65,7 +70,7 @@ ${configure_pre_args} \
 --without-x"
 make_args="-j $(($(sysctl -n hw.ncpu) + 1))"
 
-# -------------------------------------- package source
+# ------------------------------------- package source
 for pkg in \
   ${pkgsrc_7z=7z920.exe} \
   ${pkgsrc_autoconf=autoconf-2.69.tar.gz} \
@@ -85,7 +90,7 @@ for pkg in \
   ${pkgsrc_p7zip=p7zip_9.20.1_src_all.tar.bz2} \
 ; do [ -f $srcroot/$pkg ]; done
 
-# -------------------------------------- begin utilities functions
+# ------------------------------------- begin utilities functions
 makeallins (){ make $make_args && make install; }
 mkdircd (){ mkdir -p "${@:?}" && cd "$_"; }
 DocCompress_ ()
@@ -94,7 +99,7 @@ DocCompress_ ()
     [ $# = 1 ] && return || $@
 } # end DocCompress_
 
-# -------------------------------------- begin build processing functions
+# ------------------------------------- begin build processing functions
 BuildDeps_ ()
 {
   7z x -y -so $srcroot/${1:?} | tar x - -C $workroot
@@ -226,7 +231,7 @@ BuildDevel_ ()
     ;;
     ogg)
       sed -i '' 's/--enable-maintainer-mode //' autogen.sh
-      sed -i '' 's/-O4 //' configure.ac
+      sed -i '' 's/-O4 //' configure.in
       ./autogen.sh $configure_args
     ;;
     orc)
@@ -306,13 +311,14 @@ BuildTools_ ()
     texinfo   \
     p7zip
     
-  local CPPFLAGS="$CPPFLAGS -I$toolprefix/include"
-  local LDFLAGS="$LDFLAGS -L$toolprefix/lib"
-  local configure_args="${configure_args/$deps_destroot/$toolprefix}"
+  local CPPFLAGS="${CPPFLAGS/$deps_destroot/$toolprefix}"
+  local LDFLAGS="${LDFLAGS/$deps_destroot/$toolprefix}"
+  local configure_args="--prefix=$toolprefix --build=$triple"
   
-  for x in $@
+  set -- - "$@"
+  while shift && [ "$1" ]
   do
-    case $x in
+    case $1 in
       texinfo) # texinfo required from libtasn1-devel
         cp -RHf $srcroot/texinfo $workroot
         cd $workroot/texinfo
@@ -320,9 +326,9 @@ BuildTools_ ()
         ./configure $configure_args
       ;;
       *)
-        local pkg=pkgsrc_$x; pkg=${!pkg}
+        local pkg=pkgsrc_$1; pkg=${!pkg}
         tar xf $srcroot/$pkg -C $workroot
-        case $x in
+        case $1 in
           p7zip)
             cd $workroot/${pkg%_src_*}
           ;;
@@ -333,10 +339,7 @@ BuildTools_ ()
       ;;
     esac
     
-    case $x in
-      autoconf|automake)
-        ./configure $configure_args
-      ;;
+    case $1 in
       coreutils)
         ./configure $configure_args \
                     --program-prefix=g \
@@ -349,52 +352,38 @@ BuildTools_ ()
       ;;
       gettext)
         $"mkdircd" prebuild
-        ../configure  $configure_args \
-                      --disable-{csharp,native-java,openmp} \
-                      --without-{cvs,emacs,git} \
-                      --with-included-{gettext,glib,libcroro,libunistring,libxml}
+        ../configure  $configure_args
       ;;
       help2man) # help2man required from texinfo
         ./configure $configure_args
-      ;;
-      libtool)
-        ./configure $configure_args --program-prefix=g
-        $"makeallins"
-        cd $toolprefix/bin
-        ln -sf {g,}libtool
-        ln -sf {g,}libtoolize
-        continue
-      ;;
-      m4)
-        ./configure $configure_args \
-                    --enable-c++ \
-                    --disable-gcc-warnings \
-                    --with-syscmd-shell
-        $"makeallins"
-        cd $toolprefix/bin
-        ln -sf {g,}m4
-        continue
       ;;
       p7zip)
         sed "
           s#^CXX=c++#CXX=$CXX#
           s#^CC=cc#CC=$CC#
         " makefile.macosx_32bits > makefile.machine
+        sed -i "" "
+          s#444#644#g
+          s#555#755#g
+          s#777#755#g
+        " install.sh
         make $make_args all3
         make DEST_HOME=$toolprefix install
         continue
       ;;
+      *)
+        ./configure $configure_args
+      ;;
     esac
     $"makeallins"
-    continue
   done
-  unset x
+  tar cjf $toolbundle -C $(dirname $toolprefix) $(basename $toolprefix)
 }
 
 
 Bootstrap_ ()
 {
-  # -------------------------------------- begin preparing
+# ------------------------------------- begin preparing
   rm -rf ${workroot} ${destroot}
   sed "s|@DATE@|$(date +%F)|g" ${proj_root}/scripts/main.applescript | osacompile -o ${destroot}
   install -m 0644 ${proj_root}/nxwine.icns ${destroot}/Contents/Resources/droplet.icns
@@ -407,19 +396,15 @@ Bootstrap_ ()
     ln -fhs share/man man
   )
   
-  # -------------------------------------- begin tools build
-  if [ -e ${toolbundle} ]
+  # ------------------------------------- begin tools build
+  if [ -f $toolbundle ]
   then
-    hdiutil attach ${toolbundle}
+    tar xf $toolbundle -C $deps_destroot
   else
-    hdiutil create -attach -type SPARSEBUNDLE -fs HFS+ -size 1g -volname ${proj_uuid} ${toolbundle}
-    trap "hdiutil detach ${toolprefix}; rm -rf ${toolbundle}" EXIT
     BuildTools_
-    trap EXIT
   fi
-  trap "hdiutil detach ${toolprefix}" EXIT
   
-  # --------------------------------- begin build
+  # ------------------------------------- begin build
   BuildDevel_ icu
   BuildDeps_  ${pkgsrc_gettext}
   BuildDeps_  ${pkgsrc_libelf} --disable-compat
@@ -468,9 +453,9 @@ BuildStage4_ ()
   BuildDevel_ vorbis
   BuildDevel_ flac
   BuildDevel_ SDL                     # SDL required nasm
+  BuildDevel_ mpg123                  # mpg123 required SDL
   BuildDevel_ SDL_sound
   BuildDevel_ theora                  # libtheora required SDL
-  BuildDevel_ mpg123                  # mpg123 required SDL
 } # end BuildStage4_
 
 BuildStage5_ ()
@@ -615,6 +600,7 @@ _DT(11, zip,  zip Archive)
 BuildDmg_ ()
 {
   set -- $TMPDIR/$$$LINENO.\$\$
+  rm -rf $toolprefix
   (set -- $1/.resources && mkdir -p $1 && mv $destroot $1) || false
   (set -- $1/NXWineInstaller.app && osacompile -xo $1 $proj_root/scripts/installer.applescript && install -m 0644 $proj_root/nxwine.icns $1/Contents/Resources/applet.icns) || false
   hdiutil create  -ov \

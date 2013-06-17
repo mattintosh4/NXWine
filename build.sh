@@ -231,7 +231,12 @@ BuildDevel_ ()
       ./configure ${configure_args}
     ;;
     ogg)
-      ./autogen.sh ${configure_args}
+      # strip configure command
+      sed -i '' '$d' autogen.sh
+      ./autogen.sh
+      # strip default optimize flag
+      sed -i '' 's/-O4 //' configure
+      ./configure ${configure_args}
     ;;
     orc)
       git checkout -f master

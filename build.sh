@@ -79,7 +79,6 @@ for pkg in \
   ${pkgsrc_help2man=help2man-1.41.2.tar.gz} \
   ${pkgsrc_jasper=jasper-1.900.1.tar.bz2} \
   ${pkgsrc_libelf=libelf-0.8.13.tar.gz} \
-  ${pkgsrc_libtasn1=libtasn1-3.3.tar.gz} \
   ${pkgsrc_libtool=libtool-2.4.2.tar.gz} \
   ${pkgsrc_m4=m4-1.4.16.tar.bz2} \
   ${pkgsrc_mono=wine-mono-0.0.8.msi} \
@@ -197,7 +196,11 @@ BuildDevel_ ()
       git checkout -f master
       git log --date=short --pretty=format:"%ad %an <%ae>%n%n"$'\t'"%s%n%b" > ChangeLog
       autoreconf -i
-      ./configure ${configure_args} --disable-silent-rules
+      ./configure $configure_args --disable-silent-rules
+      # note: libtasn1-devel will fail with parallel build.
+      make
+      make install
+      return
     ;;
     libtiff)
       ./configure ${configure_args}
@@ -449,7 +452,7 @@ BuildStage1_ ()
 
 BuildStage2_ ()
 {
-  BuildDeps_  ${pkgsrc_libtasn1}
+  BuildDevel_ libtasn1
   BuildDevel_ nettle
   BuildDevel_ gnutls
   BuildDevel_ libusb

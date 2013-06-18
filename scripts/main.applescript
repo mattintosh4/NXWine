@@ -20,11 +20,7 @@
 
 on main(input)
     try
-        do shell script "
-            set -- /Applications/NXWine.app/Contents/Resources/bin
-            export WINEDEBUG=-all
-            if [ -d \"${WINEPREFIX:=$HOME/.wine}\" ]; then $1/wineserver -p0; fi
-            exec $1/wine" & space & input
+        do shell script "WINEDEBUG=-all /Applications/NXWine.app/Contents/Resources/bin/wine" & space & input & space & "&>/dev/null &"
     end try
 end main
 

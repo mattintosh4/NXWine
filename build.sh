@@ -333,7 +333,7 @@ BuildTools_ ()
                       --with-internal-glib \
                       --with-pc-path=$(set -- {$deps_destroot/{lib,share},/usr/lib}/pkgconfig; IFS=:; echo "$*")
       ;;
-      yasm)
+      yasm) # yasm required from mpg123
         $"scmcopy" $1
         git checkout -f master
         sed -i '' 's/--enable-maintainer-mode //' autogen.sh
@@ -432,7 +432,6 @@ Bootstrap_ ()
   BuildDeps_  ${pkgsrc_gettext}
   BuildDeps_  ${pkgsrc_libelf} --disable-compat
   BuildDeps_  ${pkgsrc_libtool}
-#  BuildDevel_ pkg-config
   BuildDevel_ readline
   BuildDevel_ zlib
   BuildDevel_ xz
@@ -463,7 +462,6 @@ BuildStage3_ ()
   BuildDeps_  ${pkgsrc_odbc}
   BuildDevel_ libpng
   BuildDevel_ freetype                # freetype required libpng
-#  BuildDevel_ nasm
   BuildDevel_ libjpeg-turbo
   BuildDevel_ libtiff
   BuildDeps_  ${pkgsrc_jasper} --disable-opengl --without-x

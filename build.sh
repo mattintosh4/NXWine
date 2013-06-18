@@ -219,12 +219,6 @@ BuildDevel_ ()
       autoreconf -i
       ./configure ${configure_args}
     ;;
-    nasm)
-      git checkout -f master
-      $"patch_nasm"
-      ./autogen.sh
-      ./configure ${configure_args}
-    ;;
     nettle)
       git checkout -f nettle-2.7-fixes
       ./.bootstrap
@@ -306,30 +300,44 @@ BuildTools_ ()
     help2man    \
     texinfo     \
     pkg-config  \
+    nasm        \
+    yasm        \
     p7zip
     
   local CPPFLAGS="${CPPFLAGS/$deps_destroot/$toolprefix}"
   local LDFLAGS="${LDFLAGS/$deps_destroot/$toolprefix}"
   local configure_args="${configure_pre_args/$deps_destroot/$toolprefix}"
   
+  scmcopy(){ cp -RHf $srcroot/$1 $workroot; cd $workroot/$1; }
+  
   set -- dummy "$@"
   while shift && [ "$1" ]
   do
     case $1 in
+      nasm)
+        scmcopy $1
+        git checkout -f master
+        $"patch_nasm"
+        ./autogen.sh
+        ./configure $configure_args
+      ;;
       texinfo) # texinfo required from libtasn1-devel
-        cp -RHf $srcroot/texinfo $workroot
-        cd $workroot/texinfo
+        scmcopy $1
         ./autogen.sh
         ./configure $configure_args
       ;;
       pkg-config)
-        cp -RHf $srcroot/pkg-config $workroot
-        cd $workroot/pkg-config
+        scmcopy $1
         git checkout -f master
         ./autogen.sh  $configure_args \
                       --disable-host-tool \
                       --with-internal-glib \
                       --with-pc-path=$(set -- {$deps_destroot/{lib,share},/usr/lib}/pkgconfig; IFS=:; echo "$*")
+      ;;
+      yasm)
+        scmcopy $1
+        sed -i '' 's/--enable-maintainer-mode //' autogen.sh
+        ./autogen.sh $configure_args
       ;;
       *)
         eval tar xf $srcroot/\$pkgsrc_$1 -C $workroot
@@ -453,7 +461,7 @@ BuildStage3_ ()
   BuildDeps_  ${pkgsrc_odbc}
   BuildDevel_ libpng
   BuildDevel_ freetype                # freetype required libpng
-  BuildDevel_ nasm
+#  BuildDevel_ nasm
   BuildDevel_ libjpeg-turbo
   BuildDevel_ libtiff
   BuildDeps_  ${pkgsrc_jasper} --disable-opengl --without-x

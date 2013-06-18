@@ -411,7 +411,7 @@ Bootstrap_ ()
 {
 # ------------------------------------- begin preparing
   rm -rf ${workroot} ${destroot}
-  sed "s|@DATE@|$(date +%F)|g" ${proj_root}/scripts/main.applescript | osacompile -o ${destroot}
+  sed "s|@DATE@|$(date +%F)|g" ${proj_root}/scripts/main.applescript | osacompile -s -o ${destroot}
   install -m 0644 ${proj_root}/nxwine.icns ${destroot}/Contents/Resources/droplet.icns
   install -d  ${deps_destroot}/{bin,include,share/{man,doc}} \
               ${wine_destroot}/lib \

@@ -19,17 +19,28 @@
 -- 
 
 on main(input)
-    try
-        do shell script "WINEDEBUG=-all /Applications/NXWine.app/Contents/Resources/bin/wine" & space & input & space & "&>/dev/null &"
-    end try
+  try
+    do shell script "WINEDEBUG=-all /Applications/NXWine.app/Contents/Resources/bin/wine" & space & input & space & "&>/dev/null &"
+  end try
 end main
 
+on run
+  main("explorer")
+end run
+
 on open argv
-    repeat with aFile in argv
-        main("start /Unix" & space & quoted form of (POSIX path of aFile))
-    end repeat
+  repeat with aFile in argv
+    main("start /Unix" & space & quoted form of (POSIX path of aFile))
+  end repeat
 end open
 
-on run
-    main("explorer")
-end run
+on reopen
+  run
+end reopen
+
+on quit
+  try
+      do shell script "kill $(ps ax | awk '/\\/Applications\\/NXWine.app\\/Contents\\/Resources\\/libexec\\/wine/ { print $1 }')"
+  end try
+  continue quit   
+end quit

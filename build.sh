@@ -88,8 +88,9 @@ for pkg in \
 ; do [ -f $srcroot/$pkg ]; done
 
 # ------------------------------------- utilities functions
-makeallins (){ make $make_args && make install; }
-mkdircd (){ mkdir -p "${@:?}" && cd "$_"; }
+makeallins(){ make $make_args && make install; }
+mkdircd(){ mkdir -p "${@:?}" && cd "$_"; }
+scmcopy(){ cp -RHf $srcroot/${1:?} $workroot; cd $workroot/$1; }
 DocCompress_ ()
 {
   set -- "tar vcjf ${deps_destroot}/share/doc/doc_${1:?}.tar.bz2 -C ${workroot}" $(cd ${workroot} && find -E $1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?')
@@ -115,8 +116,7 @@ BuildDeps_ ()
 
 BuildDevel_ ()
 {
-  cp -RHf ${srcroot}/${1:?} ${workroot}
-  cd ${workroot}/$1
+  $"scmcopy" $1
   case $1 in
     flac)
       ./autogen.sh
@@ -303,31 +303,30 @@ BuildTools_ ()
     nasm        \
     yasm        \
     p7zip
-    
+  
   local CPPFLAGS="${CPPFLAGS/$deps_destroot/$toolprefix}"
   local LDFLAGS="${LDFLAGS/$deps_destroot/$toolprefix}"
   local configure_args="${configure_pre_args/$deps_destroot/$toolprefix}"
-  
-  scmcopy(){ cp -RHf $srcroot/$1 $workroot; cd $workroot/$1; }
   
   set -- dummy "$@"
   while shift && [ "$1" ]
   do
     case $1 in
+      # ------------------------------------- scm sources
       nasm)
-        scmcopy $1
+        $"scmcopy" $1
         git checkout -f master
         $"patch_nasm"
         ./autogen.sh
         ./configure $configure_args
       ;;
       texinfo) # texinfo required from libtasn1-devel
-        scmcopy $1
+        $"scmcopy" $1
         ./autogen.sh
         ./configure $configure_args
       ;;
       pkg-config)
-        scmcopy $1
+        $"scmcopy" $1
         git checkout -f master
         ./autogen.sh  $configure_args \
                       --disable-host-tool \
@@ -335,10 +334,13 @@ BuildTools_ ()
                       --with-pc-path=$(set -- {$deps_destroot/{lib,share},/usr/lib}/pkgconfig; IFS=:; echo "$*")
       ;;
       yasm)
-        scmcopy $1
+        $"scmcopy" $1
+        git checkout -f master
         sed -i '' 's/--enable-maintainer-mode //' autogen.sh
         ./autogen.sh $configure_args
       ;;
+      
+      # ------------------------------------- tarball sources
       *)
         eval tar xf $srcroot/\$pkgsrc_$1 -C $workroot
         cd $workroot/$1*

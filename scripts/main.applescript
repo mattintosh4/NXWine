@@ -24,7 +24,7 @@ on main(input)
             set -- /Applications/NXWine.app/Contents/Resources/bin
             export WINEDEBUG=-all
             if [ -d \"${WINEPREFIX:=$HOME/.wine}\" ]; then $1/wineserver -p0; fi
-            $1/wine" & space & input
+            exec $1/wine" & space & input
     end try
 end main
 

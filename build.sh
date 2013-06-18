@@ -614,7 +614,7 @@ _DT(11, zip,  zip Archive)
 BuildDmg_ ()
 {
   set -- $TMPDIR/$$$LINENO.\$\$
-  rm -rf $toolprefix
+  rm -rf $toolprefix ${deps_destroot:?}/{include,share/aclocal}
   (set -- $1/.resources && mkdir -p $1 && mv $destroot $1) || false
   (set -- $1/NXWineInstaller.app && osacompile -xo $1 $proj_root/scripts/installer.applescript && install -m 0644 $proj_root/nxwine.icns $1/Contents/Resources/applet.icns) || false
   hdiutil create  -ov \

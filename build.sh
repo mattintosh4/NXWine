@@ -286,7 +286,7 @@ BuildDevel_ ()
       git checkout -f master
       ./configure --prefix=${deps_destroot}
     ;;
-    libcroco|cairo|gobject-introspection|harfbuzz|pango|gdk-pixbuf|librsvg)
+    harfbuzz|cairo|gobject-introspection)
       ./autogen.sh $configure_args
     ;;
   esac
@@ -460,12 +460,12 @@ BuildStage2_ ()
   BuildDevel_ gnutls
   BuildDevel_ libusb
   BuildDevel_ libusb-compat-0.1
+  BuildDevel_ orc
+  BuildDeps_  ${pkgsrc_odbc}
 } # end BuildStage2_
 
 BuildStage3_ ()
 {
-  BuildDevel_ orc
-  BuildDeps_  ${pkgsrc_odbc}
   BuildDevel_ libpng
   BuildDevel_ freetype                # freetype required libpng
   BuildDevel_ libjpeg-turbo
@@ -476,13 +476,25 @@ BuildStage3_ ()
 
 BuildStage3a_ ()
 {
-  BuildDevel_ libcroco
+  routine_(){
+    7z x -so $srcroot/$1-* | tar x - -C $workroot
+    cd $workroot/$1-*
+    shift
+    ./configure $configure_args "$@"
+    $"makeallins"
+  }
+  routine_ gnome-common
+  routine_ libart_lgpl
+  routine_ libcroco --disable-Bsymbolic
+  routine_ pixman
+  routine_ ragel
   BuildDevel_ cairo
   BuildDevel_ gobject-introspection
   BuildDevel_ harfbuzz
-  BuildDevel_ pango
-  BuildDevel_ gdk-pixbuf
-  BuildDevel_ librsvg
+  routine_ pango
+  routine_ gdk-pixbuf                 # gdk-pixbuf-2.29 required glib 2.37
+  routine_ librsvg --disable-Bsymbolic
+  unset routine_
 }
 
 BuildStage4_ ()
@@ -731,7 +743,6 @@ BuildStage1_
 BuildStage2_
 BuildStage3_
 BuildStage3a_
-exit
 BuildStage4_
 BuildStage5_
 BuildWine_

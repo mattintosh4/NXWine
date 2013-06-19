@@ -286,6 +286,9 @@ BuildDevel_ ()
       git checkout -f master
       ./configure --prefix=${deps_destroot}
     ;;
+    libcroco|cairo|gobject-introspection|harfbuzz|pango|gdk-pixbuf|librsvg)
+      ./autogen.sh $configure_args
+    ;;
   esac
   $"makeallins"
   DocCompress_ $1
@@ -470,6 +473,17 @@ BuildStage3_ ()
   BuildDeps_  ${pkgsrc_jasper} --disable-opengl --without-x
   BuildDevel_ libicns
 } # end BuildStage3_
+
+BuildStage3a_ ()
+{
+  BuildDevel_ libcroco
+  BuildDevel_ cairo
+  BuildDevel_ gobject-introspection
+  BuildDevel_ harfbuzz
+  BuildDevel_ pango
+  BuildDevel_ gdk-pixbuf
+  BuildDevel_ librsvg
+}
 
 BuildStage4_ ()
 {
@@ -716,6 +730,8 @@ Bootstrap_
 BuildStage1_
 BuildStage2_
 BuildStage3_
+BuildStage3a_
+exit
 BuildStage4_
 BuildStage5_
 BuildWine_

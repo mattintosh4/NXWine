@@ -434,6 +434,15 @@ Bootstrap_ ()
   fi
   
   # ------------------------------------- begin build
+  install_gsm(){
+    tar xf $srcroot/gsm-* -C $workroot
+    cd $workroot/gsm-*
+    $"patch_gsm"
+    make
+    make install
+  }
+  install_gsm
+  
   BuildDevel_ icu
   BuildDeps_  ${pkgsrc_gettext}
   BuildDeps_  ${pkgsrc_libelf} --disable-compat
@@ -483,6 +492,7 @@ BuildStage3a_ ()
     ./configure $configure_args "$@"
     $"makeallins"
   }
+  routine_ lcms
   routine_ gnome-common
   routine_ libart_lgpl
   routine_ libcroco --disable-Bsymbolic
@@ -531,7 +541,7 @@ BuildWine_ ()
   $srcroot/wine/configure --prefix=$wine_destroot \
                           --build=$triple \
                           --with-opengl \
-                          --without-{capi,cms,gphoto,gsm,oss,sane,v4l} \
+                          --without-{capi,gphoto,oss,sane,v4l} \
                           --x-includes=/opt/X11/include \
                           --x-libraries=/opt/X11/lib
   $"makeallins"
@@ -663,6 +673,121 @@ BuildDmg_ ()
 } # end BuildDmg_
 
 # -------------------------------------- patch
+patch_gsm(){
+  m4  -D_CC="$CC" \
+      -D_CFLAGS="$CFLAGS" \
+      -D_PREFIX=$deps_destroot \
+<<\@EOS | patch -Np0
+--- Makefile.orig
++++ Makefile
+@@ -43,8 +43,8 @@
+ # CC		= /usr/lang/acc
+ # CCFLAGS 	= -c -O
+ 
+-CC		= gcc -ansi -pedantic
+-CCFLAGS 	= -c -O2 -DNeedFunctionPrototypes=1
++CC		= _CC -ansi -pedantic
++CCFLAGS 	= -c _CFLAGS -DNeedFunctionPrototypes=1
+ 
+ LD 		= $(CC)
+ 
+@@ -71,7 +71,7 @@
+ # Leave INSTALL_ROOT empty (or just don't execute "make install") to
+ # not install gsm and toast outside of this directory.
+ 
+-INSTALL_ROOT	=
++INSTALL_ROOT	= _PREFIX
+ 
+ # Where do you want to install the gsm library, header file, and manpages?
+ #
+@@ -80,7 +80,7 @@
+ 
+ GSM_INSTALL_ROOT = $(INSTALL_ROOT)
+ GSM_INSTALL_LIB = $(GSM_INSTALL_ROOT)/lib
+-GSM_INSTALL_INC = $(GSM_INSTALL_ROOT)/inc
++GSM_INSTALL_INC = $(GSM_INSTALL_ROOT)/include
+ GSM_INSTALL_MAN = $(GSM_INSTALL_ROOT)/man/man3
+ 
+ 
+@@ -100,7 +100,7 @@
+ BASENAME 	= basename
+ AR		= ar
+ ARFLAGS		= cr
+-RMFLAGS		=
++RMFLAGS		= -f
+ FIND		= find
+ COMPRESS 	= compress
+ COMPRESSFLAGS 	= 
+@@ -258,18 +258,12 @@
+ 
+ GSM_INSTALL_TARGETS =	\
+ 		$(GSM_INSTALL_LIB)/libgsm.a		\
+-		$(GSM_INSTALL_INC)/gsm.h		\
+-		$(GSM_INSTALL_MAN)/gsm.3		\
+-		$(GSM_INSTALL_MAN)/gsm_explode.3	\
+-		$(GSM_INSTALL_MAN)/gsm_option.3		\
+-		$(GSM_INSTALL_MAN)/gsm_print.3
++		$(GSM_INSTALL_INC)/gsm.h
+ 
+ TOAST_INSTALL_TARGETS =	\
+ 		$(TOAST_INSTALL_BIN)/toast		\
+ 		$(TOAST_INSTALL_BIN)/tcat		\
+-		$(TOAST_INSTALL_BIN)/untoast		\
+-		$(TOAST_INSTALL_MAN)/toast.1
+-
++		$(TOAST_INSTALL_BIN)/untoast
+ 
+ # Default rules
+ 
+@@ -351,25 +345,25 @@
+ 		fi
+ 
+ $(TOAST_INSTALL_BIN)/toast:	$(TOAST)
+-		-rm $@
++		-rm $(RMFLAGS) $@
+ 		cp $(TOAST) $@
+ 		chmod 755 $@
+ 
+ $(TOAST_INSTALL_BIN)/untoast:	$(TOAST_INSTALL_BIN)/toast
+-		-rm $@
++		-rm $(RMFLAGS) $@
+ 		ln $? $@
+ 
+ $(TOAST_INSTALL_BIN)/tcat:	$(TOAST_INSTALL_BIN)/toast
+-		-rm $@
++		-rm $(RMFLAGS) $@
+ 		ln $? $@
+ 
+ $(TOAST_INSTALL_MAN)/toast.1:	$(MAN)/toast.1
+-		-rm $@
++		-rm $(RMFLAGS) $@
+ 		cp $? $@
+ 		chmod 444 $@
+ 
+ $(GSM_INSTALL_MAN)/gsm.3:	$(MAN)/gsm.3
+-		-rm $@
++		-rm $(RMFLAGS) $@
+ 		cp $? $@
+ 		chmod 444 $@
+ 
+@@ -389,12 +383,12 @@
+ 		chmod 444 $@
+ 
+ $(GSM_INSTALL_INC)/gsm.h:	$(INC)/gsm.h
+-		-rm $@
++		-rm $(RMFLAGS) $@
+ 		cp $? $@
+ 		chmod 444 $@
+ 
+ $(GSM_INSTALL_LIB)/libgsm.a:	$(LIBGSM)
+-		-rm $@
++		-rm $(RMFLAGS) $@
+ 		cp $? $@
+ 		chmod 444 $@
+  
+@EOS
+}
+
 patch_nasm (){ patch -Np1 <<\@EOS
 --- a/Makefile.in
 +++ b/Makefile.in

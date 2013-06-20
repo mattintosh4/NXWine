@@ -243,9 +243,13 @@ BuildDevel_ ()
                     --with-pc-path=${deps_destroot}/lib/pkgconfig:${deps_destroot}/share/pkgconfig:/usr/lib/pkgconfig
     ;;
     python) # python 2.7
-      ${hg} checkout -C v2.7.5
+      $hg checkout -C 2.7
       $"mkdircd" build
-      ../configure ${configure_args}
+      ../configure $configure_args
+      # note: python will fail with parallel build.
+      make
+      make install
+      return
     ;;
     readline)
       git checkout -f master

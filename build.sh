@@ -441,6 +441,11 @@ Bootstrap_ ()
     $"patch_gsm"
     make
     make install
+    set -- $deps_destroot/lib/libgsm.1.dylib
+    $(xcrun -find libtool 2>/dev/null || echo /usr/bin/libtool) -dynamic -v -o $1 -install_name $1 -compatibility_version 1.0.13 -current_version 1.0.13 -lc lib/libgsm.a
+    cd $deps_destroot/lib
+    set -- $(basename $1)
+    ln -fs $1 ${1//.[0-9]}
   }
   install_gsm
   

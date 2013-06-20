@@ -24,9 +24,6 @@ readonly hg=/usr/local/bin/hg
 [ -x ${git} ]
 [ -x ${hg} ]
 
-# ------------------------------------- extra tools
-if [ -x ${FONTFORGE=/opt/local/bin/fontforge} ]; then export FONTFORGE; fi
-
 # ------------------------------------- environment variables
 set -a
 MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f-2)

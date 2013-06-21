@@ -1,4 +1,4 @@
-#!/usr/bin/env - SHELL=/bin/bash TERM=xterm COMMAND_MODE=unix2003 /bin/bash -ex
+#!/usr/bin/env - SHELL=/bin/bash TERM=xterm-color COMMAND_MODE=unix2003 /bin/bash -ex
 PS4="\[\e[31m\]+\[\e[m\] "
 TMPDIR=$(getconf DARWIN_USER_TEMP_DIR); HOME=$TMPDIR; export TMPDIR HOME
 
@@ -17,70 +17,63 @@ readonly toolprefix=$deps_destroot/local
 readonly toolbundle=$proj_root/tools.tar.bz2
 
 # ------------------------------------- local tools
+readonly clang=/usr/local/llvm/bin/clang
 readonly ccache=/usr/local/bin/ccache
 readonly git=/usr/local/git/bin/git
 readonly hg=/usr/local/bin/hg
-[ -x ${ccache} ]
-[ -x ${git} ]
-[ -x ${hg} ]
+[ -x $clang ]
+[ -x $ccache ]
+[ -x $git ]
+[ -x $hg ]
 
 # ------------------------------------- environment variables
 set -a
 MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f-2)
 DEVELOPER_DIR=$(xcode-select -print-path)
-SDKROOT=$(xcodebuild -version -sdk macosx${MACOSX_DEPLOYMENT_TARGET} | sed -n '/^Path: /s///p')
-[ -n "${MACOSX_DEPLOYMENT_TARGET}" ]
-[ -d "${DEVELOPER_DIR}" ]
-[ -d "${SDKROOT}" ]
-
+SDKROOT=$(xcodebuild -version -sdk macosx$MACOSX_DEPLOYMENT_TARGET | sed -n '/^Path: /s///p')
 PATH=$(tr '\n' ':' <<@EOS
 $deps_destroot/bin
 $toolprefix/bin
+/usr/local/llvm/bin
 $(dirname $git)
 $(getconf PATH)
 @EOS); PATH=${PATH%?}
-CC="${ccache} $( xcrun -find gcc-4.2)"
-CXX="${ccache} $(xcrun -find g++-4.2)"
-CFLAGS="-pipe -O3 -m32 -arch i386 -ffast-math -march=core2 -mtune=core2 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}"
+CC="$ccache $clang"
+CXX="$ccache $clang++"
+CFLAGS="-pipe -O3 -m32 -arch i386 -march=core2 -mtune=core2 -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
 CXXFLAGS="$CFLAGS"
-CPPFLAGS="-isysroot ${SDKROOT} -I${deps_destroot}/include"
-LDFLAGS="-arch i386 -Wl,-search_paths_first -Wl,-headerpad_max_install_names -Wl,-syslibroot,${SDKROOT} -L${deps_destroot}/lib"
+CPPFLAGS="-isysroot $SDKROOT -I$deps_destroot/include"
+LDFLAGS="-arch i386 -Wl,-search_paths_first -Wl,-headerpad_max_install_names -Wl,-syslibroot,$SDKROOT -L$deps_destroot/lib"
 ACLOCAL_PATH=$deps_destroot/share/aclocal:$toolprefix/share/aclocal
 LANG=ja_JP.UTF-8; LC_ALL=$LANG; gt_cv_locale_ja=$LANG
 set +a
 
 triple=i686-apple-darwin$(uname -r)
-configure_pre_args="--prefix=${deps_destroot} --build=$triple --disable-dependency-tracking"
-configure_args="\
-${configure_pre_args} \
---enable-shared \
---enable-static \
---disable-debug \
---disable-documentation \
---disable-maintainer-mode \
---disable-gtk-doc \
---disable-gtk-doc-html \
---disable-gtk-doc-pdf \
---without-x"
+configure_pre_args="--prefix=$deps_destroot --build=$triple --disable-dependency-tracking"
+configure_args="$(echo  $configure_pre_args \
+                        --enable-{shared,static} \
+                        --disable-{debug,documentation,maintainer-mode,gtk-doc{,-{html,pdf}}} \
+                        --without-{html-dir,xml-catalog,x})"
 make_args="-j $(($(sysctl -n hw.ncpu) + 1))"
 
 # ------------------------------------- package sources
 for pkg in \
   ${pkgsrc_7z=7z920.exe} \
-  ${pkgsrc_autoconf=autoconf-2.69.tar.gz} \
-  ${pkgsrc_automake=automake-1.13.2.tar.gz} \
-  ${pkgsrc_cabextract=cabextract-1.4.tar.gz} \
-  ${pkgsrc_coreutils=coreutils-8.21.tar.bz2} \
   ${pkgsrc_gecko=wine_gecko-2.21-x86.msi} \
-  ${pkgsrc_gettext=gettext-0.18.2.tar.gz} \
-  ${pkgsrc_help2man=help2man-1.41.2.tar.gz} \
-  ${pkgsrc_jasper=jasper-1.900.1.tar.bz2} \
-  ${pkgsrc_libelf=libelf-0.8.13.tar.gz} \
-  ${pkgsrc_libtool=libtool-2.4.2.tar.gz} \
-  ${pkgsrc_m4=m4-1.4.16.tar.bz2} \
   ${pkgsrc_mono=wine-mono-0.0.8.msi} \
-  ${pkgsrc_odbc=unixODBC-2.3.1.tar.gz} \
-  ${pkgsrc_p7zip=p7zip_9.20.1_src_all.tar.bz2} \
+  autoconf-2.69.tar.gz \
+  automake-1.13.2.tar.gz \
+  cabextract-1.4.tar.gz \
+  coreutils-8.21.tar.bz2 \
+  gettext-0.18.2.tar.gz \
+  help2man-1.41.2.tar.gz \
+  jasper-1.900.1.tar.bz2 \
+  lcms-1.19.tar.gz \
+  libelf-0.8.13.tar.gz \
+  libtool-2.4.2.tar.gz \
+  m4-1.4.16.tar.bz2 \
+  p7zip_9.20.1_src_all.tar.bz2 \
+  unixODBC-2.3.1.tar.gz \
 ; do [ -f $srcroot/$pkg ]; done
 
 # ------------------------------------- utilities functions
@@ -96,17 +89,34 @@ DocCompress_ ()
 # ------------------------------------- build processing functions
 BuildDeps_ ()
 {
-  7z x -y -so $srcroot/${1:?} | tar x - -C $workroot
-  cd $workroot/${1%%-*}*
+  7z x -y -so $srcroot/$1-* | tar x - -C $workroot
+  cd $workroot/$1-*
   case $1 in
-    cabextract-*)
-      ./configure ${configure_args/${deps_destroot}/${wine_destroot}}
+    cabextract)
+      set -- ${configure_args/$deps_destroot/$wine_destroot}
+    ;;
+    gsm)
+      $"patch_gsm"
+      make
+      make install
+      set -- $deps_destroot/lib/libgsm.1.dylib 1.0.13
+      $(xcrun -find libtool 2>/dev/null || echo /usr/bin/libtool) -dynamic -v -o $1 -install_name $1 -current_version $2 -compatibility_version $2 -lc lib/libgsm.a
+      cd $deps_destroot/lib
+      set -- $(basename $1)
+      ln -fs $1 ${1//.[0-9]}
+      return
+    ;;
+    jasper)
+      set -- $configure_args --disable-opengl
+    ;;
+    libelf)
+      set -- $configure_args --disable-compat
     ;;
     *)
-      shift
-      ./configure ${configure_args} "$@"
+      set -- $configure_args
     ;;
   esac
+  ./configure "$@"
   $"makeallins"
 } # end BuildDeps_
 
@@ -116,34 +126,23 @@ BuildDevel_ ()
   case $1 in
     flac)
       ./autogen.sh
-      ./configure ${configure_args} \
-                  --disable-{asm-optimizations,xmms-plugin}
+      ./configure $configure_args --disable-{asm-optimizations,xmms-plugin}
     ;;
     freetype)
       git checkout -f master
       ./autogen.sh
-      ./configure ${configure_args}
-      $"makeallins"
-      [ -f ${deps_destroot}/lib/libfreetype.6.dylib ]
-      DocCompress_ freetype
-      return
+      ./configure $configure_args
     ;;
     glib)
-      git checkout -f glib-2-36
-      ./autogen.sh  ${configure_args} \
-                    --disable-{selinux,fam,xattr} \
-                    --with-threads=posix \
-                    --without-{html-dir,xml-catalog}
+      git checkout -f 2.37.2
+      ./autogen.sh $configure_args --disable-{selinux,fam,xattr} --with-threads=posix CC="$ccache $(xcrun -find gcc-4.2)" CXX="$ccache $(xcrun -find g++-4.2)"
     ;;
     gmp-5.1)
       sed -n '/^@set/p' .bootstrap >doc/version.texi
       autoreconf -i
       $"mkdircd" build
-      ../configure  ${configure_pre_args} \
-                    CC=$( xcrun -find gcc-4.2) \
-                    CXX=$(xcrun -find g++-4.2) \
-                    ABI=32
-      make ${make_args}
+      ../configure $configure_pre_args CC=$clang CXX=$clang++ ABI=32
+      make $make_args
       make check
       make install
     ;;
@@ -209,7 +208,7 @@ BuildDevel_ ()
     ;;
     libxml2)
       git checkout -f master
-      ./autogen.sh ${configure_args} --with-icu --with-python=$deps_destroot
+      ./autogen.sh ${configure_args} --with-{icu,python}
     ;;
     libxslt)
       git checkout -f master
@@ -348,15 +347,12 @@ BuildTools_ ()
       
       # ------------------------------------- tarball sources
       *)
-        eval tar xf $srcroot/\$pkgsrc_$1 -C $workroot
-        cd $workroot/$1*
+        tar xf $srcroot/$1[-_]* -C $workroot
+        cd $workroot/$1[-_]*
         
         case $1 in
           coreutils)
-            ./configure $configure_args \
-                        --program-prefix=g \
-                        --enable-threads=posix \
-                        --without-gmp
+            ./configure $configure_args --program-prefix=g --enable-threads=posix --without-gmp
             $"makeallins"
             cd $toolprefix/bin
             ln -fs {g,}readlink
@@ -410,6 +406,7 @@ BuildTools_ ()
 }
 
 
+
 Bootstrap_ ()
 {
 # ------------------------------------- begin preparing
@@ -434,24 +431,11 @@ Bootstrap_ ()
   fi
   
   # ------------------------------------- begin build
-  install_gsm(){
-    tar xf $srcroot/gsm-* -C $workroot
-    cd $workroot/gsm-*
-    $"patch_gsm"
-    make
-    make install
-    set -- $deps_destroot/lib/libgsm.1.dylib
-    $(xcrun -find libtool 2>/dev/null || echo /usr/bin/libtool) -dynamic -v -o $1 -install_name $1 -compatibility_version 1.0.13 -current_version 1.0.13 -lc lib/libgsm.a
-    cd $deps_destroot/lib
-    set -- $(basename $1)
-    ln -fs $1 ${1//.[0-9]}
-  }
-  install_gsm
-  
+  BuildDeps_  gsm
   BuildDevel_ icu
-  BuildDeps_  ${pkgsrc_gettext}
-  BuildDeps_  ${pkgsrc_libelf} --disable-compat
-  BuildDeps_  ${pkgsrc_libtool}
+  BuildDeps_  gettext
+  BuildDeps_  libelf
+  BuildDeps_  libtool
   BuildDevel_ readline
   BuildDevel_ zlib
   BuildDevel_ xz
@@ -475,7 +459,7 @@ BuildStage2_ ()
   BuildDevel_ libusb
   BuildDevel_ libusb-compat-0.1
   BuildDevel_ orc
-  BuildDeps_  ${pkgsrc_odbc}
+  BuildDeps_  unixODBC
 } # end BuildStage2_
 
 BuildStage3_ ()
@@ -484,8 +468,9 @@ BuildStage3_ ()
   BuildDevel_ freetype                # freetype required libpng
   BuildDevel_ libjpeg-turbo
   BuildDevel_ libtiff
-  BuildDeps_  ${pkgsrc_jasper} --disable-opengl --without-x
+  BuildDeps_  jasper
   BuildDevel_ libicns
+  BuildDeps_  lcms
 } # end BuildStage3_
 
 BuildStage3a_ ()
@@ -497,7 +482,6 @@ BuildStage3a_ ()
     ./configure $configure_args "$@"
     $"makeallins"
   }
-  routine_ lcms
   routine_ gnome-common
   routine_ libart_lgpl
   routine_ libcroco --disable-Bsymbolic
@@ -528,7 +512,7 @@ BuildStage5_ ()
 {
   set -- $wine_destroot
   # ------------------------------------- cabextract
-  BuildDeps_ $pkgsrc_cabextract
+  BuildDeps_ cabextract
   (set -- $1/share/doc/cabextract-1.4 && mkdir -p $1 && install -m 0644 $workroot/cabextract-1.4/{AUTHORS,ChangeLog,COPYING,NEWS,README,TODO} $1) || false
   # ------------------------------------- winetricks
   (set -- $1/libexec                  && mkdir -p $1 && install -m 0755 $srcroot/winetricks/src/winetricks      $1) || false
@@ -872,7 +856,7 @@ Bootstrap_
 BuildStage1_
 BuildStage2_
 BuildStage3_
-BuildStage3a_
+#BuildStage3a_
 BuildStage4_
 BuildStage5_
 BuildWine_

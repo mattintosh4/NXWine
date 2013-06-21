@@ -46,6 +46,7 @@ CXXFLAGS="$CFLAGS"
 CPPFLAGS="-isysroot $SDKROOT -I$deps_destroot/include"
 LDFLAGS="-arch i386 -Wl,-search_paths_first -Wl,-headerpad_max_install_names -Wl,-syslibroot,$SDKROOT -L$deps_destroot/lib"
 ACLOCAL_PATH=$deps_destroot/share/aclocal:$toolprefix/share/aclocal
+MAKE=$(xcrun -find gnumake)
 LANG=ja_JP.UTF-8; LC_ALL=$LANG; gt_cv_locale_ja=$LANG
 set +a
 
@@ -79,7 +80,7 @@ for pkg in \
 ; do [ -f $srcroot/$pkg ]; done
 
 # ------------------------------------- utilities functions
-makeallins(){ make $make_args && make install; }
+makeallins(){ $MAKE $make_args && $MAKE install; }
 mkdircd(){ mkdir -p "${@:?}" && cd "$_"; }
 scmcopy(){ cp -RHf $srcroot/${1:?} $workroot; cd $workroot/$1; }
 DocCompress_ ()
@@ -99,8 +100,8 @@ BuildDeps_ ()
     ;;
     gsm)
       $"patch_gsm"
-      make
-      make install
+      $MAKE
+      $MAKE install
       set -- $deps_destroot/lib/libgsm.1.dylib 1.0.13
       $(xcrun -find libtool 2>/dev/null || echo /usr/bin/libtool) -dynamic -v -o $1 -install_name $1 -current_version $2 -compatibility_version $2 -lc lib/libgsm.a
       cd $deps_destroot/lib
@@ -144,14 +145,14 @@ BuildDevel_ ()
       autoreconf -i
       $"mkdircd" build
       ../configure $configure_pre_args CC=$clang CXX=$clang++ ABI=32
-      make $make_args
-      make check
-      make install
+      $MAKE $make_args
+      $MAKE check
+      $MAKE install
     ;;
     gnutls)
       git checkout -f master
       git log | grep -v "^commit" > ChangeLog
-      make CFGFLAGS="$configure_args --disable-guile --without-p11-kit" bootstrap
+      $MAKE CFGFLAGS="$configure_args --disable-guile --without-p11-kit" bootstrap
     ;;
     guile)
       git checkout -f stable-2.0
@@ -196,8 +197,8 @@ BuildDevel_ ()
       autoreconf -i
       ./configure $configure_args --disable-silent-rules
       # note: libtasn1-devel will fail with parallel build.
-      make
-      make install
+      $MAKE
+      $MAKE install
       return
     ;;
     libtiff)
@@ -247,8 +248,8 @@ BuildDevel_ ()
       $"mkdircd" build
       ../configure $configure_args
       # note: python will fail with parallel build.
-      make
-      make install
+      $MAKE
+      $MAKE install
       return
     ;;
     readline)
@@ -392,8 +393,8 @@ BuildTools_ ()
               s#555#755#g
               s#777#755#g
             " install.sh
-            make $make_args all3
-            make DEST_HOME=$toolprefix install
+            $MAKE $make_args all3
+            $MAKE DEST_HOME=$toolprefix install
             continue
           ;;
           *)

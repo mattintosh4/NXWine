@@ -231,9 +231,8 @@ BuildDevel_ ()
     ;;
     orc)
       git checkout -f master
-      ./autogen.sh  ${configure_args} \
-                    --disable-gtk-doc{,-html,-pdf} \
-                    --without-html-dir
+      autoreconf -fi
+      ./configure $configure_args CC="$ccache $(xcrun -find gcc-4.2)" CXX="$ccache $(xcrun -find g++-4.2)"
     ;;
     pkg-config)
       git checkout -f master

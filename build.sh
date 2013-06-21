@@ -65,6 +65,7 @@ for pkg in \
   automake-1.13.2.tar.gz \
   cabextract-1.4.tar.gz \
   coreutils-8.21.tar.bz2 \
+  faenza-icon-theme_1.3.zip \
   gettext-0.18.2.tar.gz \
   help2man-1.41.2.tar.gz \
   jasper-1.900.1.tar.bz2 \

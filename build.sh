@@ -1,4 +1,5 @@
-#!/usr/bin/env - SHELL=/bin/bash TERM=xterm-color COMMAND_MODE=unix2003 /bin/bash -ex
+#!/usr/bin/env - SHELL=/bin/bash TERM=xterm COMMAND_MODE=unix2003 /bin/bash
+set -ex
 PS4="\[\e[31m\]+\[\e[m\] "
 TMPDIR=$(getconf DARWIN_USER_TEMP_DIR); HOME=$TMPDIR; export TMPDIR HOME
 

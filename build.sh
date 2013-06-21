@@ -528,13 +528,14 @@ BuildStage5_ ()
 
 BuildWine_ ()
 {
-  $"mkdircd" $workroot/wine
-  $srcroot/wine/configure --prefix=$wine_destroot \
-                          --build=$triple \
-                          --with-opengl \
-                          --without-{capi,gphoto,oss,sane,v4l} \
-                          --x-includes=/opt/X11/include \
-                          --x-libraries=/opt/X11/lib
+  $"scmcopy" wine
+  git checkout -f 1.6-rc2
+  ./configure --prefix=$wine_destroot \
+              --build=$triple \
+              --with-opengl \
+              --without-{capi,gphoto,oss,sane,v4l} \
+              --x-includes=/opt/X11/include \
+              --x-libraries=/opt/X11/lib
   $"makeallins"
   
   set -- install_name_tool -add_rpath /usr/lib $wine_destroot

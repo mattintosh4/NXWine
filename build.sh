@@ -136,7 +136,7 @@ BuildDevel_ ()
                     --without-{html-dir,xml-catalog}
     ;;
     gmp-5.1)
-      ./.bootstrap
+      sed -n '/^@set/p' .bootstrap >doc/version.texi
       autoreconf -i
       $"mkdircd" build
       ../configure  ${configure_pre_args} \

@@ -29,7 +29,7 @@ SetEnv_ ()
   export LANG=${LANG:=ja_JP.UTF-8}
   
   # note: glu32.dll still needs Mesa libraries.
-  export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib
+  export DYLD_FALLBACK_LIBRARY_PATH=/opt/X11/lib:/usr/lib
   
   # special Windows applications path
   #export WINEPATH=

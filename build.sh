@@ -530,7 +530,7 @@ BuildStage5_ ()
 BuildWine_ ()
 {
   $"scmcopy" wine
-  git checkout -f 1.6-rc2
+  git checkout -f wine-1.6-rc3
   ./configure --prefix=$wine_destroot \
               --build=$triple \
               --with-opengl \
@@ -538,11 +538,6 @@ BuildWine_ ()
               --x-includes=/opt/X11/include \
               --x-libraries=/opt/X11/lib
   $"makeallins"
-  
-  set -- install_name_tool -add_rpath /usr/lib $wine_destroot
-  $@/bin/wine
-  $@/bin/wineserver
-  $@/lib/libwine.1.0.dylib
   
   (set -- $wine_destroot/libexec && mkdir -p $1 && mv $wine_destroot/bin/wine $1) || false
 } # end BuildWine_

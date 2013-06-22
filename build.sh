@@ -60,7 +60,7 @@ make_args="-j $(($(sysctl -n hw.ncpu) + 1))"
 
 # ------------------------------------- package sources
 for pkg in \
-  ${pkgsrc_7z=7z920.exe} \
+  ${pkgsrc_7z=7z922.exe} \
   ${pkgsrc_gecko=wine_gecko-2.21-x86.msi} \
   ${pkgsrc_mono=wine-mono-0.0.8.msi} \
   autoconf-2.69.tar.gz \

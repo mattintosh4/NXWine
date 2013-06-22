@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 #
 # NXWine - No X11 Wine for Mac OS X
 #
@@ -41,21 +41,27 @@ rpgvx               RPG TKOOL VX RTP v202
 ??                  Ib v1.05
 ?????????           Yumenikki v0.10 (with patch)"
 
-case $1 in
-    aooni|ib|yumenikki|rpg200[03]|rpgxp|rpgvx)
-        # nothing to do
-    ;;
-    *)
-        exec echo "${usage}"
-    ;;
-esac
-
-prefix=/Applications/NXWine.app/Contents/Resources
-wine=${prefix}/bin/wine
-sevenzip=${prefix}/share/nxwine/programs/7-Zip/7z.exe
-FlatExtract="${wine} 7z.exe e -y"
-PathExtract="${wine} 7z.exe x -y"
-winepath="${wine} winepath --unix"
+# ------------------------------------- GUI event
+function dialog_ {
+    set -- $(
+        osascript -e '
+            property rpg2000 : "RPG TKOOL 2000"
+            property rpg2003 : "RPG TKOOL 2003"
+            property rpgxp   : "RPG TKOOL XP"
+            property rpgvx   : "RPG TKOOL VX"
+            tell application "System Events"
+                activate
+                set aRes to (choose from list {rpg2000, rpg2003, rpgxp, rpgvx} with title "NXWinetricks" with prompt "") as text
+                if aRes is "false"  then quit
+                if aRes is rpg2000  then return "rpg2000"
+                if aRes is rpg2003  then return "rpg2003"
+                if aRes is rpgxp    then return "rpgxp"
+                if aRes is rpgvx    then return "rpgvx"
+            end tell
+        '
+    )
+    if [ "$1" ]; then exec "$(dirname "$0")/$(basename "$0")" $1; else exit 0; fi
+}
 
 # -------------------------------------
 function ConvLess_ {
@@ -121,6 +127,22 @@ function install_yumenikki {
 }
 
 # ------------------------------------- begin processing
+if [ $# = 0 ]; then dialog_; fi
+case $1 in
+    aooni|ib|yumenikki|rpg200[03]|rpgxp|rpgvx)
+        # nothing to do
+    ;;
+    *)
+        exec echo "${usage}"
+    ;;
+esac
+prefix=/Applications/NXWine.app/Contents/Resources
+wine=${prefix}/bin/wine
+sevenzip=${prefix}/share/nxwine/programs/7-Zip/7z.exe
+FlatExtract="${wine} 7z.exe e -y"
+PathExtract="${wine} 7z.exe x -y"
+winepath="${wine} winepath --unix"
+
 printf "package... $1\n"
 printf "checking wine... "; [ -x "${wine}" ] && printf "${wine}\n" || { echo no; exit 1; }
 printf "checking 7z.exe... "; [ -f "${sevenzip}" ] && printf "${sevenzip}\n" || { echo no; exit 1; }

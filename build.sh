@@ -644,6 +644,21 @@ _DT(11, zip,  zip Archive)
   # remove unnecessary files
   rm -f ${libdir:?}/*.{a,la}
   rm -rf ${datadir:?}/applications
+  
+  mod_rpath(){
+    set -- $(find $wine_destroot/lib/*.dylib -type f)
+    while [ "$1" ]
+    do
+      install_name_tool -id @rpath/$(basename $1) $1
+      otool -L $1 | awk 'NR >= 2 && /\/Applications/ { print $1 }' | while read
+      do
+        install_name_tool -change $REPLY @rpath/$(basename $REPLY) $1
+      done
+      shift
+    done
+  }
+#  mod_rpath
+  
 } # end BuildStage6_
 
 BuildDmg_ ()

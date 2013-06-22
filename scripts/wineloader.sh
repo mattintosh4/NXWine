@@ -23,6 +23,7 @@ set -- ${prefix:=/Applications/NXWine.app/Contents/Resources}/libexec/wine "$@"
 # note: usage options and non-arguments have to be processed before standard run.
 case $2 in (--help|--version|"") exec "$@";; esac
 
+# -------------------------------------
 SetEnv_ ()
 {
   export PATH=${prefix}/libexec:${prefix}/bin:${prefix/Resources/SharedSupport}/bin:/usr/bin:/bin:/usr/sbin:/sbin

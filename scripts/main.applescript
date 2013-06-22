@@ -40,7 +40,7 @@ end reopen
 
 on quit
   try
-      do shell script "kill $(ps ax | awk '/\\/Applications\\/NXWine.app\\/Contents\\/Resources\\/libexec\\/wine/ { print $1 }')"
+    do shell script "kill $(ps ax | awk '/\\/Applications\\/NXWine.app\\/Contents\\/Resources\\/libexec\\/wine/ { print $1 }')"
   end try
   continue quit   
 end quit

@@ -602,7 +602,7 @@ d3dx9}_\*.dll
   InstallNativedlls_
     
   # ------------------------------------- plist
-  wine_version=$(GIT_DIR=${srcroot}/wine/.git git describe HEAD 2>/dev/null)
+  wine_version=$(GIT_DIR=$workroot/wine/.git git describe HEAD 2>/dev/null)
   : ${wine_version:?}
   
   m4  -D_PLIST=$destroot/Contents/Info.plist \

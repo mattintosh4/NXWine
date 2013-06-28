@@ -51,7 +51,7 @@ function dialog_ {
             property rpgvx   : "RPG TKOOL VX"
             tell application "System Events"
                 activate
-                set aRes to (choose from list {rpg2000, rpg2003, rpgxp, rpgvx} with title "NXWinetricks" with prompt "") as text
+                set aRes to (choose from list {rpg2000, rpg2003, rpgxp, rpgvx} with title "NXWinetricks") as text
                 if aRes is "false"  then quit
                 if aRes is rpg2000  then return "rpg2000"
                 if aRes is rpg2003  then return "rpg2003"

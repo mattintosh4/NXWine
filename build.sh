@@ -530,7 +530,7 @@ BuildStage5_ ()
 BuildWine_ ()
 {
   $"scmcopy" wine
-  git checkout -f wine-1.6-rc3
+  git checkout -f master
   ./configure --prefix=$wine_destroot \
               --build=$triple \
               --with-opengl \

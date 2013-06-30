@@ -34,18 +34,22 @@ SetEnv_ ()
   
   # special Windows applications path
   #export WINEPATH=
-}
+  
+} # end SetEnv_
 
 SetDebug_ ()
 {
   export PS4="\[\e[33m\]DEBUG:\[\e[m\] "
   set -x
   export WINEDEBUG=+loaddll
-}
+  
+} # end SetDebug_
 
 CreateWP_ ()
 {
+  set -- ${prefix}/libexec/wine
   local WINEDEBUG
+  
   $1 wineboot.exe --init
   $1 7z.exe x -y -o'C:\windows' ${prefix}/share/nxwine/nativedlls/nativedlls.exe
   cat <<@REGEDIT4 | $1 regedit.exe -
@@ -81,8 +85,7 @@ dpnhupnp,\
 dpvacm,\
 dpvoice,\
 dpvvox,\
-dsdmo,\
-dsdmoprp,\
+dsdmo{,prp},\
 dxdiagn,\
 dx{7,8}vb,\
 encapi,\
@@ -91,11 +94,12 @@ qdv,\
 qdvd,\
 qedit,\
 quartz}.dll
-}
+  
+} # end CreateWP_
 
 # -------------------------------------
 SetEnv_
 # note: some debug options is enabled because this script is incomplete yet.
 if ! [ "${WINEDEBUG+set}" ]; then SetDebug_; fi
-if ! [ -d "${WINEPREFIX:=$HOME/.wine}" ]; then CreateWP_ $1; fi
+if ! [ -d "${WINEPREFIX:=$HOME/.wine}" ]; then CreateWP_; fi
 exec "$@"

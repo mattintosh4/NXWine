@@ -55,12 +55,17 @@ $(printf '"*D3DCompiler_%d"="native"\n' {37..43})
 "*amstream"="native"
 $(printf '"*d3dx9_%d"="native"\n' {24..43})
 "*ddrawex"="native"
+"*devenum"="native"
 "*dinput"="native"
 "*dinput8"="native"
 "*dplayx"="native"
+"*dpwsockx"="native"
+"*dxdiag.exe"="native"
+"*dxdiagn"="native"
 "*gdiplus"="builtin,native"
 "*l3codecx"="native"
 "*mciqtz32"="native"
+"*qedit"="native"
 "*quartz"="native"
 @REGEDIT4
   
@@ -68,8 +73,23 @@ $(printf '"*d3dx9_%d"="native"\n' {24..43})
 XAudio2_{0..7},\
 amstream,\
 ddrawex,\
+devenum,\
+diactfrm,\
 dinput,\
 dplayx,\
+dpnhupnp,\
+dpvacm,\
+dpvoice,\
+dpvvox,\
+dsdmo,\
+dsdmoprp,\
+dxdiagn,\
+dx{7,8}vb,\
+encapi,\
+qasf,\
+qdv,\
+qdvd,\
+qedit,\
 quartz}.dll
 }
 

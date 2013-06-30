@@ -576,13 +576,46 @@ BuildStage6_ ()
     $"mkdircd" $1
     install -m 0644 $srcroot/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
     7z x -y $srcroot/nativedlls/directx_feb2010_redist.exe dxnt.cab
-    7z x -y dxnt.cab l3codecx.ax {\
+    7z x -y -odrivers dxnt.cab dxapi.sys 
+    7z x -y dxnt.cab l3codecx.ax \
+{\
+dplaysvr,\
+dpnsvr,\
+dpvsetup,\
+dxdiag,\
+}.exe \
+{\
 amstream,\
+d3d8thk,\
+d3dim700,\
+d3dpmesh,\
 ddrawex,\
+devenum,\
+diactfrm,\
+dimap,\
 dinput,\
 dinput8,\
 dplayx,\
+dpmodemx,\
+dpnhupnp,\
+dpvacm,\
+dpvoice,\
+dpvvox,\
+dpwsockx,\
+dsdmo,\
+dsdmoprp,\
+dsound3d,\
+dx7vb,\
+dx8vb,\
+dxdiagn,\
+encapi,\
+gcdef,\
 mciqtz32,\
+qasf,\
+qdv,\
+qdvd,\
+qedit,\
+qedwipes,\
 quartz}.dll
     
     7z x -y $srcroot/nativedlls/directx_Jun2010_redist.exe \*_x86.cab

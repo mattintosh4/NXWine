@@ -279,6 +279,7 @@ BuildDevel_ ()
       ./autogen.sh $configure_args
     ;;
     xz)
+      git checkout -f v5.0
       ./autogen.sh
       ./configure ${configure_args}
       $"makeallins"

@@ -361,8 +361,7 @@ BuildTools_ ()
           coreutils)
             ./configure $configure_args --program-prefix=g --enable-threads=posix --without-gmp
             $"makeallins"
-            cd $toolprefix/bin
-            ln -fs {g,}readlink
+            ln -s {g,$toolprefix/bin/}readlink
             continue
           ;;
           gettext)
@@ -375,16 +374,14 @@ BuildTools_ ()
           libtool)
             ./configure $configure_args --program-prefix=g
             $"makeallins"
-            cd $toolprefix/bin
-            ln -fs {g,}libtool
-            ln -fs {g,}libtoolize
+            ln -s {g,$toolprefix/bin/}libtool
+            ln -s {g,$toolprefix/bin/}libtoolize
             continue
           ;;
           m4)
             ./configure $configure_args --program-prefix=g
             $"makeallins"
-            cd $toolprefix/bin
-            ln -fs {g,}m4
+            ln -s {g,$toolprefix/bin/}m4
             continue
           ;;
           p7zip)
@@ -423,7 +420,7 @@ Bootstrap_ ()
   install -d  ${deps_destroot}/{bin,include,share/{man,doc}} \
               ${wine_destroot}/lib \
               ${workroot}
-  (cd ${deps_destroot} && ln -fhs ../Resources/lib lib)
+  ln -fhs {../Resources,${deps_destroot}}/lib
   
   # ------------------------------------- begin tools build
   if [ -f $toolbundle ]

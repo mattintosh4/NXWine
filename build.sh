@@ -420,11 +420,7 @@ Bootstrap_ ()
   install -d  ${deps_destroot}/{bin,include,share/{man,doc}} \
               ${wine_destroot}/lib \
               ${workroot}
-  (
-    cd ${deps_destroot}
-    ln -fhs ../Resources/lib lib
-    ln -fhs share/man man
-  )
+  (cd ${deps_destroot} && ln -fhs ../Resources/lib lib)
   
   # ------------------------------------- begin tools build
   if [ -f $toolbundle ]
@@ -698,7 +694,9 @@ _DT(11, zip,  zip Archive)
 BuildDmg_ ()
 {
   set -- $TMPDIR/$$$LINENO.\$\$
-  rm -rf $toolprefix ${deps_destroot:?}/{include,share/aclocal}
+  mv {${deps_destroot},${wine_destroot}}/share/doc
+  find ${deps_destroot:?} -mindepth 1 -type d | xargs rm -rf
+  
   (set -- $1/.resources && mkdir -p $1 && mv $destroot $1) || false
   (set -- $1/NXWineInstaller.app && osacompile -xo $1 $proj_root/scripts/installer.applescript && install -m 0644 $proj_root/nxwine.icns $1/Contents/Resources/applet.icns) || false
   hdiutil create  -ov \

@@ -26,7 +26,7 @@ case $2 in (--help|--version|"") exec "$@";; esac
 # -------------------------------------
 SetEnv_ ()
 {
-  export PATH=${prefix}/libexec:${prefix}/bin:${prefix/Resources/SharedSupport}/bin:/usr/bin:/bin:/usr/sbin:/sbin
+  export PATH=${prefix}/libexec:${prefix}/bin:/usr/bin:/bin:/usr/sbin:/sbin
   export LANG=${LANG:=ja_JP.UTF-8}
   
   # note: glu32.dll still needs Mesa libraries.

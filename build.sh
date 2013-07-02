@@ -85,8 +85,12 @@ mkdircd(){ mkdir -p "${@:?}" && cd "$_"; }
 scmcopy(){ cp -RHf $srcroot/${1:?} $workroot; cd $workroot/$1; }
 DocCompress_ ()
 {
-  set -- "tar vcjf ${deps_destroot}/share/doc/doc_${1:?}.tar.bz2 -C ${workroot}" $(cd ${workroot} && find -E $1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?')
-  [ $# = 1 ] && return || $@
+  local n=$1
+  set -- $(cd ${workroot} && find -E $1 -maxdepth 1 -type f -regex '.*/(ANNOUNCE|AUTHORS|CHANGES|ChangeLog|COPYING(.LIB)?|LICENSE|NEWS|README|RELEASE|TODO|VERSION)(\.txt)?')
+  if [ $# = 0 ]; then return
+  else
+    (cd $workroot && tar cf - "$@" | 7z a -si $deps_destroot/share/doc/doc_$n.tar.xz) || false
+  fi
 } # end DocCompress_
 
 # ------------------------------------- build processing functions
@@ -104,9 +108,8 @@ BuildDeps_ ()
       $MAKE install
       set -- $deps_destroot/lib/libgsm.1.dylib 1.0.13
       $(xcrun -find libtool 2>/dev/null || echo /usr/bin/libtool) -dynamic -v -o $1 -install_name $1 -current_version $2 -compatibility_version $2 -lc lib/libgsm.a
-      cd $deps_destroot/lib
-      set -- $(basename $1)
-      ln -fs $1 ${1//.[0-9]}
+      ln -s libgsm.1.dylib $deps_destroot/lib/libgsm.dylib
+      (cd $workroot && tar cf - gsm-1.0-pl13/{ChangeLog,COPYRIGHT,README} | 7z a -si $deps_destroot/share/doc/doc_gsm.tar.xz) || false
       return
     ;;
     jasper)
@@ -163,7 +166,7 @@ BuildDevel_ ()
       cd source
       ./configure ${configure_args} --enable-rpath --with-library-bits=32
       $"makeallins"
-      tar vcjf $deps_destroot/share/doc/icu.tar.bz2 -C $workroot icu/{license,readme}.html
+      (cd $workroot && tar cf - icu/{license,readme}.html | 7z a -si $deps_destroot/share/doc/doc_icu.tar.xz) || false
       return
     ;;
     libffi)
@@ -694,7 +697,7 @@ _DT(11, zip,  zip Archive)
 BuildDmg_ ()
 {
   set -- $TMPDIR/$$$LINENO.\$\$
-  mv {${deps_destroot},${wine_destroot}}/share/doc
+  cp -R ${deps_destroot}/share/doc ${wine_destroot}/share
   find ${deps_destroot:?} -mindepth 1 -type d | xargs rm -rf
   
   (set -- $1/.resources && mkdir -p $1 && mv $destroot $1) || false

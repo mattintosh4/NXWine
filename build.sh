@@ -260,6 +260,10 @@ BuildDevel_ ()
       $"patch_readline"
       ./configure ${configure_args} --enable-multibyte --with-curses
     ;;
+    sane-backends)
+      git checkout -f master
+      ./configure $configure_args
+    ;;
     SDL)
       $hg checkout -C SDL-1.2
       ./autogen.sh
@@ -458,6 +462,7 @@ BuildStage2_ ()
   BuildDevel_ gnutls
   BuildDevel_ libusb
   BuildDevel_ libusb-compat-0.1
+  BuildDevel_ sane-backends
   BuildDevel_ orc
   BuildDeps_  unixODBC
 } # end BuildStage2_
@@ -531,7 +536,7 @@ BuildWine_ ()
   ./configure --prefix=$wine_destroot \
               --build=$triple \
               --with-opengl \
-              --without-{capi,gphoto,oss,sane,v4l} \
+              --without-{capi,gphoto,oss,v4l} \
               --x-includes=/opt/X11/include \
               --x-libraries=/opt/X11/lib
   $"makeallins"

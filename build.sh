@@ -106,8 +106,7 @@ BuildDeps_ ()
       $"patch_gsm"
       $MAKE
       $MAKE install
-      set -- $deps_destroot/lib/libgsm.1.dylib 1.0.13
-      $(xcrun -find libtool 2>/dev/null || echo /usr/bin/libtool) -dynamic -v -o $1 -install_name $1 -current_version $2 -compatibility_version $2 -lc lib/libgsm.a
+      $(xcrun -find libtool 2>/dev/null || echo /usr/bin/libtool) -dynamic -v -o $deps_destroot/lib/libgsm.1.dylib -install_name $deps_destroot/lib/libgsm.1.dylib -compatibility_version 1.0.0 -current_version 1.0.13 -lc lib/libgsm.a
       ln -s libgsm.1.dylib $deps_destroot/lib/libgsm.dylib
       (cd $workroot && tar cf - gsm-1.0-pl13/{ChangeLog,COPYRIGHT,README} | 7z a -si $deps_destroot/share/doc/doc_gsm.tar.xz) || false
       return

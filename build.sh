@@ -526,6 +526,9 @@ BuildStage5_ ()
   (set -- $1/bin                      && mkdir -p $1 && install -m 0755 $proj_root/scripts/winetricksloader.sh  $1/winetricks) || false
   # ------------------------------------- 7-Zip
   7z x -y -o$1/share/nxwine/programs/7-Zip -x\!\$\* $srcroot/$pkgsrc_7z
+  
+  # strip out debug and non-global symbols
+  find ${deps_destroot}/lib -type f \( -name "*.dylib" -o -name "*.so" \) | xargs strip -S -x
 } # end BuildStage5_
 
 BuildWine_ ()

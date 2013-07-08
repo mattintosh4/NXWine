@@ -161,7 +161,7 @@ BuildDevel_ ()
       ./autogen.sh
       ./configure $configure_args
     ;;
-    icu) # rev 33743, release-51-2
+    icu-release-51-2) # rev 33743, release-51-2
       cd source
       ./configure ${configure_args} --enable-rpath --with-library-bits=32
       $"makeallins"
@@ -435,7 +435,7 @@ Bootstrap_ ()
   
   # ------------------------------------- begin build
   BuildDeps_  gsm
-  BuildDevel_ icu
+  BuildDevel_ icu-release-51-2
   BuildDeps_  gettext
   BuildDeps_  libelf
   BuildDeps_  libtool

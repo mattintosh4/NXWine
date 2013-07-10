@@ -18,6 +18,46 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -- 
 
+script StartMenu_
+  property control      : "コントロールパネル"
+  property explorer     : "Wine エクスプローラ"
+  property regedit      : "レジストリエディタ"
+  property uninstaller  : "プログラムの追加と削除"
+  property winecfg      : "環境設定"
+  property winefile     : "Wine ファイルマネージャ"
+  property wineprefix   : "WINEPREFIX を開く"
+  
+  set menuList to { ¬
+    explorer, ¬
+    winefile, ¬
+    winecfg, ¬
+    regedit, ¬
+    control, ¬
+    uninstaller, ¬
+    wineprefix}
+  
+  set aRes to (choose from list menuList with title "NXWine Menu") as string
+  
+  if aRes is "false" then return
+  
+  if aRes is wineprefix then
+    set thePath to POSIX file (do shell script "/Applications/NXWine.app/Contents/Resources/bin/wine winepath.exe c:")
+    tell application "Finder" to activate (open thePath)
+  else if aRes is explorer then
+    main("explorer")
+  else if aRes is winefile then
+    main("winefile")
+  else if aRes is winecfg then
+    main("winecfg")
+  else if aRes is regedit then
+    main("regedit")
+  else if aRes is control then
+    main("control")
+  else if aRes is uninstaller then
+    main("uninstaller")
+  end if
+end script
+
 on main(input)
   try
     do shell script "WINEDEBUG=-all /Applications/NXWine.app/Contents/Resources/bin/wine" & space & input & space & "&>/dev/null &"
@@ -35,7 +75,7 @@ on open argv
 end open
 
 on reopen
-  run
+  run StartMenu_
 end reopen
 
 on quit

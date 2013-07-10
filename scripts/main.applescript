@@ -36,7 +36,7 @@ script StartMenu_
     uninstaller, ¬
     wineprefix}
   
-  set aRes to (choose from list menuList with title "NXWine Menu") as string
+  set aRes to (choose from list menuList default items explorer with title "NXWine Menu") as string
   
   if aRes is "false" then
     return

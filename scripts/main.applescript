@@ -38,23 +38,23 @@ script StartMenu_
   
   set aRes to (choose from list menuList with title "NXWine Menu") as string
   
-  if aRes is "false" then return
-  
-  if aRes is wineprefix then
-    set thePath to POSIX file (do shell script "/Applications/NXWine.app/Contents/Resources/bin/wine winepath.exe c:")
-    tell application "Finder" to activate (open thePath)
+  if aRes is "false" then
+    return
+  else if aRes is control then
+    main("control")
   else if aRes is explorer then
     main("explorer")
+  else if aRes is regedit then
+    main("regedit")
+  else if aRes is uninstaller then
+    main("uninstaller")
   else if aRes is winefile then
     main("winefile")
   else if aRes is winecfg then
     main("winecfg")
-  else if aRes is regedit then
-    main("regedit")
-  else if aRes is control then
-    main("control")
-  else if aRes is uninstaller then
-    main("uninstaller")
+  else if aRes is wineprefix then
+    set thePath to POSIX file (do shell script "/Applications/NXWine.app/Contents/Resources/bin/wine winepath.exe c:")
+    tell application "Finder" to activate (open thePath)
   end if
 end script
 

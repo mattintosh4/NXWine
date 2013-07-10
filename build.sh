@@ -213,11 +213,11 @@ BuildDevel_ ()
     ;;
     libxml2)
       git checkout -f master
-      ./autogen.sh ${configure_args} --with-{icu,python}
+      ./autogen.sh ${configure_args} --with-{icu,python} --disable-silent-rules
     ;;
     libxslt)
       git checkout -f master
-      ./autogen.sh ${configure_args}
+      ./autogen.sh ${configure_args} --disable-silent-rules
     ;;
     mpg123)
       autoreconf -i

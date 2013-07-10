@@ -18,7 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-set -- ${prefix:=/Applications/NXWine.app/Contents/Resources}/libexec/wine "$@"
+prefix=/Applications/NXWine.app/Contents/Resources
+set -- ${prefix}/libexec/wine "$@"
 
 # note: usage options and non-arguments have to be processed before standard run.
 case $2 in (--help|--version|"") exec "$@";; esac
@@ -47,8 +48,8 @@ SetDebug_ ()
 
 CreateWP_ ()
 {
-  set -- ${prefix}/libexec/wine
-  local WINEDEBUG
+  save_WINEDEBUG="${WINEDEBUG}"
+  WINEDEBUG=
   
   $1 wineboot.exe --init
   $1 7z.exe x -y -o'C:\windows' ${prefix}/share/nxwine/nativedlls/nativedlls.exe
@@ -95,11 +96,21 @@ qdvd,\
 qedit,\
 quartz}.dll
   
+  if [ "$2" = --force-init ]; then
+    exit
+  fi
+  
+  WINEDEBUG="${save_WINEDEBUG}"
 } # end CreateWP_
 
 # -------------------------------------
 SetEnv_
 # note: some debug options is enabled because this script is incomplete yet.
-if ! [ "${WINEDEBUG+set}" ]; then SetDebug_; fi
-if ! [ -d "${WINEPREFIX:=$HOME/.wine}" ]; then CreateWP_; fi
+if [ "${WINEDEBUG+set}" != set ]; then
+  SetDebug_
+fi
+if [ ! -d "${WINEPREFIX:=$HOME/.wine}" ] || [ "$2" = --force-init ]; then
+  CreateWP_ "$@"
+fi
+
 exec "$@"

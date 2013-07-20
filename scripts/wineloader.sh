@@ -27,6 +27,10 @@ case $2 in (--help|--version|"") exec "$@";; esac
 # -------------------------------------
 SetEnv_ ()
 {
+  if [ "${WINEPREFIX+set}" != set ]; then
+    export WINEPREFIX="$(osascript -e 'POSIX path of (path to library folder from user domain) & "NXWine/prefixes/default"')"
+  fi
+  
   export PATH=${prefix}/libexec:${prefix}/bin:/usr/bin:/bin:/usr/sbin:/sbin
   export LANG=${LANG:=ja_JP.UTF-8}
   
@@ -51,6 +55,7 @@ CreateWP_ ()
   save_WINEDEBUG="${WINEDEBUG}"
   WINEDEBUG=
   
+  mkdir -p "${WINEPREFIX}"
   $1 wineboot.exe --init
   $1 7z.exe x -y -o'C:\windows' ${prefix}/share/nxwine/nativedlls/nativedlls.exe
   cat <<@REGEDIT4 | $1 regedit.exe -
@@ -109,7 +114,7 @@ SetEnv_
 if [ "${WINEDEBUG+set}" != set ]; then
   SetDebug_
 fi
-if [ ! -d "${WINEPREFIX:=$HOME/.wine}" ] || [ "$2" = --force-init ]; then
+if [ ! -d "${WINEPREFIX}" ] || [ "$2" = --force-init ]; then
   CreateWP_ "$@"
 fi
 

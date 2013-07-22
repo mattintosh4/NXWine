@@ -25,10 +25,10 @@ if ! [ "${WINEDEBUG+set}" ] ; then export WINEDEBUG=; fi
 
 usage="\
 Usage:
-    $(cd "$(dirname "$0")" && pwd)/nxwinetricks [package]
-    
+    $0 <package>
+
 Cache directory:
-    /Users/$(whoami)/com.github.mattintosh4.NXWine/<package>
+    ~/Library/NXWine/caches/<package>
 
 package             description
 ------------------------------------------------
@@ -42,14 +42,15 @@ rpgvx               RPG TKOOL VX RTP v202
 ?????????           Yumenikki v0.10 (with patch)"
 
 # ------------------------------------- GUI event
-function dialog_ {
+function Dialog_ {
     set -- $(
         osascript -e '
             property rpg2000 : "RPG TKOOL 2000"
             property rpg2003 : "RPG TKOOL 2003"
             property rpgxp   : "RPG TKOOL XP"
             property rpgvx   : "RPG TKOOL VX"
-            tell application "System Events"
+            
+            tell application "AppleScript Runner"
                 activate
                 set aRes to (choose from list {rpg2000, rpg2003, rpgxp, rpgvx} with title "NXWinetricks") as text
                 if aRes is "false"  then quit
@@ -60,7 +61,12 @@ function dialog_ {
             end tell
         '
     )
-    if [ "$1" ]; then exec "$(dirname "$0")/$(basename "$0")" $1; else exit 0; fi
+    
+    if [ "$1" ]; then
+        exec "$0" "$1"
+    else
+        exit 0
+    fi
 }
 
 # -------------------------------------
@@ -73,7 +79,7 @@ function install_rpg2000 {
     # f1ea2dd0610d005282f3840c349754cdece9f3ad
     set -- 2000rtp.zip
     [ -f $1 ] || curl -O 'http://ftp.vector.co.jp/pack/winnt/util/runtime/2000rtp.zip'
-    ${FlatExtract} $1
+    ${wine} 7z.exe e -y $1
     ${wine} RPG2000RTP.exe
     ConvLess_ "使用規約.txt"
 }
@@ -81,7 +87,7 @@ function install_rpg2003 {
     # 9a63d4e58d752d6ed5de79492a31ce43d0060564
     set -- 2003rtp.zip
     [ -f $1 ] || curl -O 'http://ftp.vector.co.jp/pack/winnt/util/runtime/2003rtp.zip'
-    ${FlatExtract} $1
+    ${wine} 7z.exe e -y $1
     ${wine} RPG2003RTP.exe
     ConvLess_ "使用規約.txt"
 }
@@ -89,7 +95,7 @@ function install_rpgxp {
     # 2079f38b692569c1fc734320862badb170bbd29d
     set -- xp_rtp103.zip
     [ -f $1 ] || curl -O 'http://ftp.vector.co.jp/pack/winnt/util/runtime/xp_rtp103.zip'
-    ${FlatExtract} $1
+    ${wine} 7z.exe e -y $1
     ${wine} Setup.exe
     ConvLess_ "利用規約.txt"
 }
@@ -97,7 +103,7 @@ function install_rpgvx {
     # 351b4e528dc6ed4ed9988f0a636da6b1df48d6f2
     set -- vx_rtp202.zip
     [ -f $1 ] || curl -O 'http://ftp.vector.co.jp/pack/winnt/util/runtime/vx_rtp202.zip'
-    ${FlatExtract} $1
+    ${wine} 7z.exe e -y $1
     ${wine} setup.exe
     ConvLess_ "利用規約.txt"
 }
@@ -107,47 +113,47 @@ function install_aooni {
     set -- aooni.zip
     [ -f $1 ] || curl -O 'http://mygames888.info/zip/aooni.zip'
     unzip -o $1
-    ${PathExtract} -o'c:\Program Files\aooni' $(basename $1 .zip).exe
-    less "$(${winepath} 'c:\Program Files\aooni\README.txt')"
+    ${wine} 7z.exe x -y -o'c:\Program Files\aooni' $(basename $1 .zip).exe
+    less "$(${wine} winepath.exe --unix 'c:\Program Files\aooni\README.txt')"
 }
 function install_ib {
     set -- Ib_1.05.zip
     [ -f $1 ] || curl -O 'http://ftp.vector.co.jp/pack/win95/game/avg/horror/Ib_1.05.zip'
-    ${PathExtract} -o'c:\Program Files' $1
-    ConvLess_ "$(${winepath} 'c:\Program Files\Ib_1.05\Ib_説明書.txt')"
+    ${wine} 7z.exe x -y -o'c:\Program Files' $1
+    ConvLess_ "$(${wine} winepath.exe --unix 'c:\Program Files\Ib_1.05\Ib_説明書.txt')"
 }
 function install_yumenikki {
     set -- yumenikki0.10.lzh yumesyuusei.lzh
     [ -f $1 ] || curl -O 'http://ftp.vector.co.jp/pack/win95/game/avg/yumenikki0.10.lzh'
     [ -f $2 ] || curl -O 'http://www3.nns.ne.jp/pri/tk-mto/yumesyuusei.lzh'
-    ${PathExtract} -o'c:\Program Files' $1
-    ${FlatExtract} -o'c:\Program Files\ゆめにっき\ゆめにっき0.10' $2
-    ConvLess_   "$(${winepath} 'c:\Program Files\ゆめにっき\初めに読んで下さい。0.10.txt')" \
-                "$(${winepath} 'c:\Program Files\ゆめにっき\ゆめにっき0.10\ゆめにっき修正ファイルについて.txt')"
+    ${wine} 7z.exe x -y -o'c:\Program Files' $1
+    ${wine} 7z.exe e -y -o'c:\Program Files\ゆめにっき\ゆめにっき0.10' $2
+    ConvLess_   "$(${wine} winepath.exe --unix 'c:\Program Files\ゆめにっき\初めに読んで下さい。0.10.txt')" \
+                "$(${wine} winepath.exe --unix 'c:\Program Files\ゆめにっき\ゆめにっき0.10\ゆめにっき修正ファイルについて.txt')"
 }
 
 # ------------------------------------- begin processing
-if [ $# = 0 ]; then dialog_; fi
 case $1 in
     aooni|ib|yumenikki|rpg200[03]|rpgxp|rpgvx)
-        # nothing to do
+    ;;
+    "")
+        Dialog_
     ;;
     *)
         exec echo "${usage}"
     ;;
 esac
-prefix=/Applications/NXWine.app/Contents/Resources
-wine=${prefix}/bin/wine
-sevenzip=${prefix}/share/nxwine/programs/7-Zip/7z.exe
-FlatExtract="${wine} 7z.exe e -y"
-PathExtract="${wine} 7z.exe x -y"
-winepath="${wine} winepath --unix"
 
-printf "package... $1\n"
-printf "checking wine... "; [ -x "${wine}" ] && printf "${wine}\n" || { echo no; exit 1; }
-printf "checking 7z.exe... "; [ -f "${sevenzip}" ] && printf "${sevenzip}\n" || { echo no; exit 1; }
+wine=/Applications/NXWine.app/Contents/Resources/bin/wine
+sevenzip=/Applications/NXWine.app/Contents/Resources/share/nxwine/programs/7-Zip/7z.exe
+cachedir=$(osascript -e 'POSIX path of (path to library folder from user domain) & "NXWine/caches/"')$1
+
+printf "package ... $1\n"
+printf "checking wine ... "; [ -x "${wine}" ] && printf "${wine}\n" || { echo no; exit 1; }
+printf "checking 7z.exe ... "; [ -f "${sevenzip}" ] && printf "${sevenzip}\n" || { echo no; exit 1; }
 
 PS4=
 set -x
-mkdir -p /Users/$(whoami)/Library/Caches/com.github.mattintosh4.NXWine/$1 && cd $_
+mkdir -p ${cachedir}
+cd ${cachedir}
 install_$1

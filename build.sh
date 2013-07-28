@@ -579,8 +579,8 @@ BuildStage6_ ()
     $"mkdircd" $1
     install -m 0644 $srcroot/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
     7z x -y $srcroot/nativedlls/directx_feb2010_redist.exe dxnt.cab
-    7z x -y -odrivers dxnt.cab dxapi.sys 
-    7z x -y dxnt.cab l3codecx.ax \
+    7z x -y -odrivers dxnt.cab \*.sys
+    7z x -y dxnt.cab \*.ax \
 {\
 dplaysvr,\
 dpnsvr,\
@@ -590,8 +590,12 @@ dxdiag,\
 {\
 amstream,\
 d3d8thk,\
+d3dim,\
 d3dim700,\
 d3dpmesh,\
+d3dramp,\
+d3drm,\
+d3dxof,\
 ddrawex,\
 devenum,\
 diactfrm,\
@@ -613,13 +617,23 @@ dx8vb,\
 dxdiagn,\
 encapi,\
 gcdef,\
+ksuser,\
 mciqtz32,\
+mswebdvd,\
+pid,\
 qasf,\
+qcap,\
 qdv,\
 qdvd,\
 qedit,\
 qedwipes,\
-quartz}.dll
+quartz}.dll \
+{\
+diactfrm,\
+ks,\
+kscapture,\
+ksfilter,\
+ksreg}.inf
     
     7z x -y $srcroot/nativedlls/directx_Jun2010_redist.exe \*_x86.cab
     find ./*_x86.cab | while read
@@ -628,6 +642,8 @@ quartz}.dll
 D3DCompiler,\
 XAPOFX1,\
 XAudio2,\
+d3dcompiler,\
+d3dcsx,\
 d3dx9}_\*.dll
     done
     # note: XAPOFX1_3.dll in Mar2009_XAudio_x86.cab is old

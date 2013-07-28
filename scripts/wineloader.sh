@@ -61,9 +61,13 @@ CreateWP_ ()
   cat <<@REGEDIT4 | $1 regedit.exe -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
 $(printf '"*D3DCompiler_%d"="native"\n' {37..43})
+$(printf '"*d3dcompiler_%d"="native"\n' {33..36})
+$(printf '"*d3dx9_%d"="native"\n' {24..43})
 "*XAPOFX1_1"="native"
 "*amstream"="native"
-$(printf '"*d3dx9_%d"="native"\n' {24..43})
+"*d3dim"="native"
+"*d3drm"="native"
+"*d3dxof"="native"
 "*ddrawex"="native"
 "*devenum"="native"
 "*dinput"="native"
@@ -73,13 +77,19 @@ $(printf '"*d3dx9_%d"="native"\n' {24..43})
 "*dxdiag.exe"="native"
 "*dxdiagn"="native"
 "*gdiplus"="builtin,native"
-"*l3codecx"="native"
 "*mciqtz32"="native"
+"*qcap"="native"
 "*qedit"="native"
 "*quartz"="native"
 @REGEDIT4
   
-  $1 regsvr32.exe l3codecx.ax {\
+  $1 regsvr32.exe \
+{\
+l3codecx,\
+ksolay,\
+ksproxy,\
+mpg2splt}.ax \
+{\
 XAudio2_{0..7},\
 amstream,\
 ddrawex,\
@@ -95,11 +105,19 @@ dsdmo{,prp},\
 dxdiagn,\
 dx{7,8}vb,\
 encapi,\
+mswebdvd,\
 qasf,\
+qcap,\
 qdv,\
 qdvd,\
 qedit,\
 quartz}.dll
+  
+  local n
+  for n in diactfrm ks{,capture,filter,reg}
+  do
+    $1 rundll32.exe setupapi.dll,InstallHinfSection DefaultInstall 128 ${n}.inf
+  done
   
   if [ "$2" = --force-init ]; then
     exit

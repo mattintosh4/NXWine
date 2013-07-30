@@ -842,7 +842,7 @@ patch_gsm(){
 +		-rm $(RMFLAGS) $@
  		cp $? $@
  		chmod 444 $@
-  
+ 
 @EOS
 }
 

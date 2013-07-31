@@ -579,8 +579,8 @@ BuildStage6_ ()
     $"mkdircd" $1
     install -m 0644 $srcroot/nativedlls/FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
     7z x -y $srcroot/nativedlls/directx_feb2010_redist.exe dxnt.cab
-    7z x -y -odrivers dxnt.cab \*.sys
-    7z x -y -oDirectX/Dinput \*.ini \*.png
+    7z x -y dxnt.cab -odrivers \*.sys
+    7z x -y dxnt.cab -oDirectX/Dinput \*.ini \*.png
     7z x -y dxnt.cab \*.ax \
 {\
 dplaysvr,\

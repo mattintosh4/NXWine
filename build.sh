@@ -169,7 +169,7 @@ BuildDevel_ ()
       return
     ;;
     Little-CMS)
-      git checkout -f lcms2.5
+      git checkout -f master
       ./configure $configure_args
     ;;
     libffi)

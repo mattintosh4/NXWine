@@ -641,9 +641,11 @@ ksfilter,\
 ksreg}.inf
     
     7z x -y $srcroot/nativedlls/directx_Jun2010_redist.exe \*_x86.cab
-    find ./*_x86.cab | while read
+    for i in $(printf '20%02d ' {5..10})
     do
-      7z x -y $REPLY {\
+      find *$i*.cab | sort -M | while read
+      do
+        7z x -y $REPLY {\
 D3DCompiler,\
 X3DAudio1,\
 x3daudio1,\
@@ -655,10 +657,12 @@ d3dx9,\
 xactengine{2,3}}_\*.dll
       done
     done
-    # note: XAPOFX1_3.dll in Mar2009_XAudio_x86.cab is old
-    7z x -y Aug2009_XAudio_x86.cab XAPOFX1_3.dll
+    unset i
+    
+    # remove cab files
     rm *.cab
     
+    # create native dlls pack
     7z a -sfx $datadir/nxwine/nativedlls/nativedlls.exe $1
   }
   InstallNativedlls_

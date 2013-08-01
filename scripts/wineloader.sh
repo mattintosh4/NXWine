@@ -27,8 +27,12 @@ case $2 in (--help|--version|"") exec "$@";; esac
 # -------------------------------------
 SetEnv_ ()
 {
+  
+  dataprefix="$(osascript -e 'POSIX path of (path to library folder from user domain) & "NXWine"')"
+  
+  # WINEPREFIX
   if [ "${WINEPREFIX+set}" != set ]; then
-    export WINEPREFIX="$(osascript -e 'POSIX path of (path to library folder from user domain) & "NXWine/prefixes/default"')"
+    export WINEPREFIX="${dataprefix}"/prefixies/default
   fi
   
   export PATH=${prefix}/libexec:${prefix}/bin:/usr/bin:/bin:/usr/sbin:/sbin
@@ -55,8 +59,14 @@ CreateWP_ ()
   save_WINEDEBUG="${WINEDEBUG}"
   WINEDEBUG=
   
+  # initialize
   mkdir -p "${WINEPREFIX}"
   $1 wineboot.exe --init
+  
+  # symlink to NXWinetricks cache directory
+  ln -hfs "${dataprefix}"/caches "${WINEPREFIX}"/drive_c/nxwinetricks
+  
+  # extract native dlls pack
   $1 7z.exe x -y -o'C:\windows' ${prefix}/share/nxwine/nativedlls/nativedlls.exe
   cat <<@REGEDIT4 | $1 regedit.exe -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]

@@ -71,7 +71,6 @@ for pkg in \
   gettext-0.18.3.tar.gz \
   help2man-1.41.2.tar.gz \
   jasper-1.900.1.tar.bz2 \
-  lcms-1.19.tar.gz \
   libelf-0.8.13.tar.gz \
   libtool-2.4.2.tar.gz \
   m4-1.4.16.tar.bz2 \
@@ -128,6 +127,7 @@ BuildDeps_ ()
 BuildDevel_ ()
 {
   $"scmcopy" $1
+  
   case $1 in
     flac)
       ./autogen.sh
@@ -167,6 +167,10 @@ BuildDevel_ ()
       $"makeallins"
       (cd $workroot && tar cf - icu/{license,readme}.html | 7z a -si $deps_destroot/share/doc/doc_icu.tar.xz) || false
       return
+    ;;
+    Little-CMS)
+      git checkout -f lcms2.5
+      ./configure $configure_args
     ;;
     libffi)
       git checkout -f master
@@ -474,7 +478,7 @@ BuildStage3_ ()
   BuildDevel_ libtiff
   BuildDeps_  jasper
   BuildDevel_ libicns
-  BuildDeps_  lcms
+  BuildDevel_ Little-CMS
 } # end BuildStage3_
 
 BuildStage3a_ ()

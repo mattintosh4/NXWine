@@ -733,8 +733,11 @@ BuildDmg_ ()
   cp -R ${deps_destroot}/share/doc ${wine_destroot}/share
   find ${deps_destroot:?} -mindepth 1 -type d | xargs rm -rf
   
-  (set -- $1/.resources && mkdir -p $1 && mv $destroot $1) || false
-  (set -- $1/NXWineInstaller.app && osacompile -xo $1 $proj_root/scripts/installer.applescript && install -m 0644 $proj_root/nxwine.icns $1/Contents/Resources/applet.icns) || false
+  mkdir -p $1
+  mv $destroot $1
+  ln -s /Applications $1
+#  (set -- $1/.resources && mkdir -p $1 && mv $destroot $1) || false
+#  (set -- $1/NXWineInstaller.app && osacompile -xo $1 $proj_root/scripts/installer.applescript && install -m 0644 $proj_root/nxwine.icns $1/Contents/Resources/applet.icns) || false
   hdiutil create  -ov \
                   -format UDBZ \
                   -srcdir $1 \

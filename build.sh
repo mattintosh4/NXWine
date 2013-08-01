@@ -641,9 +641,9 @@ ksfilter,\
 ksreg}.inf
     
     7z x -y $srcroot/nativedlls/directx_Jun2010_redist.exe \*_x86.cab
-    for i in $(printf '20%02d ' {5..10})
+    printf '20%02d\n' {5..10} | while read
     do
-      find *$i*.cab | sort -M | while read
+      find *$REPLY*.cab | sort -M | while read
       do
         7z x -y $REPLY {\
 D3DCompiler,\
@@ -657,7 +657,6 @@ d3dx9,\
 xactengine{2,3}}_\*.dll
       done
     done
-    unset i
     
     # remove cab files
     rm *.cab

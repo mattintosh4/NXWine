@@ -31,11 +31,12 @@ Cache directory:
     ~/Library/NXWine/caches/<package>
 
 package             description
-------------------------------------------------
+---------------------------------------------------------------
 rpg2000             RPG TKOOL 2000 RTP
 rpg2003             RPG TKOOL 2003 RTP
 rpgxp               RPG TKOOL XP RTP v103
 rpgvx               RPG TKOOL VX RTP v202
+iview               IrfanViewPortable v4.36
 
 ?????               Aooni (Japanese version)
 ??                  Ib v1.05
@@ -49,15 +50,22 @@ function Dialog_ {
             property rpg2003 : "RPG TKOOL 2003"
             property rpgxp   : "RPG TKOOL XP"
             property rpgvx   : "RPG TKOOL VX"
+            property iview   : "IrfanViewPortable v4.36"
             
             tell application "AppleScript Runner"
                 activate
-                set aRes to (choose from list {rpg2000, rpg2003, rpgxp, rpgvx} with title "NXWinetricks") as text
+                set aRes to (choose from list { ¬
+                    rpg2000, ¬
+                    rpg2003, ¬
+                    rpgxp, ¬
+                    rpgvx, ¬
+                    iview} with title "NXWinetricks") as text
                 if aRes is "false"  then quit
                 if aRes is rpg2000  then return "rpg2000"
                 if aRes is rpg2003  then return "rpg2003"
                 if aRes is rpgxp    then return "rpgxp"
                 if aRes is rpgvx    then return "rpgvx"
+                if aRes is iview    then return "iview"
             end tell
         '
     )
@@ -75,6 +83,17 @@ function ConvLess_ {
 }
 
 # -------------------------------------
+install_iview ()
+{
+    set -- IrfanViewPortable_4.36.paf.exe "$(${wine} winepath.exe --unix c:)"
+    [ -f $1 ] || curl -L -o $1 'http://software-files-a.cnet.com/s/software/13/19/99/59/IrfanViewPortable_4.36.paf.exe?lop=link&ptype=3001&ontid=2192&siteId=4&edId=3&spi=439b75060e1318db3767fc0dc5d8d6a1&pid=13199959&psid=75329972&token=1375391948_d9bb1162670144ce5122082d7cf79a5a&fileName=IrfanViewPortable_4.36.paf.exe'
+    ln -fhs "$PWD"/$1 "$2"
+    cd "$2"
+    ${wine} $1
+    sed -i '' 's/DLL=.*/DLL=Japanese.dll/; s/Lang=.*/Lang=Japanese/' IrfanViewPortable/App/DefaultData/IrfanView/i_view32.ini
+    rm $1
+}
+
 function install_rpg2000 {
     # f1ea2dd0610d005282f3840c349754cdece9f3ad
     set -- 2000rtp.zip
@@ -134,7 +153,7 @@ function install_yumenikki {
 
 # ------------------------------------- begin processing
 case $1 in
-    aooni|ib|yumenikki|rpg200[03]|rpgxp|rpgvx)
+    aooni|ib|iview|yumenikki|rpg200[03]|rpgxp|rpgvx)
     ;;
     "")
         Dialog_

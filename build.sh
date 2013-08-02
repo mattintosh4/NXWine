@@ -662,6 +662,14 @@ xactengine{2,3}}_\*.dll
     7z e $srcroot/nativedlls/dotnetfx.exe netfx1.cab
     7z e netfx1.cab FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8
     mv FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
+    # Visual C++ 2010
+    # http://www.microsoft.com/ja-jp/download/details.aspx?id=5555
+    7z e $srcroot/nativedlls/vcredist_x86_2010.exe -r vc_red.cab
+    7z e vc_red.cab F_CENTRAL_\*
+    find F_CENTRAL_* | while read
+    do
+      mv $REPLY $(echo $REPLY | sed 's/F_CENTRAL_//; s/_x86/.dll/')
+    done
     # remove cab files
     rm *.cab
     

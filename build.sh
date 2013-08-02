@@ -706,9 +706,15 @@ _DT(11, zip,  zip Archive)
   (set -- faenza-icon-theme_1.3 && unzip -od $docdir/$1 $srcroot/$1.zip AUTHORS ChangeLog COPYING README) || false
   (set -- $docdir/nxwine && mkdir -p $1 && install -m 0644 $proj_root/COPYING $1) || false
   
-  # remove unnecessary files
+  # remove unnecessary files for wine
   rm -f ${libdir:?}/*.{a,la}
   rm -rf ${datadir:?}/applications
+  
+  # move dependencies documents
+  cp -R ${deps_destroot}/share/doc ${wine_destroot}/share
+  
+  # remove unnecessary files for dependencies
+  find ${deps_destroot:?} -mindepth 1 -type d | xargs rm -rf
   
   mod_rpath(){
     set -- $(find $wine_destroot/lib/*.dylib -type f)
@@ -728,20 +734,24 @@ _DT(11, zip,  zip Archive)
 
 BuildDmg_ ()
 {
-  set -- $TMPDIR/$$$LINENO.\$\$
-  cp -R ${deps_destroot}/share/doc ${wine_destroot}/share
-  find ${deps_destroot:?} -mindepth 1 -type d | xargs rm -rf
-  
+  set -- $workroot/$proj_name.{dst,pkg}
   mkdir -p $1
   mv $destroot $1
-  ln -s /Applications $1
-#  (set -- $1/.resources && mkdir -p $1 && mv $destroot $1) || false
-#  (set -- $1/NXWineInstaller.app && osacompile -xo $1 $proj_root/scripts/installer.applescript && install -m 0644 $proj_root/nxwine.icns $1/Contents/Resources/applet.icns) || false
+  
+  # create installer
+  pkgbuild \
+    --component-plist $proj_root/scripts/installer-component.plist \
+    --install-location /Applications \
+    --ownership preserve \
+    --root $1 \
+    $2
+  
+  # create disk image
   hdiutil create  -ov \
-                  -format UDBZ \
-                  -srcdir $1 \
+                  -srcdir $2 \
                   -volname $proj_name \
                   $proj_root/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
+  
   rm -rf $1
 } # end BuildDmg_
 

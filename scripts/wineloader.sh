@@ -74,7 +74,7 @@ CreateWP_ ()
   cat <<@EOS | ${wine} regedit.exe -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
 $(
-  set - \
+  set -- \
     advpack               \
     amstream              \
     atl100                \
@@ -104,22 +104,18 @@ $(
     xinput1_{1..3}        \
     xinput9_1_0
   
-  printf '"%s"="native"\n' "$@"
-)
-
-$(
-  set - \
-    d3d8    \
-    d3d9    \
+  printf '"*%s"="native"\n' "$@"
+  
+  set -- \
     gdiplus
   
-  printf '"%s"="builtin,native"\n' "$@"
+  printf '"*%s"="builtin,native"\n' "$@"
 )
 @EOS
   
   # register native dlls
   (
-    set - \
+    set -- \
       amstream.dll        \
       comcat.dll          \
       ddrawex.dll         \
@@ -153,14 +149,8 @@ $(
     ${wine} regsvr32.exe "$@"
   )
   
-  (
-    set - diactfrm ks{,capture,filter,reg}
-    
-    for f
-    do
-      ${wine} rundll32.exe setupapi.dll,InstallHinfSection DefaultInstall 128 ${f}.inf
-    done
-  )
+  # register inf
+  ${wine} rundll32.exe setupapi.dll,InstallHinfSection DefaultInstall 128 {diactfrm,ks{,capture,filter,reg}}.inf
   
   if [ "$2" = --force-init ]; then
     exit

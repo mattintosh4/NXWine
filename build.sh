@@ -593,9 +593,7 @@ dxdiag,\
 }.exe \
 {\
 amstream,\
-d3d8,\
 d3d8thk,\
-d3d9,\
 d3dim,\
 d3dim700,\
 d3dpmesh,\
@@ -663,6 +661,7 @@ xactengine{2,3}}_\*.dll
     7z e $srcroot/nativedlls/dotnetfx.exe netfx1.cab
     7z e netfx1.cab FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8
     mv FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
+    
     # Visual C++ 2010
     # http://www.microsoft.com/ja-jp/download/details.aspx?id=5555
     7z e $srcroot/nativedlls/vcredist_x86_2010.exe -r vc_red.cab
@@ -671,6 +670,7 @@ xactengine{2,3}}_\*.dll
     do
       mv $REPLY $(echo $REPLY | sed 's/F_CENTRAL_//; s/_x86/.dll/')
     done
+    
     # Visual Basic 6.0 SP 6
     # http://www.microsoft.com/ja-jp/download/details.aspx?id=24417
     7z e $srcroot/nativedlls/VB6.0-KB290887-X86.exe
@@ -681,8 +681,9 @@ comcat,\
 msvbvm60,\
 ole{aut,pro}32}.dll
     rm -f vbrun60sp6.exe
+    
     # remove cab files
-    rm *.cab
+    rm -f *.cab
     
     # create native dlls pack
     7z a -sfx $datadir/nxwine/nativedlls/nativedlls.exe $1

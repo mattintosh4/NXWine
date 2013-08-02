@@ -644,15 +644,14 @@ ksreg}.inf
     do
       find *$REPLY*.cab | sort -M | while read
       do
-        7z x -y $REPLY {\
-D3DCompiler,\
-X3DAudio1,\
-x3daudio1,\
-XAPOFX1,\
-XAudio2,\
+        7z x -y -ssc- $REPLY {\
 d3dcompiler,\
 d3dcsx,\
 d3dx9,\
+x3daudio1,\
+xapofx1,\
+xaudio2,\
+xinput{1,9},\
 xactengine{2,3}}_\*.dll
       done
     done

@@ -670,6 +670,16 @@ xactengine{2,3}}_\*.dll
     do
       mv $REPLY $(echo $REPLY | sed 's/F_CENTRAL_//; s/_x86/.dll/')
     done
+    # Visual Basic 6.0 SP 6
+    # http://www.microsoft.com/ja-jp/download/details.aspx?id=24417
+    7z e $srcroot/nativedlls/VB6.0-KB290887-X86.exe
+    7z e -ssc- vbrun60sp6.exe stdole2.tlb {\
+advpack,\
+asycfilt,\
+comcat,\
+msvbvm60,\
+ole{aut,pro}32}.dll
+    rm -f vbrun60sp6.exe
     # remove cab files
     rm *.cab
     

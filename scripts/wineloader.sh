@@ -19,7 +19,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 prefix=/Applications/NXWine.app/Contents/Resources
-set -- ${prefix}/libexec/wine "$@"
+wine=${prefix}/libexec/wine
+set -- ${wine} "$@"
 
 # note: usage options and non-arguments have to be processed before standard run.
 case $2 in (--help|--version|"") exec "$@";; esac
@@ -61,73 +62,105 @@ CreateWP_ ()
   
   # initialize
   mkdir -p "${WINEPREFIX}"
-  $1 wineboot.exe --init
+  ${wine} wineboot.exe --init
   
   # symlink to NXWinetricks cache directory
   ln -hfs "${dataprefix}"/caches "${WINEPREFIX}"/drive_c/nxwinetricks
   
   # extract native dlls pack
-  $1 7z.exe x -y -o'C:\windows' ${prefix}/share/nxwine/nativedlls/nativedlls.exe
-  cat <<@REGEDIT4 | $1 regedit.exe -
+  ${wine} 7z.exe x -y -o'C:\windows' ${prefix}/share/nxwine/nativedlls/nativedlls.exe
+  
+  # register override settings
+  cat <<@EOS | ${wine} regedit.exe -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
-$(printf '"*D3DCompiler_%d"="native"\n' {37..43})
-$(printf '"*d3dcompiler_%d"="native"\n' {33..36})
-$(printf '"*d3dx9_%d"="native"\n' {24..43})
-"*XAPOFX1_1"="native"
-"*amstream"="native"
-"*d3dim"="native"
-"*d3drm"="native"
-"*d3dxof"="native"
-"*ddrawex"="native"
-"*devenum"="native"
-"*dinput"="native"
-"*dinput8"="native"
-"*dplayx"="native"
-"*dpwsockx"="native"
-"*dxdiag.exe"="native"
-"*dxdiagn"="native"
-"*gdiplus"="builtin,native"
-"*mciqtz32"="native"
-"*qcap"="native"
-"*qedit"="native"
-"*quartz"="native"
-@REGEDIT4
+$(
+  set - \
+    advpack               \
+    amstream              \
+    atl100                \
+    comcat                \
+    d3dcompiler_{33..43}  \
+    d3dim                 \
+    d3drm                 \
+    d3dx9_{24..43}        \
+    d3dxof                \
+    ddrawex               \
+    devenum               \
+    dinput{,8}            \
+    dplayx                \
+    dpwsockx              \
+    dxdiag.exe            \
+    dxdiagn               \
+    mciqtz32              \
+    msvcp100              \
+    msvcr100              \
+    oleaut32              \
+    olepro32              \
+    qcap                  \
+    qedit                 \
+    quartz                \
+    vcomp100              \
+    xapofx1_1             \
+    xinput1_{1..3}        \
+    xinput9_1_0
   
-  $1 regsvr32.exe \
-{\
-l3codecx,\
-ksolay,\
-ksproxy,\
-mpg2splt}.ax \
-{\
-XAudio2_{0..7},\
-amstream,\
-ddrawex,\
-devenum,\
-diactfrm,\
-dinput,\
-dplayx,\
-dpnhupnp,\
-dpvacm,\
-dpvoice,\
-dpvvox,\
-dsdmo{,prp},\
-dxdiagn,\
-dx{7,8}vb,\
-encapi,\
-mswebdvd,\
-qasf,\
-qcap,\
-qdv,\
-qdvd,\
-qedit,\
-quartz}.dll
+  printf '"%s"="native"\n' "$@"
+)
+
+$(
+  set - \
+    d3d8    \
+    d3d9    \
+    gdiplus
   
-  local n
-  for n in diactfrm ks{,capture,filter,reg}
-  do
-    $1 rundll32.exe setupapi.dll,InstallHinfSection DefaultInstall 128 ${n}.inf
-  done
+  printf '"%s"="builtin,native"\n' "$@"
+)
+@EOS
+  
+  # register native dlls
+  (
+    set - \
+      amstream.dll        \
+      comcat.dll          \
+      ddrawex.dll         \
+      devenum.dll         \
+      diactfrm.dll        \
+      dinput.dll          \
+      dplayx.dll          \
+      dpnhupnp.dll        \
+      dpvacm.dll          \
+      dpvoice.dll         \
+      dpvvox.dll          \
+      dsdmo{,prp}.dll     \
+      dxdiagn.dll         \
+      dx{7,8}vb.dll       \
+      encapi.dll          \
+      ksolay.ax           \
+      ksproxy.ax          \
+      l3codecx.ax         \
+      mpg2splt.ax         \
+      msvbvm60.dll        \
+      mswebdvd.dll        \
+      ole{aut,pro}32.dll  \
+      qasf.dll            \
+      qcap.dll            \
+      qdv.dll             \
+      qdvd.dll            \
+      qedit.dll           \
+      xaudio2_{0..7}.dll  \
+      quartz.dll
+    
+    ${wine} regsvr32.exe "$@"
+  )
+  
+  (
+    set - diactfrm ks{,capture,filter,reg}
+    
+    for f
+    do
+      ${wine} rundll32.exe setupapi.dll,InstallHinfSection DefaultInstall 128 ${f}.inf
+    done
+  )
   
   if [ "$2" = --force-init ]; then
     exit
@@ -136,12 +169,16 @@ quartz}.dll
   WINEDEBUG="${save_WINEDEBUG}"
 } # end CreateWP_
 
+
+
 # -------------------------------------
 SetEnv_
+
 # note: some debug options is enabled because this script is incomplete yet.
 if [ "${WINEDEBUG+set}" != set ]; then
   SetDebug_
 fi
+
 if [ ! -d "${WINEPREFIX}" ] || [ "$2" = --force-init ]; then
   CreateWP_ "$@"
 fi

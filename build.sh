@@ -593,7 +593,9 @@ dxdiag,\
 }.exe \
 {\
 amstream,\
+d3d8,\
 d3d8thk,\
+d3d9,\
 d3dim,\
 d3dim700,\
 d3dpmesh,\

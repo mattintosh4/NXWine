@@ -164,9 +164,59 @@ $(
   ### timezone settings test ###
   regist_timezone ()
   {
-    iconv -f UTF-8 -t CP932 <<\EOS | ${wine} regedit.exe -
-[HKEY_CURRENT_USER\Environment]
-"TZ"="JST-9"
+    ${wine} regedit.exe /D HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\\TimeZoneInformation
+    uconv -f UTF-8 -t UTF-8 --add-signature <<\EOS | ${wine} regedit.exe -
+[HKEY_CURRENT_USER\Control Panel\International]
+"iCountry"="81"
+"iCurrDigits"="0"
+"iCurrency"="0"
+"iDate"="2"
+"iDigits"="2"
+"iLZero"="1"
+"iMeasure"="0"
+"iNegCurr"="1"
+"iTime"="1"
+"iTLZero"="0"
+"Locale"="00000411"
+"s1159"="午前"
+"s2359"="午後"
+"sCountry"="日本"
+"sCurrency"="¥"
+"sDate"="/"
+"sDecimal"="."
+"sLanguage"="JPN"
+"sList"=","
+"sLongDate"="yyyy'年'M'月'd'日'"
+"sShortDate"="yyyy/MM/dd"
+"sThousand"=","
+"sTime"=":"
+"sLongDate16"="' 'yyyy'年 'M'月 'd'日 'WW"
+"iTimePrefix"="0"
+"iCentury"="0"
+"iDayLZero"="0"
+"iMonLZero"="0"
+"iJapanYear"="0"
+"iJapanDay"="2"
+"sTimeFormat"="H:mm:ss"
+"sMonDecimalSep"="."
+"sMonThousandSep"=","
+"iNegNumber"="1"
+"sNativeDigits"="0123456789"
+"NumShape"="1"
+"iCalendarType"="1"
+"iFirstDayOfWeek"="6"
+"iFirstWeekOfYear"="0"
+"sGrouping"="3;0"
+"sMonGrouping"="3;0"
+"sPositiveSign"=""
+"sNegativeSign"="-"
+
+[HKEY_CURRENT_USER\Control Panel\International\Geo]
+"Nation"="122"
+
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Time Zones]
+"TimeZoneKeyName"="Tokyo Standard Time"
 
 [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment]
 "TZ"="JST-9"
@@ -180,7 +230,6 @@ $(
 "StandardBias"=dword:00000000
 "StandardName"="東京 (標準時)"
 "StandardStart"=hex:00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
-"TimeZoneKeyName"="Tokyo Standard Time"
 
 [HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Time Zones\Tokyo Standard Time]
 "Display"="(GMT+09:00) 大阪、札幌、東京"
@@ -188,10 +237,31 @@ $(
 "Index"=dword:000000eb
 "MapID"="18,19"
 "Std"="東京 (標準時)"
-"TZI"=hex:e4,fd,ff,ff,00,00,00,00,c4,ff,ff,ff,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+"TZI"=hex:e4,fd,ff,ff,00,00,00,00,c4,ff,ff,ff,00,00,00,00,00,00,00,00,00,00,00,\
+  00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Telephony]
+"Perf1"=dword:5045524c
+"Perf2"=dword:50455246
+"DomainName"=""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Telephony\Locations]
+"DisableCallWaiting0"="*70,"
+"DisableCallWaiting1"="70#,"
+"DisableCallWaiting2"="1170,"
+"KeyRenameHistory"=hex:
+"LocationListVersion"=dword:00000002
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Telephony\Country List\81]
+"Name"="日本"
+"NameResourceId"=dword:000069c9
+"CountryCode"=dword:00000051
+"SameAreaRule"="G"
+"LongDistanceRule"="N0FG"
+"InternationalRule"="S010EFG"
 
 EOS
-
   }
   regist_timezone
   

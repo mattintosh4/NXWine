@@ -11,6 +11,7 @@ define(`_PROG_PREFIX', `Z:\Applications\NXWine.app\Contents\Resources\share\nxwi
 AddReg=\
   Classes,\
   Control Panel,\
+  Drivers,\
   Environment,\
   Favorites,\
   Fonts
@@ -73,6 +74,9 @@ HKLM,%FontSysLink%,"Verdana",,"PG_FILE"
 HKCU,Control Panel\Desktop,"FontSmoothing",,"0"
 HKCU,Control Panel\Mouse,"DoubleClickHeight",,"8"
 HKCU,Control Panel\Mouse,"DoubleClickWidth",,"8"
+
+[Drivers]
+HKCU,Software\Wine\Drivers,,,
 
 [Favorites]
 HKCU,%Favorites%,"デスクトップ",,"HKEY_CURRENT_USER\Control Panel\Desktop"

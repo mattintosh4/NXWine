@@ -24,8 +24,6 @@ FontSysLink="Software\Microsoft\Windows NT\CurrentVersion\FontLink\SystemLink"
 
 [Environment]
 HKCU,Environment,"PATH",,"_PROG_PREFIX\7-Zip"
-; HKCU,Environment,"TZ",,"JST-9"
-; HKLM,System\CurrentControlSet\Control\Session Manager\Environment,"TZ",,"JST-9"
 
 [Fonts]
 dnl

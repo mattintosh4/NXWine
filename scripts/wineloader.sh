@@ -113,8 +113,24 @@ $(
 )
 @EOS
   
-  # register native dlls
+  # register inf and dlls
   (
+    # inf
+    set -- \
+      c:\\windows\\system32\\rsrc_dinput\\dimaps \
+      diactfrm  \
+      dinput    \
+      ks        \
+      kscaptur  \
+      ksfilter  \
+      ksreg
+    
+    for f; do ${wine} rundll32.exe setupapi.dll,InstallHinfSection DefaultInstall 128 ${f}.inf; done
+    
+    # remove dinput resources
+    rm -rf "$(WINEDEBUG= ${wine} winepath.exe --unix c:\\windows\\system32\\rsrc_dinput)"
+    
+    # dlls
     set -- \
       amstream.dll        \
       comcat.dll          \
@@ -137,7 +153,8 @@ $(
       mpg2splt.ax         \
       msvbvm60.dll        \
       mswebdvd.dll        \
-      ole{aut,pro}32.dll  \
+      oleaut32.dll        \
+      olepro32.dll        \
       qasf.dll            \
       qcap.dll            \
       qdv.dll             \
@@ -149,8 +166,7 @@ $(
     ${wine} regsvr32.exe "$@"
   )
   
-  # register inf
-  ${wine} rundll32.exe setupapi.dll,InstallHinfSection DefaultInstall 128 {diactfrm,ks{,capture,filter,reg}}.inf
+  
   
   if [ "$2" = --force-init ]; then
     exit

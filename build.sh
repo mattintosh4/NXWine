@@ -583,7 +583,7 @@ BuildStage6_ ()
     $"mkdircd" $1
     7z x -y $srcroot/nativedlls/directx_feb2010_redist.exe dxnt.cab
     7z x -y dxnt.cab -odrivers \*.sys
-    7z x -y dxnt.cab -oDirectX/Dinput \*.ini \*.png
+    7z x -y dxnt.cab -orsrc_dinput dimaps.inf \*.ini \*.png
     7z x -y dxnt.cab \*.ax \
 {\
 dplaysvr,\
@@ -634,10 +634,8 @@ qedwipes,\
 quartz}.dll \
 {\
 diactfrm,\
-ks,\
-kscapture,\
-ksfilter,\
-ksreg}.inf
+dinput,\
+ks{,captur,filter,reg}}.inf
     
     7z x -y $srcroot/nativedlls/directx_Jun2010_redist.exe \*_x86.cab
     printf '20%02d\n' {5..10} | while read

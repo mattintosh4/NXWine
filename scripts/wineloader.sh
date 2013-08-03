@@ -167,6 +167,40 @@ $(
     xaudio2_{0..7}.dll  \
     quartz.dll
   
+  ### timezone settings test ###
+  regist_timezone ()
+  {
+    iconv -f UTF-8 -t CP932 <<\EOS | ${wine} regedit.exe -
+[HKEY_CURRENT_USER\Environment]
+"TZ"="JST-9"
+
+[HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment]
+"TZ"="JST-9"
+
+[HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\TimeZoneInformation]
+"ActiveTimeBias"=dword:fffffde4
+"Bias"=dword:fffffde4
+"DaylightBias"=dword:00000000
+"DaylightName"="東京 (標準時)"
+"DaylightStart"=hex:00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+"StandardBias"=dword:00000000
+"StandardName"="東京 (標準時)"
+"StandardStart"=hex:00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+"TimeZoneKeyName"="Tokyo Standard Time"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Time Zones\Tokyo Standard Time]
+"Display"="(GMT+09:00) 大阪、札幌、東京"
+"Dlt"="東京 (夏時間)"
+"Index"=dword:000000eb
+"MapID"="18,19"
+"Std"="東京 (標準時)"
+"TZI"=hex:e4,fd,ff,ff,00,00,00,00,c4,ff,ff,ff,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+
+EOS
+
+  }
+  regist_timezone
+  
   
   if [ "$2" = --force-init ]; then
     exit

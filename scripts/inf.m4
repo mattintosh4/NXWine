@@ -81,7 +81,8 @@ HKCU,%Favorites%,"フォント (Replacements)",,"HKEY_CURRENT_USER\%FontReplace%
 HKCU,%Favorites%,"フォント (SystemLink)",,"HKEY_LOCAL_MACHINE\%FontSysLink%"
 HKCU,%Favorites%,"マウス",,"HKEY_CURRENT_USER\Control Panel\Mouse"
 HKCU,%Favorites%,"ユーザー環境変数",,"HKEY_CURRENT_USER\Environment"
-HKCU,%Favorites%,"ライブラリオーバーライド",,"HKEY_CURRENT_USER\Software\Wine\DllOverrides"
+HKCU,%Favorites%,"ドライバ",,"HKEY_CURRENT_USER\Software\Wine\Drivers"
+HKCU,%Favorites%,"ライブラリのオーバーライド",,"HKEY_CURRENT_USER\Software\Wine\DllOverrides"
 
 [Classes]
 dnl

@@ -82,11 +82,17 @@ $(
     d3dim                 \
     d3drm                 \
     d3dx9_{24..43}        \
+    d3dx10_{33..43}       \
+    d3dx11_{42..43}       \
     d3dxof                \
     ddrawex               \
     devenum               \
     dinput{,8}            \
     dplayx                \
+    dpnaddr               \
+    dpnet                 \
+    dpnhpast              \
+    dpnlobby              \
     dpwsockx              \
     dxdiag.exe            \
     dxdiagn               \
@@ -137,6 +143,8 @@ $(
     diactfrm.dll        \
     dinput.dll          \
     dplayx.dll          \
+    dpnet.dll           \
+    dpnhpast.dll        \
     dpnhupnp.dll        \
     dpvacm.dll          \
     dpvoice.dll         \

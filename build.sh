@@ -582,7 +582,8 @@ BuildStage6_ ()
   {
     set -- $workroot/windows
     $"mkdircd" $1
-    7z x -y $srcroot/nativedlls/directx_feb2010_redist.exe dxnt.cab
+    7z x -y $srcroot/nativedlls/directx_feb2010_redist.exe dxnt.cab BDAXP.cab
+    7z x -y -ssc- -osystem32 BDAXP.cab {msvidctl,msyuv,wstdecod}.dll \*.ax
     7z x -y -otemp/rsrc_dinput  dxnt.cab dimaps.inf \*.ini \*.png
     7z x -y -osystem32/drivers  dxnt.cab \*.sys
     7z x -y -osystem32          dxnt.cab \*.ax \
@@ -609,7 +610,11 @@ dinput,\
 dinput8,\
 dplayx,\
 dpmodemx,\
+dpnaddr,\
+dpnet,\
+dpnhpast,\
 dpnhupnp,\
+dpnlobby,\
 dpvacm,\
 dpvoice,\
 dpvvox,\
@@ -646,7 +651,7 @@ ks{,captur,filter,reg}}.inf
         7z x -y -osystem32 -ssc- $REPLY {\
 d3dcompiler,\
 d3dcsx,\
-d3dx9,\
+d3dx{9..11},\
 x3daudio1,\
 xapofx1,\
 xaudio2,\
@@ -655,14 +660,28 @@ xactengine{2,3}}_\*.dll
       done
     done
     
-    # .NET Framework 1.1
-    # http://www.microsoft.com/ja-jp/download/details.aspx?id=26
-    7z e -y $srcroot/nativedlls/dotnetfx.exe netfx1.cab
-    7z e -y netfx1.cab FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8
-    mv FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 system32/gdiplus.dll
+    ## MDX1
+    7z x -y -ssc- $srcroot/nativedlls/directx_Jun2010_redist.exe apr2006_mdx1\*.cab
     
-    # Visual C++ 2010
-    # http://www.microsoft.com/ja-jp/download/details.aspx?id=5555
+    ## MDX1_x86
+    7z x -y -ssc- -oMicrosoft.NET/"DirectX for Managed Code"/1.0.2911.0 apr2006_mdx1_x86.cab \*direct3dx\*
+    7z x -y -ssc- -oMicrosoft.NET/"DirectX for Managed Code"/1.0.2902.0 apr2006_mdx1_x86.cab -x\!\*direct3dx\* -x\!\*.inf
+    
+    ## MDX1_x86_Archive
+    7z x -y -ssc- apr2006_mdx1_x86_archive.cab
+    for f in 1.0.{2902..2910}.0
+    do
+      7z x -y -oMicrosoft.NET/"DirectX for Managed Code"/$f mdx_${f}_x86.cab -x\!\*.inf
+    done
+    
+    ## .NET Framework 1.1
+    ## http://www.microsoft.com/ja-jp/download/details.aspx?id=26
+    7z e -y $srcroot/nativedlls/dotnetfx.exe netfx1.cab
+    7z e -y -osystem32 netfx1.cab FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8
+    mv system32/{FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8,gdiplus.dll}
+    
+    ## Visual C++ 2010
+    ## http://www.microsoft.com/ja-jp/download/details.aspx?id=5555
     7z e -y $srcroot/nativedlls/vcredist_x86_2010.exe -r vc_red.cab
     7z e -y vc_red.cab F_CENTRAL_\*
     find F_CENTRAL_* | while read
@@ -670,15 +689,15 @@ xactengine{2,3}}_\*.dll
       mv $REPLY system32/$(echo $REPLY | sed 's/F_CENTRAL_//; s/_x86/.dll/')
     done
     
-    # Visual Basic 6.0 SP 6
-    # http://www.microsoft.com/ja-jp/download/details.aspx?id=24417
+    ## Visual Basic 6.0 SP 6
+    ## http://www.microsoft.com/ja-jp/download/details.aspx?id=24417
     7z e -y $srcroot/nativedlls/VB6.0-KB290887-X86.exe
-    7z e -y -osystem32 -ssc- vbrun60sp6.exe {asycfilt,msvbvm60}.dll
+    7z e -y -ssc- -osystem32 vbrun60sp6.exe {asycfilt,msvbvm60}.dll
     
-    # remove temp files
+    ## remove temp files
     rm -f *.{cab,exe}
     
-    # create native dlls pack
+    ## create native dlls pack
     7z a -sfx $datadir/nxwine/nativedlls/nativedlls.exe $1
   }
   InstallNativedlls_

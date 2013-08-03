@@ -90,6 +90,7 @@ $(
     dpwsockx              \
     dxdiag.exe            \
     dxdiagn               \
+    gdiplus               \
     mciqtz32              \
     msvcp100              \
     msvcr100              \
@@ -102,13 +103,6 @@ $(
     xinput9_1_0
   
   printf '"*%s"="native"\n' "$@"
-  
-  
-  ### built-in priority ###
-  set -- \
-    gdiplus
-  
-  printf '"*%s"="builtin,native"\n' "$@"
 )
 @EOS
   

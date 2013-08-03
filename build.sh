@@ -134,7 +134,8 @@ BuildDevel_ ()
       ./configure $configure_args --disable-{asm-optimizations,xmms-plugin}
     ;;
     freetype)
-      git checkout -f master
+      #git checkout -f master
+      git checkout -f 2b29ed6
       ./autogen.sh
       ./configure $configure_args
     ;;
@@ -579,12 +580,12 @@ BuildStage6_ ()
   # ------------------------------------- native dlls
   InstallNativedlls_ ()
   {
-    set -- $workroot/system32
+    set -- $workroot/windows
     $"mkdircd" $1
     7z x -y $srcroot/nativedlls/directx_feb2010_redist.exe dxnt.cab
-    7z x -y dxnt.cab -odrivers \*.sys
-    7z x -y dxnt.cab -orsrc_dinput dimaps.inf \*.ini \*.png
-    7z x -y dxnt.cab \*.ax \
+    7z x -y -otemp/rsrc_dinput  dxnt.cab dimaps.inf \*.ini \*.png
+    7z x -y -osystem32/drivers  dxnt.cab \*.sys
+    7z x -y -osystem32          dxnt.cab \*.ax \
 {\
 dplaysvr,\
 dpnsvr,\
@@ -642,7 +643,7 @@ ks{,captur,filter,reg}}.inf
     do
       find *$REPLY*.cab | sort -M | while read
       do
-        7z x -y -ssc- $REPLY {\
+        7z x -y -osystem32 -ssc- $REPLY {\
 d3dcompiler,\
 d3dcsx,\
 d3dx9,\
@@ -656,32 +657,31 @@ xactengine{2,3}}_\*.dll
     
     # .NET Framework 1.1
     # http://www.microsoft.com/ja-jp/download/details.aspx?id=26
-    7z e $srcroot/nativedlls/dotnetfx.exe netfx1.cab
-    7z e netfx1.cab FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8
-    mv FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 gdiplus.dll
+    7z e -y $srcroot/nativedlls/dotnetfx.exe netfx1.cab
+    7z e -y netfx1.cab FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8
+    mv FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8 system32/gdiplus.dll
     
     # Visual C++ 2010
     # http://www.microsoft.com/ja-jp/download/details.aspx?id=5555
-    7z e $srcroot/nativedlls/vcredist_x86_2010.exe -r vc_red.cab
-    7z e vc_red.cab F_CENTRAL_\*
+    7z e -y $srcroot/nativedlls/vcredist_x86_2010.exe -r vc_red.cab
+    7z e -y vc_red.cab F_CENTRAL_\*
     find F_CENTRAL_* | while read
     do
-      mv $REPLY $(echo $REPLY | sed 's/F_CENTRAL_//; s/_x86/.dll/')
+      mv $REPLY system32/$(echo $REPLY | sed 's/F_CENTRAL_//; s/_x86/.dll/')
     done
     
     # Visual Basic 6.0 SP 6
     # http://www.microsoft.com/ja-jp/download/details.aspx?id=24417
-    7z e $srcroot/nativedlls/VB6.0-KB290887-X86.exe
-    7z e -ssc- vbrun60sp6.exe stdole2.tlb {\
+    7z e -y $srcroot/nativedlls/VB6.0-KB290887-X86.exe
+    7z e -y -osystem32 -ssc- vbrun60sp6.exe stdole2.tlb {\
 advpack,\
 asycfilt,\
 comcat,\
 msvbvm60,\
 ole{aut,pro}32}.dll
-    rm -f vbrun60sp6.exe
     
-    # remove cab files
-    rm -f *.cab
+    # remove temp files
+    rm -f *.{cab,exe}
     
     # create native dlls pack
     7z a -sfx $datadir/nxwine/nativedlls/nativedlls.exe $1

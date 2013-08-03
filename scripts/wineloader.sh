@@ -68,12 +68,13 @@ CreateWP_ ()
   ln -hfs "${dataprefix}"/caches "${WINEPREFIX}"/drive_c/nxwinetricks
   
   # extract native dlls pack
-  ${wine} 7z.exe x -y -o'C:\windows' ${prefix}/share/nxwine/nativedlls/nativedlls.exe
+  ${wine} 7z.exe x -y -oc:\\ ${prefix}/share/nxwine/nativedlls/nativedlls.exe
   
   # register override settings
   cat <<@EOS | ${wine} regedit.exe -
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
 $(
+  ### native priority ###
   set -- \
     advpack               \
     amstream              \
@@ -106,6 +107,8 @@ $(
   
   printf '"*%s"="native"\n' "$@"
   
+  
+  ### built-in priority ###
   set -- \
     gdiplus
   
@@ -113,59 +116,62 @@ $(
 )
 @EOS
   
-  # register inf and dlls
-  (
-    # inf
-    set -- \
-      c:\\windows\\system32\\rsrc_dinput\\dimaps \
-      diactfrm  \
-      dinput    \
-      ks        \
-      kscaptur  \
-      ksfilter  \
-      ksreg
-    
-    for f; do ${wine} rundll32.exe setupapi.dll,InstallHinfSection DefaultInstall 128 ${f}.inf; done
+  regist_inf ()
+  {
+    for f
+    do
+      ${wine} rundll32.exe setupapi.dll,InstallHinfSection DefaultInstall 128 ${f}.inf
+    done
     
     # remove dinput resources
-    rm -rf "$(WINEDEBUG= ${wine} winepath.exe --unix c:\\windows\\system32\\rsrc_dinput)"
-    
-    # dlls
-    set -- \
-      amstream.dll        \
-      comcat.dll          \
-      ddrawex.dll         \
-      devenum.dll         \
-      diactfrm.dll        \
-      dinput.dll          \
-      dplayx.dll          \
-      dpnhupnp.dll        \
-      dpvacm.dll          \
-      dpvoice.dll         \
-      dpvvox.dll          \
-      dsdmo{,prp}.dll     \
-      dxdiagn.dll         \
-      dx{7,8}vb.dll       \
-      encapi.dll          \
-      ksolay.ax           \
-      ksproxy.ax          \
-      l3codecx.ax         \
-      mpg2splt.ax         \
-      msvbvm60.dll        \
-      mswebdvd.dll        \
-      oleaut32.dll        \
-      olepro32.dll        \
-      qasf.dll            \
-      qcap.dll            \
-      qdv.dll             \
-      qdvd.dll            \
-      qedit.dll           \
-      xaudio2_{0..7}.dll  \
-      quartz.dll
-    
-    ${wine} regsvr32.exe "$@"
-  )
+    rm -rf "$(WINEDEBUG= ${wine} winepath.exe --unix c:\\windows\\temp\\rsrc_dinput)"
+  }
+  regist_inf \
+    c:\\windows\\temp\\rsrc_dinput\\dimaps \
+    diactfrm  \
+    dinput    \
+    ks        \
+    kscaptur  \
+    ksfilter  \
+    ksreg
   
+  regist_dll ()
+  {
+    ${wine} regsvr32.exe "$@"
+  }
+  regist_dll \
+    amstream.dll        \
+    comcat.dll          \
+    ddrawex.dll         \
+    devenum.dll         \
+    diactfrm.dll        \
+    dinput.dll          \
+    dplayx.dll          \
+    dpnhupnp.dll        \
+    dpvacm.dll          \
+    dpvoice.dll         \
+    dpvvox.dll          \
+    dsdmo.dll           \
+    dsdmoprp.dll        \
+    dx7vb.dll           \
+    dx8vb.dll           \
+    dxdiagn.dll         \
+    encapi.dll          \
+    ksolay.ax           \
+    ksproxy.ax          \
+    l3codecx.ax         \
+    mpg2splt.ax         \
+    msvbvm60.dll        \
+    mswebdvd.dll        \
+    oleaut32.dll        \
+    olepro32.dll        \
+    qasf.dll            \
+    qcap.dll            \
+    qdv.dll             \
+    qdvd.dll            \
+    qedit.dll           \
+    xaudio2_{0..7}.dll  \
+    quartz.dll
   
   
   if [ "$2" = --force-init ]; then

@@ -76,7 +76,7 @@ HKCU,Control Panel\Mouse,"DoubleClickHeight",,"8"
 HKCU,Control Panel\Mouse,"DoubleClickWidth",,"8"
 
 [Drivers]
-HKCU,Software\Wine\Drivers,,,
+HKCU,Software\Wine\Drivers
 
 [Favorites]
 HKCU,%Favorites%,"デスクトップ",,"HKEY_CURRENT_USER\Control Panel\Desktop"

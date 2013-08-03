@@ -65,7 +65,7 @@ CreateWP_ ()
   ${wine} wineboot.exe --init
   
   # symlink to NXWinetricks cache directory
-  ln -hfs "${dataprefix}"/caches "${WINEPREFIX}"/drive_c/nxwinetricks
+  ln -fhs "${dataprefix}"/caches "${WINEPREFIX}"/drive_c/nxwinetricks
   
   # extract native dlls pack
   ${wine} 7z.exe x -y -oc:\\ ${prefix}/share/nxwine/nativedlls/nativedlls.exe
@@ -76,10 +76,8 @@ CreateWP_ ()
 $(
   ### native priority ###
   set -- \
-    advpack               \
     amstream              \
     atl100                \
-    comcat                \
     d3dcompiler_{33..43}  \
     d3dim                 \
     d3drm                 \
@@ -95,8 +93,6 @@ $(
     mciqtz32              \
     msvcp100              \
     msvcr100              \
-    oleaut32              \
-    olepro32              \
     qcap                  \
     qedit                 \
     quartz                \
@@ -163,8 +159,6 @@ $(
     mpg2splt.ax         \
     msvbvm60.dll        \
     mswebdvd.dll        \
-    oleaut32.dll        \
-    olepro32.dll        \
     qasf.dll            \
     qcap.dll            \
     qdv.dll             \

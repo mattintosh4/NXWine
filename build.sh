@@ -673,12 +673,7 @@ xactengine{2,3}}_\*.dll
     # Visual Basic 6.0 SP 6
     # http://www.microsoft.com/ja-jp/download/details.aspx?id=24417
     7z e -y $srcroot/nativedlls/VB6.0-KB290887-X86.exe
-    7z e -y -osystem32 -ssc- vbrun60sp6.exe stdole2.tlb {\
-advpack,\
-asycfilt,\
-comcat,\
-msvbvm60,\
-ole{aut,pro}32}.dll
+    7z e -y -osystem32 -ssc- vbrun60sp6.exe {asycfilt,msvbvm60}.dll
     
     # remove temp files
     rm -f *.{cab,exe}

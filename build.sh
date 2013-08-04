@@ -630,6 +630,7 @@ dpwsockx,\
 dsdmo,\
 dsdmoprp,\
 dsound3d,\
+dswave,\
 dx7vb,\
 dx8vb,\
 dxdiagn,\

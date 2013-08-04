@@ -661,17 +661,17 @@ xactengine{2,3}}_\*.dll
     done
     
     ## MDX1
-    7z x -y -ssc- $srcroot/nativedlls/directx_Jun2010_redist.exe apr2006_mdx1\*.cab
+    7z x -y $srcroot/nativedlls/directx_Jun2010_redist.exe Apr2006_MDX1_\*.cab
     
     ## MDX1_x86
-    7z x -y -ssc- -oMicrosoft.NET/"DirectX for Managed Code"/1.0.2911.0 apr2006_mdx1_x86.cab \*direct3dx\*
-    7z x -y -ssc- -oMicrosoft.NET/"DirectX for Managed Code"/1.0.2902.0 apr2006_mdx1_x86.cab -x\!\*direct3dx\* -x\!\*.inf
+    7z x -y -ssc- -oMicrosoft.NET/"DirectX for Managed Code"/1.0.2911.0 Apr2006_MDX1_x86.cab \*direct3dx\*
+    7z x -y -ssc- -oMicrosoft.NET/"DirectX for Managed Code"/1.0.2902.0 Apr2006_MDX1_x86.cab -x\!\*direct3dx\* -x\!\*.inf
     
     ## MDX1_x86_Archive
-    7z x -y -ssc- apr2006_mdx1_x86_archive.cab
+    7z x -y -ssc- Apr2006_MDX1_x86_Archive.cab \*.cab
     for f in 1.0.{2902..2910}.0
     do
-      7z x -y -oMicrosoft.NET/"DirectX for Managed Code"/$f mdx_${f}_x86.cab -x\!\*.inf
+      7z x -y -ssc- -oMicrosoft.NET/"DirectX for Managed Code"/$f mdx_${f}_x86.cab -x\!\*.inf
     done
     
     ## .NET Framework 1.1

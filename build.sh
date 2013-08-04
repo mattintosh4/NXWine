@@ -608,6 +608,14 @@ diactfrm,\
 dimap,\
 dinput,\
 dinput8,\
+dmband,\
+dmcompos,\
+dmime,\
+dmloader,\
+dmscript,\
+dmstyle,\
+dmsynth,\
+dmusic,\
 dplayx,\
 dpmodemx,\
 dpnaddr,\
@@ -641,6 +649,7 @@ quartz}.dll \
 {\
 diactfrm,\
 dinput,\
+dmusic,\
 ks{,captur,filter,reg}}.inf
     
     7z x -y $srcroot/nativedlls/directx_Jun2010_redist.exe \*_x86.cab

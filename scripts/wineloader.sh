@@ -88,12 +88,21 @@ $(
     ddrawex               \
     devenum               \
     dinput{,8}            \
+    dmband                \
+    dmcompos              \
+    dmime                 \
+    dmloader              \
+    dmscript              \
+    dmstyle               \
+    dmsynth               \
+    dmusic                \
     dplayx                \
     dpnaddr               \
     dpnet                 \
     dpnhpast              \
     dpnlobby              \
     dpwsockx              \
+    dswave                \
     dxdiag.exe            \
     dxdiagn               \
     gdiplus               \
@@ -125,7 +134,7 @@ $(
   regist_inf \
     c:\\windows\\temp\\rsrc_dinput\\dimaps \
     diactfrm  \
-    dinput    \
+    dmusic    \
     ks        \
     kscaptur  \
     ksfilter  \
@@ -142,6 +151,14 @@ $(
     devenum.dll         \
     diactfrm.dll        \
     dinput.dll          \
+    dmband              \
+    dmcompos            \
+    dmime               \
+    dmloader            \
+    dmscript            \
+    dmstyle             \
+    dmsynth             \
+    dmusic              \
     dplayx.dll          \
     dpnet.dll           \
     dpnhpast.dll        \
@@ -151,6 +168,7 @@ $(
     dpvvox.dll          \
     dsdmo.dll           \
     dsdmoprp.dll        \
+    dswave              \
     dx7vb.dll           \
     dx8vb.dll           \
     dxdiagn.dll         \

@@ -68,7 +68,7 @@ CreateWP_ ()
   ln -fhs "${dataprefix}"/caches "${WINEPREFIX}"/drive_c/nxwinetricks
   
   # extract native dlls pack
-  ${wine} 7z.exe x -y -oc:\\ ${prefix}/share/nxwine/nativedlls/nativedlls.exe
+  ${wine} 7z.exe x -y -oc:\\ ${prefix}/share/nxwine/rsrc/nativedlls.7z
   
   # register override settings
   cat <<@EOS | ${wine} regedit.exe -

@@ -708,7 +708,7 @@ xactengine{2,3}}_\*.dll
     rm -f *.{cab,exe}
     
     ## create native dlls pack
-    7z a -sfx $datadir/nxwine/nativedlls/nativedlls.exe $1
+    7z a -t7z $datadir/nxwine/rsrc/nativedlls.7z $1
   }
   InstallNativedlls_
     

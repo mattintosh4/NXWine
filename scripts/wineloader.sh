@@ -134,6 +134,7 @@ $(
   regist_inf \
     c:\\windows\\temp\\rsrc_dinput\\dimaps \
     diactfrm  \
+    dinput    \
     dmusic    \
     ks        \
     kscaptur  \

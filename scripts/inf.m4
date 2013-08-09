@@ -14,7 +14,9 @@ AddReg=\
   Drivers,\
   Environment,\
   Favorites,\
-  Fonts
+  Fonts,\
+  Time Zones,\
+  TimeZoneInformation
 
 [Strings]
 Favorites="Software\Microsoft\Windows\CurrentVersion\Applets\Regedit\Favorites"
@@ -76,7 +78,7 @@ HKCU,Control Panel\Mouse,"DoubleClickHeight",,"8"
 HKCU,Control Panel\Mouse,"DoubleClickWidth",,"8"
 
 [Drivers]
-HKCU,Software\Wine\Drivers
+HKCU,Software\Wine\Drivers,"Graphics",,"mac"
 
 [Favorites]
 HKCU,%Favorites%,"デスクトップ",,"HKEY_CURRENT_USER\Control Panel\Desktop"
@@ -104,3 +106,22 @@ _7z_class_regist(lzma, 16)
 _7z_class_regist(rar,   3)
 _7z_class_regist(xz,   23)
 _7z_class_regist(zip,   1)
+
+[Time Zones]
+HKCU,%CurrentVersionNT%\Time Zones,"TimeZoneKeyName",,"Tokyo Standard Time"
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time,"Display",,"(GMT+09:00) 大阪、札幌、東京"
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time,"Dlt",,"東京 (夏時間)"
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time,"Std",,"東京 (標準時)"
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time,"MapID",,"18,19"
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time,"Index",0x10001,0x000000eb
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time,"TZI",1,e4,fd,ff,ff,00,00,00,00,c4,ff,ff,ff,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+
+[TimeZoneInformation]
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation,"Bias",0x10001,0xfffffde4
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation,"StandardName",,"東京 (標準時)"
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation,"StandardBias",0x10001,0x00000000
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation,"StandardStart",1,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation,"DaylightName",,"東京 (標準時)"
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation,"DaylightBias",0x10001,0x00000000
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation,"DaylightStart",1,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation,"ActiveTimeBias",0x10001,0xfffffde4

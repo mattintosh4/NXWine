@@ -569,8 +569,11 @@ BuildStage6_ ()
   
   # ------------------------------------- fonts
   # note: some fonts are duplicated with system fonts. using 'rm' command only is not useful.
-  find $datadir/wine/fonts -name "*.ttf" | egrep "(symbol|tahoma(bd)?|wingding).ttf" | xargs rm
-  tar xf $srcroot/fonts/Konatu_ver_20121218.zip   -C $docdir
+  rm -f ${datadir:?}/wine/fonts/symbol.ttf
+  rm -f ${datadir:?}/wine/fonts/tahoma.ttf
+  rm -f ${datadir:?}/wine/fonts/tahomabd.ttf
+  rm -f ${datadir:?}/wine/fonts/wingding.ttf
+#  tar xf $srcroot/fonts/Konatu_ver_20121218.zip   -C $docdir
   tar xf $srcroot/fonts/sazanami-20040629.tar.bz2 -C $docdir
   mv $docdir/*/*.ttf $datadir/wine/fonts
   

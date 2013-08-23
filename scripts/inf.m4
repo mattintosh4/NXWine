@@ -17,19 +17,25 @@ AddReg=\
   Time Zones,\
   TimeZoneInformation
 
+
 [Strings]
-ExternalAppRoot = Z:\Applications\NXWine.app\Contents\Resources\share\nxwine\programs
 GothicMonoFile  = ヒラギノ角ゴ Pro W3.otf
 GothicMonoName  = ヒラギノ角ゴ Pro W3
 GothicPropFile  = ヒラギノ角ゴ Pro W3.otf
 GothicPropName  = ヒラギノ角ゴ Pro W3
+GothicUIFile    = ヒラギノ角ゴ Pro W3.otf
+GothicUIName    = ヒラギノ角ゴ Pro W3
 MinchoMonoFile  = sazanami-mincho.ttf
 MinchoMonoName  = さざなみ明朝
 MinchoPropFile  = sazanami-mincho.ttf
 MinchoPropName  = さざなみ明朝
 
+ExternalAppRoot = Z:\Applications\NXWine.app\Contents\Resources\share\nxwine\programs
+
+
 [Environment]
 HKCU,Environment,"PATH",0x00020000,"%ExternalAppRoot%\7-Zip"
+
 
 [Fonts]
 HKCU,Software\Wine\Fonts\Replacements,"Lucida Sans Unicode",,"Lucida Grande"
@@ -37,8 +43,8 @@ HKCU,Software\Wine\Fonts\Replacements,"MS Gothic",,"%GothicMonoName%"
 HKCU,Software\Wine\Fonts\Replacements,"MS Mincho",,"%MinchoMonoName%"
 HKCU,Software\Wine\Fonts\Replacements,"MS PGothic",,"%GothicPropName%"
 HKCU,Software\Wine\Fonts\Replacements,"MS PMincho",,"%MinchoPropName%"
-HKCU,Software\Wine\Fonts\Replacements,"MS UI Gothic",,"%GothicPropName%"
-HKCU,Software\Wine\Fonts\Replacements,"Meiryo UI",,"%GothicPropName%"
+HKCU,Software\Wine\Fonts\Replacements,"MS UI Gothic",,"%GothicUIName%"
+HKCU,Software\Wine\Fonts\Replacements,"Meiryo UI",,"%GothicUIName%"
 HKCU,Software\Wine\Fonts\Replacements,"Meiryo",,"%GothicPropName%"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ 明朝",,"%MinchoMonoName%"
 HKCU,Software\Wine\Fonts\Replacements,"ＭＳ Ｐ明朝",,"%MinchoPropName%"
@@ -82,13 +88,16 @@ HKLM,%CurrentVersionNT%\FontMapper,"ＭＳ Ｐ明朝",0x00010001,0x00004080
 HKLM,%CurrentVersionNT%\FontMapper,"ＭＳ ゴシック",0x00010001,0x00008080
 HKLM,%CurrentVersionNT%\FontMapper,"ＭＳ Ｐゴシック",0x00010001,0x00000080
 
+
 [Control Panel]
 HKCU,Control Panel\Desktop,"FontSmoothing",,"0"
 HKCU,Control Panel\Mouse,"DoubleClickHeight",,"8"
 HKCU,Control Panel\Mouse,"DoubleClickWidth",,"8"
 
+
 [Drivers]
 HKCU,Software\Wine\Drivers,"Graphics",,"mac"
+
 
 [Favorites]
 HKCU,%CurrentVersion%\Applets\Regedit\Favorites,"マウス",,"HKEY_CURRENT_USER\Control Panel\Mouse"
@@ -99,6 +108,7 @@ HKCU,%CurrentVersion%\Applets\Regedit\Favorites,"ドライバ",,"HKEY_CURRENT_US
 HKCU,%CurrentVersion%\Applets\Regedit\Favorites,"デスクトップ",,"HKEY_CURRENT_USER\Control Panel\Desktop"
 HKCU,%CurrentVersion%\Applets\Regedit\Favorites,"ユーザー環境変数",,"HKEY_CURRENT_USER\Environment"
 HKCU,%CurrentVersion%\Applets\Regedit\Favorites,"ライブラリのオーバーライド",,"HKEY_CURRENT_USER\Software\Wine\DllOverrides"
+
 
 [Classes]
 dnl
@@ -117,14 +127,17 @@ _7z_class_regist(rar,   3)
 _7z_class_regist(xz,   23)
 _7z_class_regist(zip,   1)
 
+
 [Time Zones]
 HKCU,%CurrentVersionNT%\Time Zones,"TimeZoneKeyName",,"Tokyo Standard Time"
+
 HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time,"Display",,"(GMT+09:00) 大阪、札幌、東京"
 HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time,"Dlt",,"東京 (夏時間)"
 HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time,"Std",,"東京 (標準時)"
 HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time,"MapID",,"18,19"
 HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time,"Index",0x00010001,0x000000eb
 HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time,"TZI",0x00000001,e4,fd,ff,ff,00,00,00,00,c4,ff,ff,ff,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+
 
 [TimeZoneInformation]
 HKLM,System\CurrentControlSet\Control\TimeZoneInformation,"Bias",0x00010001,0xfffffde4

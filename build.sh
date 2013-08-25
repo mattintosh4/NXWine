@@ -183,10 +183,11 @@ BuildDevel_ ()
     ;;
     libjpeg-turbo)
       git checkout -f master
-      sed -i .orig '/$(datadir)\/doc/s/$/\/libjpeg-turbo/' Makefile.am
       autoreconf -i
       ./configure ${configure_args} --with-jpeg8
-      $"makeallins"
+      make -j 4
+      set -- $deps_destroot/share/doc/libjpeg-turbo
+      make docdir=$1 exampledir=$1 install
       return
     ;;
     libmodplug)

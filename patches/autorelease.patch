@@ -1,0 +1,21 @@
+diff --git a/dlls/winemac.drv/cocoa_main.m b/dlls/winemac.drv/cocoa_main.m
+index 6682f98..8daf566 100644
+--- a/dlls/winemac.drv/cocoa_main.m
++++ b/dlls/winemac.drv/cocoa_main.m
+@@ -87,7 +87,7 @@ static void run_cocoa_app(void* info)
+     [lock unlockWithCondition:COCOA_APP_RUNNING];
+     [lock release];
+ 
+-    [pool release];
++    [pool drain];
+ 
+     if (created_app && startup_info->success)
+     {
+@@ -151,6 +151,6 @@ int macdrv_start_cocoa_app(unsigned long long tickcount)
+     if (source)
+         CFRelease(source);
+     [startup_info.lock release];
+-    [pool release];
++    [pool drain];
+     return ret;
+ }

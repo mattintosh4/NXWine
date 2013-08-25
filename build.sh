@@ -553,16 +553,26 @@ BuildWine_ ()
     /HKLM,System\\CurrentControlSet\\Control\\TimeZoneInformation,"TimeZoneKeyName",2,""/d
   ' tools/wine.inf.in
   
+  args=(
+    --prefix=$wine_destroot
+    --build=$triple
+    --with-opengl
+    --with-x
+    --without-capi
+    --without-gphoto
+    --without-oss
+    --without-v4l
+    --x-includes=/opt/X11/include
+    --x-libraries=/opt/X11/lib
+  )
   
-  ./configure --prefix=$wine_destroot \
-              --build=$triple \
-              --with-opengl \
-              --without-{capi,gphoto,oss,v4l} \
-              --x-includes=/opt/X11/include \
-              --x-libraries=/opt/X11/lib
+  ./configure $args
   $"makeallins"
   
-  (set -- $wine_destroot/libexec && mkdir -p $1 && mv $wine_destroot/bin/wine $1) || false
+  mkdir -p $wine_destroot/libexec && mv $wine_destroot/bin/wine $_
+  install -m 0755 $proj_root/scripts/wineloader.sh    $wine_destroot/bin/wine
+  install -m 0755 $proj_root/scripts/nxwinetricks.sh  $wine_destroot/bin/nxwinetricks
+  sed -i "" "s|@DATE@|$(date +%F)|g" $bindir/{wine,nxwinetricks}
 } # end BuildWine_
 
 BuildStage6_ ()
@@ -593,11 +603,6 @@ BuildStage6_ ()
     m4 $proj_root/scripts/inf.m4 | cat $1.orig /dev/fd/3 3<&0 | uconv -f UTF-8 -t UTF-8 --add-signature -o $1 &&
     :
   ) || false
-  
-  # ------------------------------------- executables
-  install -m 0755 $proj_root/scripts/wineloader.sh    $bindir/wine
-  install -m 0755 $proj_root/scripts/nxwinetricks.sh  $bindir/nxwinetricks
-  sed -i "" "s|@DATE@|$(date +%F)|g" $bindir/{wine,nxwinetricks}
   
   # ------------------------------------- native dlls
   InstallNativedlls_ ()

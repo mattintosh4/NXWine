@@ -185,7 +185,7 @@ BuildDevel_ ()
       git checkout -f master
       autoreconf -i
       ./configure ${configure_args} --with-jpeg8
-      make -j 4
+      make $make_args
       set -- $deps_destroot/share/doc/libjpeg-turbo
       make docdir=$1 exampledir=$1 install
       return

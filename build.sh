@@ -336,7 +336,6 @@ BuildTools_ ()
       nasm)
         $"scmcopy" $1
         git checkout -f master
-        $"patch_nasm"
         ./autogen.sh
         ./configure $configure_args
       ;;
@@ -927,35 +926,6 @@ patch_gsm(){
  		cp $? $@
  		chmod 444 $@
  
-@EOS
-}
-
-patch_nasm (){ patch -Np1 <<\@EOS
---- a/Makefile.in
-+++ b/Makefile.in
-@@ -64,10 +64,10 @@ endif
- 	$(CC) -E $(ALL_CFLAGS) -o $@ $<
- 
- .txt.xml:
--	$(ASCIIDOC) -b docbook -d manpage -o $@ $<
-+	: -b docbook -d manpage -o $@ $<
- 
- .xml.1:
--	$(XMLTO) man --skip-validation $< 2>/dev/null
-+	: man --skip-validation $< 2>/dev/null
- 
- 
- #-- Begin File Lists --#
-@@ -191,9 +191,6 @@ install: nasm$(X) ndisasm$(X)
- 	$(MKDIR) -p $(INSTALLROOT)$(bindir)
- 	$(INSTALL_PROGRAM) nasm$(X) $(INSTALLROOT)$(bindir)/nasm$(X)
- 	$(INSTALL_PROGRAM) ndisasm$(X) $(INSTALLROOT)$(bindir)/ndisasm$(X)
--	$(MKDIR) -p $(INSTALLROOT)$(mandir)/man1
--	$(INSTALL_DATA) $(srcdir)/nasm.1 $(INSTALLROOT)$(mandir)/man1/nasm.1
--	$(INSTALL_DATA) $(srcdir)/ndisasm.1 $(INSTALLROOT)$(mandir)/man1/ndisasm.1
- 
- clean:
- 	$(RM) -f *.$(O) *.s *.i
 @EOS
 }
 

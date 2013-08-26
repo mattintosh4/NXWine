@@ -541,9 +541,9 @@ BuildWine_ ()
   $"scmcopy" wine
   git checkout -f master
 
-  patch -Np1 $proj_root/patches/changelocale.patch
-  patch -Np1 $proj_root/patches/autorelease.patch
-  patch -Np1 $proj_root/patches/autohidemenu.patch
+  patch -Np1 < $proj_root/patches/changelocale.patch
+  patch -Np1 < $proj_root/patches/autorelease.patch
+  patch -Np1 < $proj_root/patches/autohidemenu.patch
   
   ## remove time zone keys
   sed -i '' '

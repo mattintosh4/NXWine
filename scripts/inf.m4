@@ -18,6 +18,7 @@ AddReg=\
   TimeZoneInformation
 
 
+
 [Strings]
 GothicMonoFile  = ヒラギノ角ゴ Pro W3.otf
 GothicMonoName  = ヒラギノ角ゴ Pro W3
@@ -25,12 +26,13 @@ GothicPropFile  = ヒラギノ角ゴ Pro W3.otf
 GothicPropName  = ヒラギノ角ゴ Pro W3
 GothicUIFile    = ヒラギノ角ゴ Pro W3.otf
 GothicUIName    = ヒラギノ角ゴ Pro W3
-MinchoMonoFile  = sazanami-mincho.ttf
-MinchoMonoName  = さざなみ明朝
-MinchoPropFile  = sazanami-mincho.ttf
-MinchoPropName  = さざなみ明朝
+MinchoMonoFile  = sazanami-mincho.ttf   ;ヒラギノ明朝 Pro W3.otf
+MinchoMonoName  = さざなみ明朝            ;ヒラギノ明朝 Pro W3
+MinchoPropFile  = sazanami-mincho.ttf   ;ヒラギノ明朝 Pro W3.otf
+MinchoPropName  = さざなみ明朝            ;ヒラギノ明朝 Pro W3
 
 ExternalAppRoot = Z:\Applications\NXWine.app\Contents\Resources\share\nxwine\programs
+
 
 
 [Control Panel]
@@ -39,12 +41,15 @@ HKCU,Control Panel\Mouse    ,"DoubleClickHeight",,"8"
 HKCU,Control Panel\Mouse    ,"DoubleClickWidth" ,,"8"
 
 
+
 [Drivers]
 HKCU,Software\Wine\Drivers,"Graphics",,"mac"
 
 
+
 [Environment]
 HKCU,Environment,"PATH",0x00020000,"%ExternalAppRoot%\7-Zip"
+
 
 
 [Fonts]
@@ -97,6 +102,8 @@ HKLM,%CurrentVersionNT%\FontMapper,"ＭＳ Ｐ明朝"    ,0x00010001,0x00004080
 HKLM,%CurrentVersionNT%\FontMapper,"ＭＳ ゴシック"  ,0x00010001,0x00008080
 HKLM,%CurrentVersionNT%\FontMapper,"ＭＳ Ｐゴシック",0x00010001,0x00000080
 
+
+
 [Favorites]
 HKCU,%CurrentVersion%\Applets\Regedit\Favorites,"マウス"                    ,,"HKEY_CURRENT_USER\Control Panel\Mouse"
 HKCU,%CurrentVersion%\Applets\Regedit\Favorites,"フォント (FontSubstitutes)",,"HKEY_LOCAL_MACHINE\%CurrentVersionNT%\FontSubstitutes"
@@ -107,23 +114,6 @@ HKCU,%CurrentVersion%\Applets\Regedit\Favorites,"デスクトップ"            
 HKCU,%CurrentVersion%\Applets\Regedit\Favorites,"ユーザー環境変数"          ,,"HKEY_CURRENT_USER\Environment"
 HKCU,%CurrentVersion%\Applets\Regedit\Favorites,"ライブラリのオーバーライド",,"HKEY_CURRENT_USER\Software\Wine\DllOverrides"
 
-
-[Classes]
-dnl
-define(`_7z_class_regist', `dnl
-HKCR,.$1,,2,"7-Zip.$1"
-HKCR,7-Zip.$1,,2,"$1 Archive"
-HKCR,7-Zip.$1\shell\open\command,,2,"""%ExternalAppRoot%\7-Zip\7zFM.exe"" ""%1"""
-HKCR,7-Zip.$1\DefaultIcon,,2,"%ExternalAppRoot%\7-Zip\7z.dll,$2"')dnl
-dnl
-_7z_class_regist(7z,    0)
-_7z_class_regist(cab,   7)
-_7z_class_regist(lha,   6)
-_7z_class_regist(lzh,   6)
-_7z_class_regist(lzma, 16)
-_7z_class_regist(rar,   3)
-_7z_class_regist(xz,   23)
-_7z_class_regist(zip,   1)
 
 
 [Time Zones]
@@ -145,3 +135,22 @@ HKLM,System\CurrentControlSet\Control\TimeZoneInformation ,"DaylightName"   ,   
 HKLM,System\CurrentControlSet\Control\TimeZoneInformation ,"DaylightBias"   ,0x00010001 ,0x00000000
 HKLM,System\CurrentControlSet\Control\TimeZoneInformation ,"DaylightStart"  ,0x00000001 ,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
 HKLM,System\CurrentControlSet\Control\TimeZoneInformation ,"ActiveTimeBias" ,0x00010001 ,0xfffffde4
+
+
+
+[Classes]
+dnl
+define(`_7z_class_regist', `dnl
+HKCR,.$1,,2,"7-Zip.$1"
+HKCR,7-Zip.$1,,2,"$1 Archive"
+HKCR,7-Zip.$1\shell\open\command,,2,"""%ExternalAppRoot%\7-Zip\7zFM.exe"" ""%1"""
+HKCR,7-Zip.$1\DefaultIcon,,2,"%ExternalAppRoot%\7-Zip\7z.dll,$2"')dnl
+dnl
+_7z_class_regist(7z,    0)
+_7z_class_regist(cab,   7)
+_7z_class_regist(lha,   6)
+_7z_class_regist(lzh,   6)
+_7z_class_regist(lzma, 16)
+_7z_class_regist(rar,   3)
+_7z_class_regist(xz,   23)
+_7z_class_regist(zip,   1)

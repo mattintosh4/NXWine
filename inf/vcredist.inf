@@ -2,60 +2,28 @@
 signature="$CHICAGO$"
 
 [DefaultInstall]
-AddReg               = DllOverrides
-DelFiles             = DelFilesSection
-UnregisterDlls       = UnregisterDllsSection
+AddReg = DllOverrides
 
 [Strings]
 DllOverrides = Software\Wine\DllOverrides
 
 [DllOverrides]
 ;; Visual C++ 2005
-HKCU,%DllOverrides%,"atl80"     ,,"native"
-HKCU,%DllOverrides%,"msvcm80"   ,,"native"
-HKCU,%DllOverrides%,"msvcp80"   ,,"native"
-HKCU,%DllOverrides%,"msvcr80"   ,,"native"
-HKCU,%DllOverrides%,"vcomp"     ,,"native"
+HKCU,%DllOverrides%,"atl80"     ,,"native,builtin"
+HKCU,%DllOverrides%,"msvcm80"   ,,"native,builtin"
+HKCU,%DllOverrides%,"msvcp80"   ,,"native,builtin"
+HKCU,%DllOverrides%,"msvcr80"   ,,"native,builtin"
+HKCU,%DllOverrides%,"vcomp"     ,,"native,builtin"
 
 ;; Visual C++ 2008
-HKCU,%DllOverrides%,"msvcm90"   ,,"native"
-HKCU,%DllOverrides%,"msvcp90"   ,,"native"
-HKCU,%DllOverrides%,"msvcr90"   ,,"native"
-HKCU,%DllOverrides%,"vcomp90"   ,,"native"
+HKCU,%DllOverrides%,"msvcm90"   ,,"native,builtin"
+HKCU,%DllOverrides%,"msvcp90"   ,,"native,builtin"
+HKCU,%DllOverrides%,"msvcr90"   ,,"native,builtin"
+HKCU,%DllOverrides%,"vcomp90"   ,,"native,builtin"
 
 ;; Visual C++ 2010
-HKCU,%DllOverrides%,"atl100"    ,,"native"
-HKCU,%DllOverrides%,"msvcm100"  ,,"native"
-HKCU,%DllOverrides%,"msvcp100"  ,,"native"
-HKCU,%DllOverrides%,"msvcr100"  ,,"native"
-HKCU,%DllOverrides%,"vcomp100"  ,,"native"
+HKCU,%DllOverrides%,"atl100"    ,,"native,builtin"
+HKCU,%DllOverrides%,"msvcp100"  ,,"native,builtin"
+HKCU,%DllOverrides%,"msvcr100"  ,,"native,builtin"
+HKCU,%DllOverrides%,"vcomp100"  ,,"native,builtin"
 
-[DelFilesSection]
-atl80.dll
-msvcm80.dll
-msvcp80.dll
-msvcr80.dll
-msvcm90.dll
-msvcp90.dll
-msvcr90.dll
-vcomp90.dll
-atl100.dll
-msvcm100.dll
-msvcp100.dll
-msvcr100.dll
-vcomp100.dll
-
-[UnregisterDllsSection]
-11,atl80.dll   ,1
-11,msvcm80.dll ,1
-11,msvcp80.dll ,1
-11,msvcr80.dll ,1
-11,msvcm90.dll ,1
-11,msvcp90.dll ,1
-11,msvcr90.dll ,1
-11,vcomp90.dll ,1
-11,atl100.dll  ,1
-11,msvcm100.dll,1
-11,msvcp100.dll,1
-11,msvcr100.dll,1
-11,vcomp100.dll,1

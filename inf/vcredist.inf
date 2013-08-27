@@ -9,20 +9,20 @@ DllOverrides = Software\Wine\DllOverrides
 
 [DllOverrides]
 ;; Visual C++ 2005
-HKCU,%DllOverrides%,"atl80"     ,,"native,builtin"
-HKCU,%DllOverrides%,"msvcm80"   ,,"native,builtin"
-HKCU,%DllOverrides%,"msvcp80"   ,,"native,builtin"
-HKCU,%DllOverrides%,"msvcr80"   ,,"native,builtin"
-HKCU,%DllOverrides%,"vcomp"     ,,"native,builtin"
+HKCU,%DllOverrides%,"*atl80"     ,,"native,builtin"
+HKCU,%DllOverrides%,"*msvcm80"   ,,"native,builtin"
+HKCU,%DllOverrides%,"*msvcp80"   ,,"native,builtin"
+HKCU,%DllOverrides%,"*msvcr80"   ,,"native,builtin"
+HKCU,%DllOverrides%,"*vcomp"     ,,"native,builtin"
 
 ;; Visual C++ 2008
-HKCU,%DllOverrides%,"msvcm90"   ,,"native,builtin"
-HKCU,%DllOverrides%,"msvcp90"   ,,"native,builtin"
-HKCU,%DllOverrides%,"msvcr90"   ,,"native,builtin"
-HKCU,%DllOverrides%,"vcomp90"   ,,"native,builtin"
+HKCU,%DllOverrides%,"*msvcm90"   ,,"native,builtin"
+HKCU,%DllOverrides%,"*msvcp90"   ,,"native,builtin"
+HKCU,%DllOverrides%,"*msvcr90"   ,,"native,builtin"
+HKCU,%DllOverrides%,"*vcomp90"   ,,"native,builtin"
 
 ;; Visual C++ 2010
-HKCU,%DllOverrides%,"atl100"    ,,"native,builtin"
-HKCU,%DllOverrides%,"msvcp100"  ,,"native,builtin"
-HKCU,%DllOverrides%,"msvcr100"  ,,"native,builtin"
-HKCU,%DllOverrides%,"vcomp100"  ,,"native,builtin"
+HKCU,%DllOverrides%,"*atl100"    ,,"native,builtin"
+HKCU,%DllOverrides%,"*msvcp100"  ,,"native,builtin"
+HKCU,%DllOverrides%,"*msvcr100"  ,,"native,builtin"
+HKCU,%DllOverrides%,"*vcomp100"  ,,"native,builtin"

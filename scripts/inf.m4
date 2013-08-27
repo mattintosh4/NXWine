@@ -20,6 +20,7 @@ AddReg=\
 
 
 [Strings]
+; Font
 GothicMonoFile  = ヒラギノ角ゴ Pro W3.otf
 GothicMonoName  = ヒラギノ角ゴ Pro W3
 GothicPropFile  = ヒラギノ角ゴ Pro W3.otf
@@ -31,19 +32,22 @@ MinchoMonoName  = さざなみ明朝            ;ヒラギノ明朝 Pro W3
 MinchoPropFile  = sazanami-mincho.ttf   ;ヒラギノ明朝 Pro W3.otf
 MinchoPropName  = さざなみ明朝            ;ヒラギノ明朝 Pro W3
 
+; Path
 ExternalAppRoot = Z:\Applications\NXWine.app\Contents\Resources\share\nxwine\programs
 
 
 
 [Control Panel]
-;HKCU,Control Panel\Desktop ,"FontSmoothing"     ,,"0"
-HKCU,Control Panel\Mouse    ,"DoubleClickHeight",,"8"
-HKCU,Control Panel\Mouse    ,"DoubleClickWidth" ,,"8"
+;HKCU,Control Panel\Desktop  ,"*FontSmoothing"     ,,"0"
+HKCU,Control Panel\Mouse    ,"*DoubleClickHeight" ,,"8"
+HKCU,Control Panel\Mouse    ,"*DoubleClickWidth"  ,,"8"
 
 
 
 [Drivers]
-HKCU,Software\Wine\Drivers,"Graphics",,"mac"
+HKCU,Software\Wine\Direct3D   ,"*DirectDrawRenderer"       ,,"opengl"
+HKCU,Software\Wine\Drivers    ,"*Graphics"                 ,,"mac"
+HKCU,Software\Wine\Mac Driver ,"*WindowsFloatWhenInactive" ,,"nonfullscreen"
 
 
 

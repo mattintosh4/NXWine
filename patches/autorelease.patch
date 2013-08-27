@@ -1,3 +1,117 @@
+diff --git a/dlls/winemac.drv/cocoa_app.m b/dlls/winemac.drv/cocoa_app.m
+index 8de68bb..eb125a0 100644
+--- a/dlls/winemac.drv/cocoa_app.m
++++ b/dlls/winemac.drv/cocoa_app.m
+@@ -266,7 +266,7 @@ - (BOOL) waitUntilQueryDone:(int*)done timeout:(NSDate*)timeout processEvents:(B
+                                                       dequeue:YES];
+                 if (event)
+                     [NSApp sendEvent:event];
+-                [pool release];
++                [pool drain];
+             }
+             else
+                 [[NSRunLoop currentRunLoop] runMode:WineAppWaitQueryResponseMode beforeDate:timeout];
+@@ -2040,7 +2040,7 @@ void LogErrorv(const char* func, NSString* format, va_list args)
+     fprintf(stderr, "err:%s:%s", func, [message UTF8String]);
+     [message release];
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+diff --git a/dlls/winemac.drv/cocoa_clipboard.m b/dlls/winemac.drv/cocoa_clipboard.m
+index b8ca796..dc997ef 100644
+--- a/dlls/winemac.drv/cocoa_clipboard.m
++++ b/dlls/winemac.drv/cocoa_clipboard.m
+@@ -107,7 +107,7 @@ CFArrayRef macdrv_copy_pasteboard_types(CFTypeRef pasteboard)
+         }
+     });
+ 
+-    [pool release];
++    [pool drain];
+     return ret;
+ }
+ 
+diff --git a/dlls/winemac.drv/cocoa_display.m b/dlls/winemac.drv/cocoa_display.m
+index 5e3c8f3..1f50e11 100644
+--- a/dlls/winemac.drv/cocoa_display.m
++++ b/dlls/winemac.drv/cocoa_display.m
+@@ -86,7 +86,7 @@ int macdrv_get_displays(struct macdrv_display** displays, int* count)
+         }
+     }
+ 
+-    [pool release];
++    [pool drain];
+     return ret;
+ }
+ 
+diff --git a/dlls/winemac.drv/cocoa_event.m b/dlls/winemac.drv/cocoa_event.m
+index 8d997d0..603f8c4 100644
+--- a/dlls/winemac.drv/cocoa_event.m
++++ b/dlls/winemac.drv/cocoa_event.m
+@@ -321,7 +321,7 @@ void OnMainThread(dispatch_block_t block)
+     {
+         /* Fall back to synchronous dispatch without handling query events. */
+         dispatch_sync(dispatch_get_main_queue(), block);
+-        [pool release];
++        [pool drain];
+         return;
+     }
+ 
+@@ -345,14 +345,14 @@ void OnMainThread(dispatch_block_t block)
+ 
+         if (!finished)
+         {
+-            [pool release];
++            [pool drain];
+             pool = [[NSAutoreleasePool alloc] init];
+ 
+             kevent(queue->kq, NULL, 0, &kev, 1, NULL);
+         }
+     }
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ 
+@@ -380,7 +380,7 @@ macdrv_event_queue macdrv_create_event_queue(macdrv_event_handler handler)
+         }
+     }
+ 
+-    [pool release];
++    [pool drain];
+     return (macdrv_event_queue)queue;
+ }
+ 
+@@ -399,7 +399,7 @@ void macdrv_destroy_event_queue(macdrv_event_queue queue)
+     [[WineApplicationController sharedController] unregisterEventQueue:q];
+     [threadDict removeObjectForKey:WineEventQueueThreadDictionaryKey];
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -434,7 +434,7 @@ int macdrv_copy_event_from_queue(macdrv_event_queue queue,
+     if (macDrvEvent)
+         *event = macdrv_retain_event(macDrvEvent->event);
+ 
+-    [pool release];
++    [pool drain];
+     return (macDrvEvent != nil);
+ }
+ 
+@@ -495,7 +495,7 @@ void macdrv_release_event(macdrv_event *event)
+         [(WineWindow*)event->window release];
+         free(event);
+ 
+-        [pool release];
++        [pool drain];
+     }
+ }
+ 
 diff --git a/dlls/winemac.drv/cocoa_main.m b/dlls/winemac.drv/cocoa_main.m
 index 6682f98..8daf566 100644
 --- a/dlls/winemac.drv/cocoa_main.m
@@ -19,3 +133,180 @@ index 6682f98..8daf566 100644
 +    [pool drain];
      return ret;
  }
+diff --git a/dlls/winemac.drv/cocoa_opengl.m b/dlls/winemac.drv/cocoa_opengl.m
+index b678cae..4557b20 100644
+--- a/dlls/winemac.drv/cocoa_opengl.m
++++ b/dlls/winemac.drv/cocoa_opengl.m
+@@ -80,7 +80,7 @@ macdrv_opengl_context macdrv_create_opengl_context(void* cglctx)
+ 
+     context = [[WineOpenGLContext alloc] initWithCGLContextObj:cglctx];
+ 
+-    [pool release];
++    [pool drain];
+     return (macdrv_opengl_context)context;
+ }
+ 
+@@ -102,7 +102,7 @@ void macdrv_dispose_opengl_context(macdrv_opengl_context c)
+     [context clearDrawableLeavingSurfaceOnScreen];
+     [context release];
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -149,7 +149,7 @@ void macdrv_make_context_current(macdrv_opengl_context c, macdrv_view v)
+     else
+         [WineOpenGLContext clearCurrentContext];
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -172,7 +172,7 @@ void macdrv_update_opengl_context(macdrv_opengl_context c)
+             [context update];
+     }
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -189,5 +189,5 @@ void macdrv_flush_opengl_context(macdrv_opengl_context c)
+     macdrv_update_opengl_context(c);
+     [context flushBuffer];
+ 
+-    [pool release];
++    [pool drain];
+ }
+diff --git a/dlls/winemac.drv/cocoa_window.m b/dlls/winemac.drv/cocoa_window.m
+index 4a0a945..f122dfe 100644
+--- a/dlls/winemac.drv/cocoa_window.m
++++ b/dlls/winemac.drv/cocoa_window.m
+@@ -1594,7 +1594,7 @@ void macdrv_destroy_cocoa_window(macdrv_window w)
+     [window close];
+     [window release];
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -1660,7 +1660,7 @@ void macdrv_set_cocoa_window_title(macdrv_window w, const unsigned short* title,
+             [NSApp changeWindowsItem:window title:titleString filename:NO];
+     });
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -1770,7 +1770,7 @@ void macdrv_set_window_surface(macdrv_window w, void *surface, pthread_mutex_t *
+         window.surface_mutex = mutex;
+     });
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -1788,7 +1788,7 @@ void macdrv_window_needs_display(macdrv_window w, CGRect rect)
+         [[window contentView] setNeedsDisplayInRect:NSRectFromCGRect(rect)];
+     });
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -1817,7 +1817,7 @@ void macdrv_set_window_shape(macdrv_window w, const CGRect *rects, int count)
+         }
+     });
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -1830,7 +1830,7 @@ void macdrv_set_window_alpha(macdrv_window w, CGFloat alpha)
+ 
+     [window setAlphaValue:alpha];
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -1850,7 +1850,7 @@ void macdrv_set_window_color_key(macdrv_window w, CGFloat keyRed, CGFloat keyGre
+         [window checkTransparency];
+     });
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -1866,7 +1866,7 @@ void macdrv_clear_window_color_key(macdrv_window w)
+         [window checkTransparency];
+     });
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -1882,7 +1882,7 @@ void macdrv_window_use_per_pixel_alpha(macdrv_window w, int use_per_pixel_alpha)
+         [window checkTransparency];
+     });
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -1933,7 +1933,7 @@ macdrv_view macdrv_create_view(macdrv_window w, CGRect rect)
+         [window updateColorSpace];
+     });
+ 
+-    [pool release];
++    [pool drain];
+     return (macdrv_view)view;
+ }
+ 
+@@ -1962,7 +1962,7 @@ void macdrv_dispose_view(macdrv_view v)
+         [window updateColorSpace];
+     });
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -2013,7 +2013,7 @@ void macdrv_set_view_window_and_frame(macdrv_view v, macdrv_window w, CGRect rec
+             [(WineWindow*)[view window] updateColorSpace];
+     });
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -2031,7 +2031,7 @@ void macdrv_add_view_opengl_context(macdrv_view v, macdrv_opengl_context c)
+         [view addGLContext:context];
+     });
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************
+@@ -2049,7 +2049,7 @@ void macdrv_remove_view_opengl_context(macdrv_view v, macdrv_opengl_context c)
+         [view removeGLContext:context];
+     });
+ 
+-    [pool release];
++    [pool drain];
+ }
+ 
+ /***********************************************************************

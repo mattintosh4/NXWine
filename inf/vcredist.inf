@@ -26,4 +26,3 @@ HKCU,%DllOverrides%,"atl100"    ,,"native,builtin"
 HKCU,%DllOverrides%,"msvcp100"  ,,"native,builtin"
 HKCU,%DllOverrides%,"msvcr100"  ,,"native,builtin"
 HKCU,%DllOverrides%,"vcomp100"  ,,"native,builtin"
-

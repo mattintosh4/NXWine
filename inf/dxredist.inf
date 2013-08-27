@@ -1,0 +1,114 @@
+[version]
+signature = "$CHICAGO$"
+
+[DefaultInstall]
+AddReg    = DllOverrides
+DelFiles  = DelFilesSection
+
+[Strings]
+DllOverrides = Software\Wine\DllOverrides
+
+[DllOverrides]
+HKCU,%DllOverrides%,"d3dcompiler_33.dll"  ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dcompiler_34.dll"  ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dcompiler_35.dll"  ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dcompiler_36.dll"  ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dcompiler_37.dll"  ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dcompiler_38.dll"  ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dcompiler_39.dll"  ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dcompiler_40.dll"  ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dcompiler_41.dll"  ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dcompiler_42.dll"  ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dcompiler_43.dll"  ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dim.dll"           ,,"native,builtin"
+HKCU,%DllOverrides%,"d3drm.dll"           ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx10_33.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx10_34.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx10_35.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx10_36.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx10_37.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx10_38.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx10_39.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx10_40.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx10_41.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx10_42.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx10_43.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_24.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_25.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_26.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_27.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_28.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_29.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_30.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_31.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_32.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_33.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_34.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_35.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_36.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_37.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_38.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_39.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_40.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_41.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_42.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dx9_43.dll"        ,,"native,builtin"
+HKCU,%DllOverrides%,"d3dxof.dll"          ,,"native,builtin"
+HKCU,%DllOverrides%,"dsound.vxd"          ,,"native,builtin" ; Exception
+HKCU,%DllOverrides%,"xapofx1_1.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"xinput1_1.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"xinput1_2.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"xinput1_3.dll"       ,,"native,builtin"
+HKCU,%DllOverrides%,"xinput9_1_0.dll"     ,,"native,builtin"
+
+[DelFilesSection]
+d3dcompiler_33.dll
+d3dcompiler_34.dll
+d3dcompiler_35.dll
+d3dcompiler_36.dll
+d3dcompiler_37.dll
+d3dcompiler_38.dll
+d3dcompiler_39.dll
+d3dcompiler_40.dll
+d3dcompiler_41.dll
+d3dcompiler_42.dll
+d3dcompiler_43.dll
+d3dim.dll
+d3drm.dll
+d3dx10_33.dll
+d3dx10_34.dll
+d3dx10_35.dll
+d3dx10_36.dll
+d3dx10_37.dll
+d3dx10_38.dll
+d3dx10_39.dll
+d3dx10_40.dll
+d3dx10_41.dll
+d3dx10_42.dll
+d3dx10_43.dll
+d3dx9_24.dll
+d3dx9_25.dll
+d3dx9_26.dll
+d3dx9_27.dll
+d3dx9_28.dll
+d3dx9_29.dll
+d3dx9_30.dll
+d3dx9_31.dll
+d3dx9_32.dll
+d3dx9_33.dll
+d3dx9_34.dll
+d3dx9_35.dll
+d3dx9_36.dll
+d3dx9_37.dll
+d3dx9_38.dll
+d3dx9_39.dll
+d3dx9_40.dll
+d3dx9_41.dll
+d3dx9_42.dll
+d3dx9_43.dll
+d3dxof.dll
+xapofx1_1.dll
+xinput1_1.dll
+xinput1_2.dll
+xinput1_3.dll
+xinput9_1_0.dll

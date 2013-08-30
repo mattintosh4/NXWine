@@ -1,9 +1,14 @@
+#!/usr/bin/python
+# -*- encoding: utf-8 -*-
+
 import fnmatch
 import os
+import re
 import shutil
 import subprocess
 
-WINELOADER  = '/usr/local/wine/bin/wine'
+prefix      = "/usr/local/wine/"
+WINELOADER  = prefix + "bin/wine"
 w_system32  = os.path.expanduser('~/.wine/drive_c/windows/system32/')
 srcmedia    = '/Volumes/WindowsXPSP3/i386/'
 
@@ -151,19 +156,26 @@ dsound.vxd
 """.splitlines()
 
 for f in additions:
-  subprocess.call(
-    ["/opt/local/bin/7z", "e", "-y", "-o" + w_system32, "/usr/local/wine/share/wine/directx9/feb2010/dxnt.cab", f],
-  stdout=open(os.devnull, 'w'))
-  print 'Extracted file', f, "from dxnt.cab"
-  
-  src = os.path.join(w_system32, f)
-  dst = w_system32
-  if fnmatch.fnmatch(f, "dxapi.xpg"):
-    dst += "drivers/dxapi.sys"
-  else:
-    dst += os.path.splitext(f)[0] + ".dll"
-  shutil.move(src, dst)
-  print "Renamed file", src, "->", dst
+    
+    subprocess.call(
+        ["/opt/local/bin/7z", "e", "-y", "-o" + w_system32, "/usr/local/wine/share/wine/directx9/feb2010/dxnt.cab", f],
+        stdout=open(os.devnull, 'w'))
+    
+    print 'Extracted file', f, "from dxnt.cab"
+    
+    if fnmatch.fnmatch(f, "dsound.vxd"):
+        continue
+    
+    src = os.path.join(w_system32, f)
+    dst = w_system32
+    
+    if fnmatch.fnmatch(f, "dxapi.xpg"):
+        dst += "drivers/dxapi.sys"
+    else:
+        dst += os.path.splitext(f)[0] + ".dll"
+    
+    shutil.move(src, dst)
+    print "Renamed file", src, "->", dst
 
 reg = '''\
 [HKEY_CURRENT_USER\Software\Wine\DllOverrides]
@@ -482,3 +494,52 @@ for f in files:
     else:
         shutil.copy2(src, dst)
         print "Copied file", src, "->", os.path.join(dst, f)
+
+
+wine("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", "/usr/local/src/NXWine/inf/regist.inf")
+
+
+##############
+# Visual C++ #
+##############
+
+wine('rundll32.exe', 'setupapi,InstallHinfSection', 'DefaultInstall', '128', prefix + '/share/wine/vcredist.inf')
+wine(prefix + '/share/wine/vcrun2005/vcredist_x86.exe', '/q')
+wine(prefix + '/share/wine/vcrun2008sp1/vcredist_x86.exe', '/q')
+wine(prefix + '/share/wine/vcrun2010sp1/vcredist_x86.exe', '/q')
+wine('wineboot.exe', '-r')
+
+
+###########
+# DirectX #
+###########
+
+wine('rundll32.exe', 'setupapi,InstallHinfSection', 'DefaultInstall', '128', prefix + '/share/wine/dxredist.inf')
+os.environ['WINEDLLOVERRIDES'] = 'apphelp,scecli,setupapi=n'
+wine("/usr/local/src/NXWine/sources/nativedlls/directx_feb2010_redist.exe", "/Q", "/T:c:\\windows\\temp\\dx9")
+subprocess.call([WINELOADER, "c:\\windows\\temp\\dx9\\dxsetup.exe", "/silent"])
+wine("cmd.exe", "/C", "rmdir /s /q c:\\windows\\temp\\dx9")
+wine('wineboot.exe', '-r')
+subprocess.call([WINELOADER, prefix + "/share/wine/directx9/jun2010/dxsetup.exe", "/silent"])
+wine('wineboot.exe', '-r')
+os.unsetenv('WINEDLLOVERRIDES')
+
+
+#####################
+# Direct3D settings #
+#####################
+
+plist   = subprocess.Popen(['/usr/sbin/system_profiler', 'SPDisplaysDataType'], stdout=subprocess.PIPE).communicate()[0]
+vendor  = re.search('Vendor:.*(0x....)', plist).group(1)
+device  = re.search('Device ID: (0x....)', plist).group(1)
+vram    = re.search('VRAM \(Total\): ([0-9]+)', plist).group(1)
+reg = '''\
+[HKEY_CURRENT_USER\\Software\\Wine\\Direct3D]
+"*VideoMemorySize"="__VideoMemorySize__"
+"*VideoPciDeviceID"=dword:__VideoPciDeviceID__
+"*VideoPciVendorID"=dword:__VideoPciVendorID__
+'''\
+.replace('__VideoMemorySize__', vram)\
+.replace('__VideoPciDeviceID__', device)\
+.replace('__VideoPciVendorID__', vendor)
+subprocess.Popen([prefix + "/libexec/wine", "regedit.exe", "-"], stdin=subprocess.PIPE).communicate(reg)

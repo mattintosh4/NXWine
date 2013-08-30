@@ -209,10 +209,10 @@ reg = '''\
 "dxdiagn"="native"
 "joy.cpl"="native"
 "mciqtz32"="native"
+"msdmo"="native"
 "qcap"="native"
 "qedit"="native"
 "quartz"="native"
-"query"="native"
 '''
 
 subprocess.Popen([WINELOADER, 'regedit.exe', '-'], stdin=subprocess.PIPE).communicate(reg)
@@ -220,15 +220,39 @@ subprocess.Popen([WINELOADER, 'regedit.exe', '-'], stdin=subprocess.PIPE).commun
 
 
 files_dll = '''\
+aclua.dl_
+aclui.dl_
+activeds.dl_
 actxprxy.dl_
+advapi32.dl_
 advpack.dl_
 apphelp.dl_
 asms/10/msft/windows/gdiplus/gdiplus.dll
 asms/52/msft/windows/net/dxmrtp/dxmrtp.dll
-atl.dl_
+asms/60/msft/vcrtl/atl.dll
+asms/60/msft/vcrtl/mfc42.dll
+asms/60/msft/vcrtl/mfc42u.dll
+asms/60/msft/vcrtl/msvcp60.dll
+asms/60/msft/windows/common/controls/comctl32.dll
+asms/70/msft/windows/mswincrt/msvcirt.dll
+asms/70/msft/windows/mswincrt/msvcrt.dll
+aspnet_filter.dll
+aspnet_isapi.dll
+authz.dl_
 avifil32.dl_
 batmeter.dl_
 browseui.dl_
+comaddin.dl_
+comadmin.dl_
+comdlg32.dl_
+compatui.dl_
+compstui.dl_
+comrepl.dl_
+comres.dl_
+comsetup.dl_
+comsnap.dl_
+comsvcs.dl_
+comuid.dl_
 ddrawex.dl_
 devenum.dl_
 devmgr.dl_
@@ -249,7 +273,6 @@ fontsub.dl_
 fusion.dl_
 fusion.dll
 glu32.dl_
-grpconv.ex_
 hhsetup.dl_
 hid.dl_
 imm32.dl_
@@ -260,8 +283,6 @@ mciavi32.dl_
 mciseq.dl_
 mciwave.dl_
 mfc40u.dl_
-mfc42.dl_
-mfc42u.dl_
 mfcsubs.dl_
 midimap.dl_
 mp43dmod.dl_
@@ -275,15 +296,15 @@ mscorwks.dll
 msctf.dl_
 msctfp.dl_
 msvbvm60.dl_
-msvcirt.dl_
-msvcp60.dl_
-msvcrt.dl_
 msvcrt40.dl_
 msvfw32.dl_
 mswmdm.dl_
+netapi32.dl_
 ntdll.dll
 odbc32.dl_
-odbcad32.ex_
+odbc32gt.dl_
+odbcdcp.dl_
+odbcconf.dl_
 odbccp32.dl_
 odbccr32.dl_
 odbccu32.dl_
@@ -364,31 +385,6 @@ xolehlp.dl_
 zipfldr.dl_
 '''
 
-files_sys = '''\
-avc.sy_
-avcstrm.sy_
-bdasup.sy_
-ccdecode.sy_
-dmboot.sy_
-dmio.sy_
-dmusic.sy_
-kmixer.sy_
-ksecdd.sys
-ntio.sy_
-ntio404.sy_
-ntio411.sy_
-ntio412.sy_
-ntio804.sy_
-s3gnbm.sy_
-swmidi.sy_
-sysaudio.sy_
-watchdog.sy_
-wdmaud.sy_
-win32k.sy_
-wmiacpi.sy_
-wvchntxx.sy_
-'''
-
 files_acm = """\
 l3codeca.ac_
 msadp32.ac_
@@ -430,6 +426,26 @@ wdmaud.dr_
 winspool.dr_
 """
 
+files_exe = """\
+admin.exe
+aspnet_regiis.exe
+aspnet_state.exe
+aspnet_wp.exe
+author.exe
+comrepl.ex_
+comrereg.ex_
+cscript.ex_
+grpconv.ex_
+odbcad32.ex_
+odbcconf.ex_
+pinball.ex_
+smss.ex_
+spider.ex_
+taskmgr.ex_
+vbc.exe
+wscript.ex_
+"""
+
 files_ocx = """\
 asctrls.oc_
 flash.oc_
@@ -442,6 +458,31 @@ tdc.oc_
 wmp.oc_
 wshom.oc_
 """
+
+files_sys = '''\
+avc.sy_
+avcstrm.sy_
+bdasup.sy_
+ccdecode.sy_
+dmboot.sy_
+dmio.sy_
+dmusic.sy_
+kmixer.sy_
+ksecdd.sys
+ntio.sy_
+ntio404.sy_
+ntio411.sy_
+ntio412.sy_
+ntio804.sy_
+s3gnbm.sy_
+swmidi.sy_
+sysaudio.sy_
+watchdog.sy_
+wdmaud.sy_
+win32k.sy_
+wmiacpi.sy_
+wvchntxx.sy_
+'''
 
 files_tlb = """\
 msado20.tl_
@@ -473,6 +514,7 @@ files = \
     files_cpl + \
     files_dll + \
     files_drv + \
+    files_exe + \
     files_ocx + \
     files_sys + \
     files_tlb + \
@@ -494,6 +536,9 @@ for f in files:
     else:
         shutil.copy2(src, dst)
         print "Copied file", src, "->", os.path.join(dst, f)
+        
+    if f.endswith((".ex_", ".exe")):
+        os.chmod(dst + os.path.splitext(os.path.basename(f))[0] + ".exe", 0755)
 
 
 wine("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", "/usr/local/src/NXWine/inf/regist.inf")
@@ -514,32 +559,28 @@ wine('wineboot.exe', '-r')
 # DirectX #
 ###########
 
-wine('rundll32.exe', 'setupapi,InstallHinfSection', 'DefaultInstall', '128', prefix + '/share/wine/dxredist.inf')
-os.environ['WINEDLLOVERRIDES'] = 'apphelp,scecli,setupapi=n'
+wine("rundll32.exe", "setupapi,InstallHinfSection", "DefaultInstall", "128", prefix + "/share/wine/dxredist.inf")
+os.putenv("WINEDLLOVERRIDES", "apphelp,scecli,setupapi=n")
 wine("/usr/local/src/NXWine/sources/nativedlls/directx_feb2010_redist.exe", "/Q", "/T:c:\\windows\\temp\\dx9")
-subprocess.call([WINELOADER, "c:\\windows\\temp\\dx9\\dxsetup.exe", "/silent"])
+wine("c:\\windows\\temp\\dx9\\dxsetup.exe", "/silent")
 wine("cmd.exe", "/C", "rmdir /s /q c:\\windows\\temp\\dx9")
-wine('wineboot.exe', '-r')
-subprocess.call([WINELOADER, prefix + "/share/wine/directx9/jun2010/dxsetup.exe", "/silent"])
-wine('wineboot.exe', '-r')
-os.unsetenv('WINEDLLOVERRIDES')
+wine("wineboot.exe", "-r")
+wine(prefix + "/share/wine/directx9/jun2010/dxsetup.exe", "/silent")
+wine("wineboot.exe", "-r")
+os.unsetenv("WINEDLLOVERRIDES")
 
 
-#####################
-# Direct3D settings #
-#####################
-
+####################
+# Direct3D setting #
+####################
 plist   = subprocess.Popen(['/usr/sbin/system_profiler', 'SPDisplaysDataType'], stdout=subprocess.PIPE).communicate()[0]
 vendor  = re.search('Vendor:.*(0x....)', plist).group(1)
 device  = re.search('Device ID: (0x....)', plist).group(1)
-vram    = re.search('VRAM \(Total\): ([0-9]+)', plist).group(1)
 reg = '''\
 [HKEY_CURRENT_USER\\Software\\Wine\\Direct3D]
-"*VideoMemorySize"="__VideoMemorySize__"
 "*VideoPciDeviceID"=dword:__VideoPciDeviceID__
 "*VideoPciVendorID"=dword:__VideoPciVendorID__
 '''\
-.replace('__VideoMemorySize__', vram)\
 .replace('__VideoPciDeviceID__', device)\
 .replace('__VideoPciVendorID__', vendor)
 subprocess.Popen([prefix + "/libexec/wine", "regedit.exe", "-"], stdin=subprocess.PIPE).communicate(reg)

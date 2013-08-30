@@ -24,6 +24,7 @@ def p7ze (src, dst):
 
 wine("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", "/usr/local/src/NXWine/inf/init.inf")
 
+
 as_dxnt = '''\
 amstream.dl_
 d3d8.dl_
@@ -560,10 +561,8 @@ wine('wineboot.exe', '-r')
 ###########
 
 wine("rundll32.exe", "setupapi,InstallHinfSection", "DefaultInstall", "128", prefix + "/share/wine/dxredist.inf")
-os.putenv("WINEDLLOVERRIDES", "apphelp,scecli,setupapi=n")
-wine("/usr/local/src/NXWine/sources/nativedlls/directx_feb2010_redist.exe", "/Q", "/T:c:\\windows\\temp\\dx9")
-wine("c:\\windows\\temp\\dx9\\dxsetup.exe", "/silent")
-wine("cmd.exe", "/C", "rmdir /s /q c:\\windows\\temp\\dx9")
+os.putenv("WINEDLLOVERRIDES", "setupapi=n")
+wine(prefix + "/share/wine/directx9/feb2010/dxsetup.exe", "/silent")
 wine("wineboot.exe", "-r")
 wine(prefix + "/share/wine/directx9/jun2010/dxsetup.exe", "/silent")
 wine("wineboot.exe", "-r")

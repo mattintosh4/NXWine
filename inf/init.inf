@@ -141,13 +141,14 @@ HKCU,%DllOverrides%,"*zipfldr"          ,,"native,builtin"
 ;;;;;;;;;;;;;;;;;;
 ; DLL (UNSTABLE) ;
 ;;;;;;;;;;;;;;;;;;
-HKCU,%DllOverrides%,"*setupapi"         ,,"builtin,native"
+
 HKCU,%DllOverrides%,"*fusion"           ,,"builtin,native"
 HKCU,%DllOverrides%,"*ole32"            ,,"builtin,native"
 HKCU,%DllOverrides%,"*oleaut32"         ,,"builtin,native"
 HKCU,%DllOverrides%,"*olecli32"         ,,"builtin,native"
 HKCU,%DllOverrides%,"*oledlg"           ,,"builtin,native"
 HKCU,%DllOverrides%,"*olepro32"         ,,"builtin,native"
+HKCU,%DllOverrides%,"*setupapi"         ,,"builtin,native"
 HKCU,%DllOverrides%,"*shell32"          ,,"builtin,native"
 HKCU,%DllOverrides%,"*wbemprox"         ,,"builtin"
 HKCU,%DllOverrides%,"*winmm"            ,,"builtin,native"
@@ -171,18 +172,18 @@ HKCU,%DllOverrides%,"*wscript.exe"          ,,"native"
 HKCU,%CurrentVersionNT%\Time Zones                      ,"TimeZoneKeyName"  ,           ,"Tokyo Standard Time"
 HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time  ,"Display"          ,           ,"(GMT+09:00) 大阪、札幌、東京"
 HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time  ,"Dlt"              ,           ,"東京 (夏時間)"
-HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time  ,"Std"              ,           ,"東京 (標準時)"
-HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time  ,"MapID"            ,           ,"18,19"
 HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time  ,"Index"            ,0x00010001 ,0x000000eb
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time  ,"MapID"            ,           ,"18,19"
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time  ,"Std"              ,           ,"東京 (標準時)"
 HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time  ,"TZI"              ,0x00000001 ,e4,fd,ff,ff,00,00,00,00,c4,ff,ff,ff,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
-HKLM,%Control%\TimeZoneInformation                      ,"Bias"             ,0x00010001 ,0xfffffde4
-HKLM,%Control%\TimeZoneInformation                      ,"StandardName"     ,           ,"東京 (標準時)"
-HKLM,%Control%\TimeZoneInformation                      ,"StandardBias"     ,0x00010001 ,0x00000000
-HKLM,%Control%\TimeZoneInformation                      ,"StandardStart"    ,0x00000001 ,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
-HKLM,%Control%\TimeZoneInformation                      ,"DaylightName"     ,           ,"東京 (標準時)"
-HKLM,%Control%\TimeZoneInformation                      ,"DaylightBias"     ,0x00010001 ,0x00000000
-HKLM,%Control%\TimeZoneInformation                      ,"DaylightStart"    ,0x00000001 ,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
 HKLM,%Control%\TimeZoneInformation                      ,"ActiveTimeBias"   ,0x00010001 ,0xfffffde4
+HKLM,%Control%\TimeZoneInformation                      ,"Bias"             ,0x00010001 ,0xfffffde4
+HKLM,%Control%\TimeZoneInformation                      ,"DaylightBias"     ,0x00010001 ,0x00000000
+HKLM,%Control%\TimeZoneInformation                      ,"DaylightName"     ,           ,"東京 (標準時)"
+HKLM,%Control%\TimeZoneInformation                      ,"DaylightStart"    ,0x00000001 ,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+HKLM,%Control%\TimeZoneInformation                      ,"StandardBias"     ,0x00010001 ,0x00000000
+HKLM,%Control%\TimeZoneInformation                      ,"StandardName"     ,           ,"東京 (標準時)"
+HKLM,%Control%\TimeZoneInformation                      ,"StandardStart"    ,0x00000001 ,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
 
 ;;;;;;;;;;
 ; DELETE ;

@@ -8,6 +8,7 @@ AddReg=\
     Control Panel,\
     Fonts,\
     DllOverrides,\
+    Time Zones,\
     Wine Settings
 
 
@@ -156,6 +157,24 @@ HKCU,%DllOverrides%,"*aspnet_regiis.exe"    ,,"native"
 HKCU,%DllOverrides%,"*cscript.exe"          ,,"native"
 HKCU,%DllOverrides%,"*taskmgr.exe"          ,,"native"
 HKCU,%DllOverrides%,"*wscript.exe"          ,,"native"
+
+
+[Time Zones]
+HKCU,%CurrentVersionNT%\Time Zones                          ,"TimeZoneKeyName"  ,           ,"Tokyo Standard Time"
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time      ,"Display"          ,           ,"(GMT+09:00) 大阪、札幌、東京"
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time      ,"Dlt"              ,           ,"東京 (夏時間)"
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time      ,"Std"              ,           ,"東京 (標準時)"
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time      ,"MapID"            ,           ,"18,19"
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time      ,"Index"            ,0x00010001 ,0x000000eb
+HKLM,%CurrentVersionNT%\Time Zones\Tokyo Standard Time      ,"TZI"              ,0x00000001 ,e4,fd,ff,ff,00,00,00,00,c4,ff,ff,ff,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation   ,"Bias"             ,0x00010001 ,0xfffffde4
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation   ,"StandardName"     ,           ,"東京 (標準時)"
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation   ,"StandardBias"     ,0x00010001 ,0x00000000
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation   ,"StandardStart"    ,0x00000001 ,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation   ,"DaylightName"     ,           ,"東京 (標準時)"
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation   ,"DaylightBias"     ,0x00010001 ,0x00000000
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation   ,"DaylightStart"    ,0x00000001 ,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+HKLM,System\CurrentControlSet\Control\TimeZoneInformation   ,"ActiveTimeBias"   ,0x00010001 ,0xfffffde4
 
 
 [Wine Settings]

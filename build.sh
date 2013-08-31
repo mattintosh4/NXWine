@@ -70,7 +70,6 @@ for pkg in \
   faenza-icon-theme_1.3.zip \
   gettext-0.18.3.tar.gz \
   help2man-1.41.2.tar.gz \
-  libelf-0.8.13.tar.gz \
   libtool-2.4.2.tar.gz \
   m4-1.4.16.tar.bz2 \
   p7zip_9.20.1_src_all.tar.bz2 \
@@ -108,9 +107,6 @@ BuildDeps_ ()
       ln -s libgsm.1.dylib $deps_destroot/lib/libgsm.dylib
       (cd $workroot && tar cf - gsm-1.0-pl13/{ChangeLog,COPYRIGHT,README} | 7z a -si $deps_destroot/share/doc/doc_gsm.tar.xz) || false
       return
-    ;;
-    libelf)
-      set -- $configure_args --disable-compat
     ;;
     *)
       set -- $configure_args
@@ -434,7 +430,6 @@ Bootstrap_ ()
   BuildDeps_  gsm
   BuildDevel_ icu-release-51-2
   BuildDeps_  gettext
-  BuildDeps_  libelf
   BuildDeps_  libtool
   BuildDevel_ readline
   BuildDevel_ zlib

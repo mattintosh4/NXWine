@@ -529,14 +529,6 @@ BuildWine_ ()
   patch -Np1 < $proj_root/patches/changelocale.patch
   patch -Np1 < $proj_root/patches/autorelease.patch
   patch -Np1 < $proj_root/patches/autohidemenu.patch
-  
-  ## remove time zone keys
-  sed -i '' '
-    /Korea Standard Time/d
-    /Tokyo Standard Time/d
-    /HKLM,System\\CurrentControlSet\\Control\\TimeZoneInformation,"StandardName",2,""/d
-    /HKLM,System\\CurrentControlSet\\Control\\TimeZoneInformation,"TimeZoneKeyName",2,""/d
-  ' tools/wine.inf.in
   patch -Np1 < $proj_root/patches/excludefonts.patch
   
   args=(

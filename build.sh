@@ -492,14 +492,14 @@ BuildStage3a_ ()
 
 BuildStage4_ ()
 {
-  BuildDevel_ libmodplug
-  BuildDevel_ ogg
-  BuildDevel_ vorbis
-  BuildDevel_ flac
-  BuildDevel_ SDL                     # SDL required nasm
+#  BuildDevel_ libmodplug
+#  BuildDevel_ ogg
+#  BuildDevel_ vorbis
+#  BuildDevel_ flac
+#  BuildDevel_ SDL                     # SDL required nasm
   BuildDevel_ mpg123                  # mpg123 required SDL
-  BuildDevel_ SDL_sound
-  BuildDevel_ theora                  # libtheora required SDL
+#  BuildDevel_ SDL_sound
+#  BuildDevel_ theora                  # libtheora required SDL
 } # end BuildStage4_
 
 BuildStage5_ ()

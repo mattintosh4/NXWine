@@ -683,11 +683,6 @@ xactengine{2,3}}_\*.dll
       7z x -y -ssc- -oMicrosoft.NET/"DirectX for Managed Code"/$f mdx_${f}_x86.cab -x\!\*.inf
     done
     
-    ## .NET Framework 1.1
-    ## http://www.microsoft.com/ja-jp/download/details.aspx?id=26
-    7z e -y $srcroot/nativedlls/dotnetfx.exe netfx1.cab
-    7z e -y -osystem32 netfx1.cab FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8
-    mv system32/{FL_gdiplus_dll_____X86.3643236F_FC70_11D3_A536_0090278A1BB8,gdiplus.dll}
     
     ## Visual C++ 2010
     ## http://www.microsoft.com/ja-jp/download/details.aspx?id=5555

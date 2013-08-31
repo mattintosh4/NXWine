@@ -70,7 +70,6 @@ for pkg in \
   faenza-icon-theme_1.3.zip \
   gettext-0.18.3.tar.gz \
   help2man-1.41.2.tar.gz \
-  jasper-1.900.1.tar.bz2 \
   libelf-0.8.13.tar.gz \
   libtool-2.4.2.tar.gz \
   m4-1.4.16.tar.bz2 \
@@ -109,9 +108,6 @@ BuildDeps_ ()
       ln -s libgsm.1.dylib $deps_destroot/lib/libgsm.dylib
       (cd $workroot && tar cf - gsm-1.0-pl13/{ChangeLog,COPYRIGHT,README} | 7z a -si $deps_destroot/share/doc/doc_gsm.tar.xz) || false
       return
-    ;;
-    jasper)
-      set -- $configure_args --disable-opengl
     ;;
     libelf)
       set -- $configure_args --disable-compat
@@ -175,10 +171,6 @@ BuildDevel_ ()
     ;;
     libffi)
       git checkout -f master
-      ./configure ${configure_args}
-    ;;
-    libicns)
-      autoreconf -i
       ./configure ${configure_args}
     ;;
     libjpeg-turbo)
@@ -477,8 +469,6 @@ BuildStage3_ ()
   BuildDevel_ freetype                # freetype required libpng
   BuildDevel_ libjpeg-turbo
   BuildDevel_ libtiff
-  BuildDeps_  jasper
-  BuildDevel_ libicns
   BuildDevel_ Little-CMS
 } # end BuildStage3_
 

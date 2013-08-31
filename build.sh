@@ -579,130 +579,18 @@ BuildStage6_ ()
   # ------------------------------------- native dlls
   InstallNativedlls_ ()
   {
-    set -- $workroot/windows
-    $"mkdircd" $1
-    7z x -y $srcroot/nativedlls/directx_feb2010_redist.exe dxnt.cab BDAXP.cab
-    7z x -y -ssc- -osystem32 BDAXP.cab {msvidctl,msyuv,wstdecod}.dll \*.ax
-    7z x -y -otemp/rsrc_dinput  dxnt.cab dimaps.inf \*.ini \*.png
-    7z x -y -osystem32/drivers  dxnt.cab \*.sys
-    7z x -y -osystem32          dxnt.cab \*.ax \
-{\
-dplaysvr,\
-dpnsvr,\
-dpvsetup,\
-dxdiag,\
-}.exe \
-{\
-amstream,\
-d3d8thk,\
-d3dim,\
-d3dim700,\
-d3dpmesh,\
-d3dramp,\
-d3drm,\
-d3dxof,\
-ddrawex,\
-devenum,\
-diactfrm,\
-dimap,\
-dinput,\
-dinput8,\
-dmband,\
-dmcompos,\
-dmime,\
-dmloader,\
-dmscript,\
-dmstyle,\
-dmsynth,\
-dmusic,\
-dplayx,\
-dpmodemx,\
-dpnaddr,\
-dpnet,\
-dpnhpast,\
-dpnhupnp,\
-dpnlobby,\
-dpvacm,\
-dpvoice,\
-dpvvox,\
-dpwsockx,\
-dsdmo,\
-dsdmoprp,\
-dsound3d,\
-dswave,\
-dx7vb,\
-dx8vb,\
-dxdiagn,\
-encapi,\
-gcdef,\
-ksuser,\
-mciqtz32,\
-mswebdvd,\
-pid,\
-qasf,\
-qcap,\
-qdv,\
-qdvd,\
-qedit,\
-qedwipes,\
-quartz}.dll \
-{\
-diactfrm,\
-dinput,\
-dmusic,\
-ks{,captur,filter,reg}}.inf
+    ## DirectX 9.0c
+    7z e -o$datadir/wine/directx9/feb2010 $srcroot/nativedlls/directx_feb2010_redist.exe
+    7z e -o$datadir/wine/directx9/jun2010 $srcroot/nativedlls/directx_Jun2010_redist.exe -x'!*200?*'
     
-    7z x -y $srcroot/nativedlls/directx_Jun2010_redist.exe \*_x86.cab
-    printf '20%02d\n' {5..10} | while read
-    do
-      find *$REPLY*.cab | sort -M | while read
-      do
-        7z x -y -osystem32 -ssc- $REPLY {\
-d3dcompiler,\
-d3dcsx,\
-d3dx{9..11},\
-x3daudio1,\
-xapofx1,\
-xaudio2,\
-xinput{1,9},\
-xactengine{2,3}}_\*.dll
-      done
-    done
-    
-    ## MDX1
-    7z x -y $srcroot/nativedlls/directx_Jun2010_redist.exe Apr2006_MDX1_\*.cab
-    
-    ## MDX1_x86
-    7z x -y -ssc- -oMicrosoft.NET/"DirectX for Managed Code"/1.0.2911.0 Apr2006_MDX1_x86.cab \*direct3dx\*
-    7z x -y -ssc- -oMicrosoft.NET/"DirectX for Managed Code"/1.0.2902.0 Apr2006_MDX1_x86.cab -x\!\*direct3dx\* -x\!\*.inf
-    
-    ## MDX1_x86_Archive
-    7z x -y -ssc- Apr2006_MDX1_x86_Archive.cab \*.cab
-    for f in 1.0.{2902..2910}.0
-    do
-      7z x -y -ssc- -oMicrosoft.NET/"DirectX for Managed Code"/$f mdx_${f}_x86.cab -x\!\*.inf
-    done
-    
-    
-    ## Visual C++ 2010
-    ## http://www.microsoft.com/ja-jp/download/details.aspx?id=5555
-    7z e -y $srcroot/nativedlls/vcredist_x86_2010.exe -r vc_red.cab
-    7z e -y vc_red.cab F_CENTRAL_\*
-    find F_CENTRAL_* | while read
-    do
-      mv $REPLY system32/$(echo $REPLY | sed 's/F_CENTRAL_//; s/_x86/.dll/')
-    done
+    ## Visual C++
+    ditto {$srcroot/nativedlls,$datadir/wine}/vcrun2005/vcredist_x86.exe
+    ditto {$srcroot/nativedlls,$datadir/wine}/vcrun2008sp1/vcredist_x86.exe
+    ditto {$srcroot/nativedlls,$datadir/wine}/vcrun2010sp1/vcredist_x86.exe
     
     ## Visual Basic 6.0 SP 6
     ## http://www.microsoft.com/ja-jp/download/details.aspx?id=24417
-    7z e -y $srcroot/nativedlls/VB6.0-KB290887-X86.exe
-    7z e -y -ssc- -osystem32 vbrun60sp6.exe {asycfilt,msvbvm60}.dll
-    
-    ## remove temp files
-    rm -f *.{cab,exe}
-    
-    ## create native dlls pack
-    7z a -t7z $datadir/nxwine/rsrc/nativedlls.7z $1
+    7z e -o$datadir/wine/vbrun60sp6 $srcroot/nativedlls/VB6.0-KB290887-X86.exe vbrun60sp6.exe
   }
   InstallNativedlls_
     

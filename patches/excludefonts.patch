@@ -1,0 +1,17 @@
+diff --git a/fonts/Makefile.in b/fonts/Makefile.in
+index 556ed0c..c21ac28 100644
+--- a/fonts/Makefile.in
++++ b/fonts/Makefile.in
+@@ -53,11 +53,7 @@ BITMAP_FONTS  = \
+ 	vgas874.fon
+ 
+ TRUETYPE_FONTS = \
+-	marlett.ttf \
+-	symbol.ttf \
+-	tahoma.ttf \
+-	tahomabd.ttf \
+-	wingding.ttf
++	marlett.ttf
+ 
+ FONTS = $(BITMAP_FONTS) $(TRUETYPE_FONTS)
+ 

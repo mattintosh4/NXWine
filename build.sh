@@ -572,12 +572,6 @@ BuildStage6_ ()
   (set -- $docdir/wine        && mkdir -p $1 && install -m 0644 $srcroot/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $1) || false
   
   # ------------------------------------- fonts
-  # note: some fonts are duplicated with system fonts. using 'rm' command only is not useful.
-  rm -f ${datadir:?}/wine/fonts/symbol.ttf
-  rm -f ${datadir:?}/wine/fonts/tahoma.ttf
-  rm -f ${datadir:?}/wine/fonts/tahomabd.ttf
-  rm -f ${datadir:?}/wine/fonts/wingding.ttf
-#  tar xf $srcroot/fonts/Konatu_ver_20121218.zip   -C $docdir
   tar xf $srcroot/fonts/sazanami-20040629.tar.bz2 -C $docdir
   mv $docdir/*/*.ttf $datadir/wine/fonts
   

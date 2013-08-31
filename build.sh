@@ -215,7 +215,7 @@ BuildDevel_ ()
     ;;
     mpg123)
       autoreconf -i
-      ./configure ${configure_args}
+      ./configure ${configure_args} --with-default-audio=coreaudio --with-optimization=3
     ;;
     nettle)
       git checkout -f nettle-2.7-fixes

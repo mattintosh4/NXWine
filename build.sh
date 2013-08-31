@@ -791,18 +791,23 @@ BuildDmg_ ()
   mv $destroot $1
   
   # create installer
-  pkgbuild \
-    --component-plist $proj_root/scripts/installer-component.plist \
-    --install-location /Applications \
-    --ownership preserve \
-    --root $1 \
+  args=(
+    --component-plist     $proj_root/scripts/installer-component.plist
+    --install-location    /Applications
+    --ownership           preserve
+    --root                $1
     $2
+  )
+  pkgbuild "${args[@]}"
   
   # create disk image
-  hdiutil create  -ov \
-                  -srcdir $2 \
-                  -volname $proj_name \
-                  $proj_root/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
+  args=(
+    -ov
+    -srcdir $2
+    -volname $proj_name
+    $proj_root/${proj_name}_${proj_version}_${wine_version/wine-}.dmg
+  )
+  hdiutil create "${args[@]}"
   
   rm -rf $1
 } # end BuildDmg_

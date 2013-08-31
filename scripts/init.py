@@ -239,6 +239,7 @@ asms/70/msft/windows/mswincrt/msvcirt.dll
 asms/70/msft/windows/mswincrt/msvcrt.dll
 aspnet_filter.dll
 aspnet_isapi.dll
+asycfilt.dl_
 authz.dl_
 avifil32.dl_
 batmeter.dl_

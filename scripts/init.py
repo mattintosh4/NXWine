@@ -218,13 +218,22 @@ reg = '''\
 
 subprocess.Popen([WINELOADER, 'regedit.exe', '-'], stdin=subprocess.PIPE).communicate(reg)
 
-
+# VisualBasic 6 sp 6
+# VB6.0-KB290887-X86.exe/vbrun60sp6.exe
+# asycfilt.dll
+# comcat.dll
+# msvbvm60.dll
+# oleaut32.dll
+# olepro32.dll
+# stdole2.tlb
 
 files_dll = '''\
 aclua.dl_
 aclui.dl_
 activeds.dl_
 actxprxy.dl_
+adsldp.dl_
+adsldpc.dl_
 advapi32.dl_
 advpack.dl_
 apphelp.dl_
@@ -320,11 +329,6 @@ oledb32r.dl_
 oledlg.dl_
 oleprn.dl_
 olepro32.dl_
-qagent.dl_
-qagentrt.dl_
-qcliprov.dl_
-qmgr.dl_
-qmgrprxy.dl_
 query.dl_
 qutil.dl_
 rtutils.dl_
@@ -542,8 +546,144 @@ for f in files:
     if f.endswith((".ex_", ".exe")):
         os.chmod(dst + os.path.splitext(os.path.basename(f))[0] + ".exe", 0755)
 
+subprocess.call(["/opt/local/bin/7z", "e", "-y", "-o" + w_system32, srcmedia + "root/cmpnents/netfx/i386/netfx.cab", "msvcp70.dll", "msvcr70.dll"])
 
-wine("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", "/usr/local/src/NXWine/inf/regist.inf")
+RegisterDlls = """\
+actxprxy.dll
+advpack.dll
+asctrls.ocx
+atl.dll
+bdaplgin.ax
+browseui.dll
+ddrawex.dll
+devenum.dll
+dinput.dll
+dinput8.dll
+dispex.dll
+dmband.dll
+dmcompos.dll
+dmime.dll
+dmloader.dll
+dmscript.dll
+dmstyle.dll
+dmsynth.dll
+dmusic.dll
+dplayx.dll
+dpnet.dll
+dpnhpast.dll
+dpnhupnp.dll
+dpvacm.dll
+dpvoice.dll
+dpvvox.dll
+dsdmo.dll
+dsdmoprp.dll
+dsprop.dll
+dsquery.dll
+dssenh.dll
+dsuiext.dll
+dswave.dll
+dx7vb.dll
+dx8vb.dll
+dxdiagn.dll
+dxmasf.dll
+dxmrtp.dll
+dxtmsft.dll
+dxtrans.dll
+encapi.dll
+encdec.dll
+flash.ocx
+fontext.dll
+hhctrl.ocx
+ipsink.ax
+jscript.dll
+ksproxy.ax
+kswdmcap.ax
+l3codeca.acm
+mfc40u.dll
+mfc42.dll
+mfc42u.dll
+mp43dmod.dll
+mp4sdmod.dll
+mpg2data.ax
+mpg2splt.ax
+mpg4dmod.dll
+mpg4ds32.ax
+msadds32.ax
+msdvbnp.ax
+msdxm.ocx
+msscds32.ax
+msscript.ocx
+msvbvm60.dll
+mswebdvd.dll
+mswmdm.dll
+oledb32.dll
+oledb32r.dll
+oleprn.dll
+proctexe.ocx
+psisrndr.ax
+qasf.dll
+qcap.dll
+qcliprov.dll
+qdv.dll
+qdvd.dll
+qedit.dll
+quartz.dll
+query.dll
+qutil.dll
+scecli.dll
+shdocvw.dll
+shgina.dll
+shimgvw.dll
+shmedia.dll
+shsvcs.dll
+slbcsp.dll
+slbiop.dll
+stobject.dll
+sysmon.ocx
+tdc.ocx
+vbicodec.ax
+vbisurf.ax
+vbscript.dll
+vidcap.ax
+wmadmod.dll
+wmadmoe.dll
+wmdmlog.dll
+wmdmps.dll
+wmm2ae.dll
+wmm2ext.dll
+wmm2filt.dll
+wmm2fxa.dll
+wmm2fxb.dll
+wmp.ocx
+wmpcd.dll
+wmpcore.dll
+wmphoto.dll
+wmpui.dll
+wmsdmod.dll
+wmsdmoe.dll
+wmsdmoe2.dll
+wmspdmod.dll
+wmspdmoe.dll
+wmstream.dll
+wmv8ds32.ax
+wmvcore.dll
+wmvdmod.dll
+wmvdmoe2.dll
+wmvds32.ax
+wshcon.dll
+wshext.dll
+wshom.ocx
+wstdecod.dll
+wstpager.ax
+wstrendr.ax
+xmlprov.dll
+xmlprovi.dll
+zipfldr.dll
+""".splitlines()
+
+for f in RegisterDlls:
+    wine('regsvr32.exe', f)
+
 
 
 ##############

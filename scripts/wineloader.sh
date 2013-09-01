@@ -37,5 +37,5 @@ if [ ! -d "${WINEPREFIX}" ] || [ "$2" = --force-init ]; then
   /Applications/NXWine.app/Contents/Resources/share/wine/init.py
 fi
 
-printf '\033[4;32m%s\033[m\n' "$*"
+printf '\033[4;32m%s\033[m\n' "$*" >&2
 exec "$@"

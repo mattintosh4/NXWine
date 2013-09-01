@@ -1,0 +1,101 @@
+diff --git a/src/winetricks b/src/winetricks
+index acfe66f..a99e6b0 100755
+--- a/src/winetricks
++++ b/src/winetricks
+@@ -3874,6 +3874,96 @@ helper_win7sp1()
+ 
+ #---------------------------------------------------------
+ 
++w_metadata rpg2000 dlls \
++    title="RPG TKOOL 2000 RTP" \
++    publisher="enterbrain" \
++    media="download" \
++    year="2000" \
++    file1="2000rtp.zip" \
++    homepage="http://tkool.jp/"
++
++load_rpg2000()
++{
++    w_download http://ftp.vector.co.jp/pack/winnt/util/runtime/2000rtp.zip
++    w_try_unzip -j -d "$W_TMP" "$W_CACHE/$W_PACKAGE"/2000rtp.zip "*/RPG2000RTP.exe"
++    cd "$W_TMP"
++    w_try $WINE RPG2000RTP.exe
++}
++
++#----------------------------------------------------------------
++
++w_metadata rpg2003 dlls \
++    title="RPG TKOOL 2003 RTP" \
++    publisher="enterbrain" \
++    year="2002" \
++    media="download" \
++    file1="2003rtp.zip" \
++    homepage="http://tkool.jp/"
++
++load_rpg2003()
++{
++    w_download http://ftp.vector.co.jp/pack/winnt/util/runtime/2003rtp.zip
++    w_try_unzip -j -d "$W_TMP" "$W_CACHE/$W_PACKAGE"/2003rtp.zip "*/RPG2003RTP.exe"
++    cd "$W_TMP"
++    w_try $WINE RPG2003RTP.exe
++}
++
++#----------------------------------------------------------------
++
++w_metadata rpgxp dlls \
++    title="RPG TKOOL XP RTP" \
++    publisher="enterbrain" \
++    year="2004" \
++    media="download" \
++    file1="xp_rtp103.zip" \
++    homepage="http://tkool.jp/"
++
++load_rpgxp()
++{
++    w_download http://ftp.vector.co.jp/pack/winnt/util/runtime/xp_rtp103.zip
++    w_try_unzip -j -d "$W_TMP" "$W_CACHE/$W_PACKAGE"/xp_rtp103.zip "*/Setup.exe"
++    cd "$W_TMP"
++    w_try $WINE setup.exe
++}
++
++#----------------------------------------------------------------
++
++w_metadata rpgvx dlls \
++    title="RPG TKOOL VX RTP" \
++    publisher="enterbrain" \
++    year="2007" \
++    media="download" \
++    file1="vx_rtp202.zip" \
++    homepage="http://tkool.jp/"
++
++load_rpgvx()
++{
++    w_download http://ftp.vector.co.jp/pack/winnt/util/runtime/vx_rtp202.zip
++    w_try_unzip -j -d "$W_TMP" "$W_CACHE/$W_PACKAGE"/vx_rtp202.zip "*/setup.exe"
++    cd "$W_TMP"
++    w_try $WINE Setup.exe
++}
++
++#----------------------------------------------------------------
++
++w_metadata rpgvxace dlls \
++    title="RPG TKOOL VX Ace RTP" \
++    publisher="enterbrain" \
++    year="2011" \
++    media="download" \
++    file1="vxace_rtp100.zip" \
++    homepage="http://tkool.jp/"
++
++load_rpgvxace()
++{
++    w_download http://ftp.vector.co.jp/pack/winnt/util/runtime/vxace_rtp100.zip
++    w_try_unzip -j -d "$W_TMP" "$W_CACHE/$W_PACKAGE"/vxace_rtp100.zip
++    cd "$W_TMP"
++    w_try $WINE Setup.exe
++}
++
++#----------------------------------------------------------------
++
+ w_metadata  adobeair dlls \
+     title="Adobe AIR 2.7" \
+     publisher="Adobe" \

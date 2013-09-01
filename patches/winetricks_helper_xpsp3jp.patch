@@ -12,7 +12,7 @@ index acfe66f..6f7b881 100755
 +
 +    # http://www.microsoft.com/ja-jp/download/details.aspx?id=24
 +    w_download_to xpsp3 http://download.microsoft.com/download/e/4/a/e4a9e704-eea9-452e-bef2-79f29cbe116e/WindowsXP-KB936929-SP3-x86-JPN.exe e0fc34cfa52d270b3c79a68af8fa358244f7419e
-+    w_try_cabextract -d "$W_TMP" -L -F $filename "$W_CACHE"/xpsp3/WINDOWSXP-KB936929-SP3-X86-JPN.EXE
++    w_try_cabextract -d "$W_TMP" -L -F $filename "$W_CACHE"/xpsp3/WindowsXP-KB936929-SP3-x86-JPN.exe
 +}
 +
  helper_win7sp1()

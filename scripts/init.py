@@ -15,7 +15,7 @@ import tempfile
 
 prefix      = "/usr/local/wine/"
 WINELOADER  = os.path.join(prefix, "bin/wine")
-SPSRC       = "/usr/local/src/NXWine/sources/nativedlls/WINDOWSXP-KB936929-SP3-X86-JPN.EXE"
+SPSRC       = os.path.expanduser("~/Library/Caches/winetricks/xpsp3jp/WindowsXP-KB936929-SP3-x86-JPN.exe")
 
 W_DRIVE_C   = Popen([WINELOADER, "winepath.exe", "-u", "c:"], stdout=PIPE).communicate()[0].rstrip()
 W_SYSTEM32  = os.path.join(W_DRIVE_C, "windows/system32/")

@@ -1,8 +1,8 @@
 #!/usr/bin/env python2.7
 # -*- encoding: utf-8 -*-
 
+from fnmatch import fnmatch
 from subprocess import call, check_call, check_output, Popen, PIPE
-import fnmatch
 import os
 import re
 import shutil
@@ -16,16 +16,18 @@ W_DRIVE_C   = check_output([WINELOADER, "winepath.exe", "-u", "c:"]).strip()
 W_SYSTEM32  = os.path.join(W_DRIVE_C, "windows/system32/")
 W_TEMP      = os.path.join(W_DRIVE_C, "windows/temp", os.path.basename(tempfile.NamedTemporaryFile().name))
 
-def wine (*args):
+def wine(*args):
     check_call((WINELOADER,) + args)
 
-def p7ze (src, dst):
-    check_call(['/opt/local/bin/7z', 'e', '-y', '-ssc-', '-o' + dst, src], stdout=open(os.devnull, 'w'))
+def p7ze(src, dst):
+    check_call(
+        ['/opt/local/bin/7z', 'e', '-y', '-ssc-', '-o' + dst, src],
+        stdout=open(os.devnull, 'w'))
 
 # ------------------------------------------------------------------------------
 # dxnt
 # ------------------------------------------------------------------------------
-def load_dxnt ():
+def load_dxnt():
     _files = (
         # as dxnt.cab
         """
@@ -138,21 +140,22 @@ def load_dxnt ():
     for f in _files: _array.append(os.path.join("i386", f))
 
     # Extracet from SP image
-    check_call(["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + W_TEMP, SPSRC] + _array)
+    check_call(
+        ["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + W_TEMP, SPSRC] + _array,
+        stdout=open(os.devnull, "w"))
 
     # Extrace from TEMP
     for f in _files:
-
         _src = os.path.join(W_TEMP, os.path.basename(f))
         _dst = W_SYSTEM32
-
         if f.endswith('.in_'): _dst = os.path.join(_dst, "../inf")
-
         check_call(
             ["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + _dst, _src],
             stdout=open(os.devnull, "w"))
 
-    ### dxnt.cab ###
+    #----------#
+    # dxnt.cab #
+    #----------#
     _files = """
     d3dim.xpg
     d3dpmesh.xpg
@@ -168,17 +171,19 @@ def load_dxnt ():
 
     check_call(
         ["/opt/local/bin/7z", "e", "-y", "-o" + W_SYSTEM32, prefix + "/share/wine/directx9/feb2010/dxnt.cab"] + _files,
-        stdout=open(os.devnull, 'w'))
+        stdout=open(os.devnull, "w"))
 
     _files.remove('dsound.vxd')
 
     for f in _files:
         src = os.path.join(W_SYSTEM32, f)
         dst = W_SYSTEM32
-        if fnmatch.fnmatch(f, "dxapi.xpg"):
+
+        if fnmatch(f, "dxapi.xpg"):
             dst += "drivers/dxapi.sys"
         else:
             dst += os.path.splitext(f)[0] + ".dll"
+
         shutil.move(src, dst)
 
     Popen(
@@ -233,7 +238,7 @@ def load_dxnt ():
 # olepro32.dll
 # stdole2.tlb
 
-def load_core ():
+def load_core():
     _files = (
         # dll
         """
@@ -536,7 +541,9 @@ def load_core ():
     _array = []
     for f in _files: _array.append(os.path.join("i386", f))
 
-    check_call(["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + W_TEMP, SPSRC] + _array)
+    check_call(
+        ["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + W_TEMP, SPSRC] + _array,
+        stdout=open(os.devnull, "w"))
 
     for f in _files:
         _src = os.path.join(W_TEMP, os.path.basename(f))
@@ -737,25 +744,25 @@ def load_dx9():
 
     wine("rundll32.exe", "setupapi,InstallHinfSection", "DefaultInstall", "128", inf)
     # note: dxsetup.exe will return the exit status 1
-    call([WINELOADER, dx9feb2010, "/silent"], env={ "WINEDLLOVERRIDES": "setupapi=n" })
+    call([WINELOADER, dx9feb2010, "/silent"], env={"WINEDLLOVERRIDES": "setupapi=n"})
     wine("wineboot.exe", "-r")
-    call([WINELOADER, dx9jun2010, "/silent"], env={ "WINEDLLOVERRIDES": "setupapi=n" })
+    call([WINELOADER, dx9jun2010, "/silent"], env={"WINEDLLOVERRIDES": "setupapi=n"})
     wine("wineboot.exe", "-r")
 
     #-------------------#
     # Direct3D settings #
     #-------------------#
     SPDisplaysDataType  = check_output(['/usr/sbin/system_profiler', 'SPDisplaysDataType'])
-    VideoPciDeviceID    = re.search('Device ID:.*(0x....)', SPDisplaysDataType).group(1)
-    VideoPciVendorID    = re.search('Vendor:.*(0x....)',    SPDisplaysDataType).group(1)
-
+    _value = {
+        "VideoPciDeviceID": re.search('Device ID:.*(0x....)', SPDisplaysDataType).group(1),
+        "VideoPciVendorID": re.search('Vendor:.*(0x....)',    SPDisplaysDataType).group(1)
+    }
+    
     Popen([WINELOADER, "regedit.exe", "-"], stdin=PIPE).communicate("""\
 [HKEY_CURRENT_USER\\Software\\Wine\\Direct3D]
-"*VideoPciDeviceID"=dword:__VideoPciDeviceID__
-"*VideoPciVendorID"=dword:__VideoPciVendorID__
-"""\
-.replace('__VideoPciDeviceID__', VideoPciDeviceID)\
-.replace('__VideoPciVendorID__', VideoPciVendorID))
+"*VideoPciDeviceID"=dword:{VideoPciDeviceID}
+"*VideoPciVendorID"=dword:{VideoPciVendorID}
+""".format(**_value))
 
 #-------------------------------------------------------------------------------
 

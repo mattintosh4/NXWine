@@ -249,8 +249,6 @@ def load_core ():
         asms/10/msft/windows/gdiplus/gdiplus.dll
         asms/52/msft/windows/net/dxmrtp/dxmrtp.dll
         asms/60/msft/vcrtl/atl.dll
-        asms/60/msft/vcrtl/mfc42.dll
-        asms/60/msft/vcrtl/mfc42u.dll
         asms/60/msft/vcrtl/msvcp60.dll
         asms/60/msft/windows/common/controls/comctl32.dll
         asms/70/msft/windows/mswincrt/msvcirt.dll
@@ -302,6 +300,8 @@ def load_core ():
         mciseq.dl_
         mciwave.dl_
         mfc40u.dl_
+        mfc42.dl_
+        mfc42u.dl_
         mfcsubs.dl_
         midimap.dl_
         mp43dmod.dl_

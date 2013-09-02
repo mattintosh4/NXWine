@@ -99,7 +99,7 @@ def load_dxnt ():
         stream.sy_
         swenum.sy_
         """
-        
+
         # as bdaxp.cab
         + """
         bdaplgin.ax_
@@ -133,25 +133,25 @@ def load_dxnt ():
         wstdecod.dl_
         """
     ).split()
-    
+
     _array = []
     for f in _files: _array.append(os.path.join("i386", f))
-    
+
     # Extracet from SP image
     check_call(["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + W_TEMP, SPSRC] + _array)
-    
+
     # Extrace from TEMP
     for f in _files:
-        
+
         _src = os.path.join(W_TEMP, os.path.basename(f))
         _dst = W_SYSTEM32
-        
+
         if f.endswith('.in_'): _dst = os.path.join(_dst, "../inf")
-        
+
         check_call(
             ["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + _dst, _src],
             stdout=open(os.devnull, "w"))
-    
+
     ### dxnt.cab ###
     _files = """
     d3dim.xpg
@@ -165,13 +165,13 @@ def load_dxnt ():
     gcdef.xpg
     dsound.vxd
     """.split()
-    
+
     check_call(
         ["/opt/local/bin/7z", "e", "-y", "-o" + W_SYSTEM32, prefix + "/share/wine/directx9/feb2010/dxnt.cab"] + _files,
         stdout=open(os.devnull, 'w'))
-    
+
     _files.remove('dsound.vxd')
-    
+
     for f in _files:
         src = os.path.join(W_SYSTEM32, f)
         dst = W_SYSTEM32
@@ -180,60 +180,60 @@ def load_dxnt ():
         else:
             dst += os.path.splitext(f)[0] + ".dll"
         shutil.move(src, dst)
-    
+
     Popen(
         [WINELOADER, 'regedit.exe', '-'],
         stdin=PIPE).communicate("""\
 [HKEY_CURRENT_USER\Software\Wine\DllOverrides]
-"amstream"="native"
-"d3dim"="native"
-"d3drm"="native"
-"d3dxof"="native"
-"ddrawex"="native"
-"devenum"="native"
-"dinput"="native"
-"dinput8"="native"
-"dmband"="native"
-"dmcompos"="native"
-"dmime"="native"
-"dmloader"="native"
-"dmscript"="native"
-"dmstyle"="native"
-"dmsynth"="native"
-"dmusic"="native"
-"dplayx"="native"
-"dpnaddr"="native"
-"dpnet"="native"
-"dpnhpast"="native"
-"dpnlobby"="native"
-"dpwsockx"="native"
-"dsound"="builtin,native"
-"dsound.vxd"="native"
-"dsound3d"="native"
-"dswave"="native"
-"dxdiag.exe"="native"
-"dxdiagn"="native"
-"joy.cpl"="native"
-"mciqtz32"="native"
-"msdmo"="native"
-"qcap"="native"
-"qedit"="native"
-"quartz"="native"
+"*amstream"="native"
+"*d3dim"="native"
+"*d3drm"="native"
+"*d3dxof"="native"
+"*ddrawex"="native"
+"*devenum"="native"
+"*dinput"="native"
+"*dinput8"="native"
+"*dmband"="native"
+"*dmcompos"="native"
+"*dmime"="native"
+"*dmloader"="native"
+"*dmscript"="native"
+"*dmstyle"="native"
+"*dmsynth"="native"
+"*dmusic"="native"
+"*dplayx"="native"
+"*dpnaddr"="native"
+"*dpnet"="native"
+"*dpnhpast"="native"
+"*dpnlobby"="native"
+"*dpwsockx"="native"
+"*dsound"="builtin,native"
+"*dsound.vxd"="native"
+"*dsound3d"="native"
+"*dswave"="native"
+"*dxdiag.exe"="native"
+"*dxdiagn"="native"
+"*joy.cpl"="native"
+"*mciqtz32"="native"
+"*msdmo"="native"
+"*qcap"="native"
+"*qedit"="native"
+"*quartz"="native"
 """)
 
 # ------------------------------------------------------------------------------
 # core component
 # ------------------------------------------------------------------------------
+## VisualBasic 6 sp 6 data
+# VB6.0-KB290887-X86.exe/vbrun60sp6.exe
+# asycfilt.dll
+# comcat.dll
+# msvbvm60.dll
+# oleaut32.dll
+# olepro32.dll
+# stdole2.tlb
+
 def load_core ():
-    ## VisualBasic 6 sp 6 data
-    # VB6.0-KB290887-X86.exe/vbrun60sp6.exe
-    # asycfilt.dll
-    # comcat.dll
-    # msvbvm60.dll
-    # oleaut32.dll
-    # olepro32.dll
-    # stdole2.tlb
-    
     _files = (
         # dll
         """
@@ -398,14 +398,14 @@ def load_core ():
         xolehlp.dl_
         zipfldr.dl_
         """
-        
+
         # acm
         + """
         l3codeca.ac_
         msadp32.ac_
         msaud32.ac_
         """
-        
+
         # ax
         + """
         dshowext.ax_
@@ -421,14 +421,14 @@ def load_core ():
         wmv8ds32.ax_
         wmvds32.ax_
         """
-        
+
         # com
         + """
         format.co_
         more.co_
         tree.co_
         """
-        
+
         # cpl
         + """
         hdwwiz.cp_
@@ -436,7 +436,7 @@ def load_core ():
         odbccp32.cp_
         timedate.cp_
         """
-        
+
         # drv
         + """
         msh261.dr_
@@ -444,7 +444,7 @@ def load_core ():
         wdmaud.dr_
         winspool.dr_
         """
-        
+
         # exe
         + """
         admin.exe
@@ -465,7 +465,7 @@ def load_core ():
         vbc.exe
         wscript.ex_
         """
-        
+
         # ocx
         + """\
         asctrls.oc_
@@ -479,7 +479,7 @@ def load_core ():
         wmp.oc_
         wshom.oc_
         """
-        
+
         # sys
         + """
         avc.sy_
@@ -505,7 +505,7 @@ def load_core ():
         wmiacpi.sy_
         wvchntxx.sy_
         """
-        
+
         # tlb
         + """
         msado20.tl_
@@ -520,7 +520,7 @@ def load_core ():
         stdole2.tl_
         stdole32.tl_
         """
-        
+
         # tsp
         + """
         h323.ts_
@@ -532,35 +532,45 @@ def load_core ():
         unimdm.ts_
         """
     ).split()
-    
+
     _array = []
     for f in _files: _array.append(os.path.join("i386", f))
-    
+
     check_call(["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + W_TEMP, SPSRC] + _array)
-    
+
     for f in _files:
-        src = os.path.join(W_TEMP, os.path.basename(f))
-        dst = W_SYSTEM32
-        
+        _src = os.path.join(W_TEMP, os.path.basename(f))
+        _dst = W_SYSTEM32
+
         if f.endswith((".sy_", ".sys")):
-            dst = os.path.join(dst, "drivers")
-        
+            _dst = os.path.join(_dst, "drivers")
+
         if f.endswith(("_")):
             check_call(
-                ["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + dst, src],
+                ["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + _dst, _src],
                 stdout=open(os.devnull, "w"))
-        else:
-            shutil.copy2(src, dst)
-        
-        if f.endswith((".ex_", ".exe")):
-            os.chmod(os.path.join(dst, os.path.splitext(os.path.basename(f))[0] + ".exe"), 0755)
-    
-    ### netfx.cab ###
-    check_call(["/opt/local/bin/7z", "e", "-y", "-o" + W_TEMP, SPSRC, "i386/root/cmpnents/netfx/i386/netfx.cab"])
-    check_call(["/opt/local/bin/7z", "e", "-y", "-o" + W_SYSTEM32, os.path.join(W_TEMP, "netfx.cab"), "msvcp70.dll", "msvcr70.dll"])
 
-    ### RegisterDlls ###
-    inf_data = """\
+        else:
+            shutil.copy2(_src, _dst)
+
+        if f.endswith((".ex_", ".exe")):
+            os.chmod(os.path.join(_dst, os.path.splitext(os.path.basename(f))[0] + ".exe"), 0755)
+
+    #-----------#
+    # netfx.cab #
+    #-----------#
+    check_call(
+        ["/opt/local/bin/7z", "e", "-y", "-o" + W_TEMP, SPSRC, "i386/root/cmpnents/netfx/i386/netfx.cab"],
+        stdout=open(os.devnull, "w"))
+    check_call(
+        ["/opt/local/bin/7z", "e", "-y", "-o" + W_SYSTEM32, os.path.join(W_TEMP, "netfx.cab"), "msvcp70.dll", "msvcr70.dll"],
+        stdout=open(os.devnull, "w"))
+
+    #--------------#
+    # RegisterDlls #
+    #--------------#
+    _inf = os.path.join(W_TEMP, os.path.basename(tempfile.NamedTemporaryFile(suffix=".inf").name))
+    open(_inf, "w").write("""\
 [version]
 signature = $CHICAGO$
 
@@ -698,11 +708,9 @@ RegisterDlls = RegisterDllsSection
 11,,xmlprov.dll     ,1
 11,,xmlprovi.dll    ,1
 11,,zipfldr.dll     ,1
-"""
-    
-    inf_tmp = os.path.join(W_TEMP, os.path.basename(tempfile.NamedTemporaryFile(suffix=".inf").name))
-    open(inf_tmp, "w").write(inf_data)
-    wine("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", inf_tmp)
+""")
+
+    wine("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", _inf)
 
 #-------------------------------------------------------------------------------
 # Visual C++
@@ -712,7 +720,7 @@ def load_vcrun():
     vcrun2005 = os.path.join(prefix, "share/wine/vcrun2005/vcredist_x86.exe")
     vcrun2008 = os.path.join(prefix, "share/wine/vcrun2008sp1/vcredist_x86.exe")
     vcrun2010 = os.path.join(prefix, "share/wine/vcrun2010sp1/vcredist_x86.exe")
-    
+
     wine('rundll32.exe', 'setupapi,InstallHinfSection', 'DefaultInstall', '128', inf)
     wine(vcrun2005, '/q')
     wine(vcrun2008, '/q')
@@ -723,24 +731,24 @@ def load_vcrun():
 # DirectX 9.0c
 #-------------------------------------------------------------------------------
 def load_dx9():
-    inf     = os.path.join(prefix, "share/wine/dxredist.inf")
-    feb2010 = os.path.join(prefix, "share/wine/directx9/feb2010/dxsetup.exe")
-    jun2010 = os.path.join(prefix, "share/wine/directx9/jun2010/dxsetup.exe")
-    
+    inf         = os.path.join(prefix, "share/wine/dxredist.inf")
+    dx9feb2010  = os.path.join(prefix, "share/wine/directx9/feb2010/dxsetup.exe")
+    dx9jun2010  = os.path.join(prefix, "share/wine/directx9/jun2010/dxsetup.exe")
+
     wine("rundll32.exe", "setupapi,InstallHinfSection", "DefaultInstall", "128", inf)
     # note: dxsetup.exe will return the exit status 1
-    call([WINELOADER, feb2010, "/silent"], env={ "WINEDLLOVERRIDES": "setupapi=n" })
+    call([WINELOADER, dx9feb2010, "/silent"], env={ "WINEDLLOVERRIDES": "setupapi=n" })
     wine("wineboot.exe", "-r")
-    call([WINELOADER, jun2010, "/silent"], env={ "WINEDLLOVERRIDES": "setupapi=n" })
+    call([WINELOADER, dx9jun2010, "/silent"], env={ "WINEDLLOVERRIDES": "setupapi=n" })
     wine("wineboot.exe", "-r")
-    
+
     #-------------------#
     # Direct3D settings #
     #-------------------#
     SPDisplaysDataType  = check_output(['/usr/sbin/system_profiler', 'SPDisplaysDataType'])
     VideoPciDeviceID    = re.search('Device ID:.*(0x....)', SPDisplaysDataType).group(1)
     VideoPciVendorID    = re.search('Vendor:.*(0x....)',    SPDisplaysDataType).group(1)
-    
+
     Popen([WINELOADER, "regedit.exe", "-"], stdin=PIPE).communicate("""\
 [HKEY_CURRENT_USER\\Software\\Wine\\Direct3D]
 "*VideoPciDeviceID"=dword:__VideoPciDeviceID__
@@ -752,7 +760,9 @@ def load_dx9():
 #-------------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    # todo: init.inf
     wine("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", "/usr/local/src/NXWine/inf/init.inf")
+
     load_dxnt()
     load_core()
     load_vcrun()

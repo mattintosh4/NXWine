@@ -19,10 +19,11 @@ SPSRC       = os.path.expanduser("~/Library/Caches/winetricks/xpsp3jp/WindowsXP-
 
 W_DRIVE_C   = Popen([WINE, "winepath.exe", "-u", "c:"], stdout=PIPE).communicate()[0].strip()
 W_SYSTEM32  = os.path.join(W_DRIVE_C, "windows/system32")
-W_TEMP      = os.path.join(W_DRIVE_C, "windows/temp", os.path.basename(tempfile.NamedTemporaryFile().name))
 W_INF       = os.path.join(W_DRIVE_C, "windows/inf")
 W_DRIVERS   = os.path.join(W_DRIVE_C, "windows/system32/drivers")
 
+tempfile.tempdir    = os.path.join(W_DRIVE_C, "windows/temp")
+W_TEMP              = tempfile.mkdtemp()
 
 
 def wine(*args):
@@ -575,7 +576,7 @@ def load_core():
     #--------------#
     # RegisterDlls #
     #--------------#
-    _inf = os.path.join(W_TEMP, os.path.basename(tempfile.NamedTemporaryFile(suffix=".inf").name))
+    _inf = tempfile.mkstemp(suffix=".inf")[1]
     open(_inf, "w").write("""\
 [version]
 signature = $CHICAGO$

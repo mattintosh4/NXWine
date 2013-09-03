@@ -560,9 +560,9 @@ BuildStage6_ ()
   local datadir=$wine_destroot/share
   local docdir=$datadir/doc
   
-  (set -- $datadir/wine/gecko && mkdir -p $1 && install -m 0644 $srcroot/$pkgsrc_gecko  $1) || false
-#  (set -- $datadir/wine/mono  && mkdir -p $1 && install -m 0644 $srcroot/$pkgsrc_mono   $1) || false
-  (set -- $docdir/wine        && mkdir -p $1 && install -m 0644 $srcroot/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $1) || false
+#  mkdir -p $datadir/wine/gecko  && install -m 0644 $srcroot/$pkgsrc_gecko $_
+#  mkdir -p $datadir/wine/mono   && install -m 0644 $srcroot/$pkgsrc_mono $_
+  mkdir -p $docdir/wine         && install -m 0644 $srcroot/wine/{ANNOUNCE,AUTHORS,COPYING.LIB,LICENSE,README,VERSION} $_
   
   # ------------------------------------- fonts
   tar xf $srcroot/fonts/sazanami-20040629.tar.bz2 -C $docdir

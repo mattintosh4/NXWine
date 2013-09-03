@@ -1,33 +1,45 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-from fnmatch import fnmatch
-from subprocess import call, check_call, check_output, Popen, PIPE
+from subprocess import call, check_call, Popen, PIPE
 import os
+import sys
 import re
 import shutil
 import tempfile
 
-prefix      = "/usr/local/wine/"
+
+
+prefix      = "/usr/local/wine"
+WINE        = os.path.join(prefix, "libexec/wine")
 WINELOADER  = os.path.join(prefix, "bin/wine")
+CABEXTRACT  = os.path.join(prefix, "bin/cabextract")
+
 SPSRC       = os.path.expanduser("~/Library/Caches/winetricks/xpsp3jp/WindowsXP-KB936929-SP3-x86-JPN.exe")
 
-W_DRIVE_C   = check_output([WINELOADER, "winepath.exe", "-u", "c:"]).strip()
-W_SYSTEM32  = os.path.join(W_DRIVE_C, "windows/system32/")
+W_DRIVE_C   = Popen([WINE, "winepath.exe", "-u", "c:"], stdout=PIPE).communicate()[0].strip()
+W_SYSTEM32  = os.path.join(W_DRIVE_C, "windows/system32")
 W_TEMP      = os.path.join(W_DRIVE_C, "windows/temp", os.path.basename(tempfile.NamedTemporaryFile().name))
+W_INF       = os.path.join(W_DRIVE_C, "windows/inf")
+W_DRIVERS   = os.path.join(W_DRIVE_C, "windows/system32/drivers")
+
+
 
 def wine(*args):
-    check_call((WINELOADER,) + args)
+    try:
+        check_call((WINELOADER,) + args)
+    except:
+        sys.exit()
 
-def p7ze(src, dst):
-    check_call(
-        ['/opt/local/bin/7z', 'e', '-y', '-ssc-', '-o' + dst, src],
-        stdout=open(os.devnull, 'w'))
+def cabextract(*args):
+    check_call((CABEXTRACT, "-q", "-L") + args)
 
 # ------------------------------------------------------------------------------
 # dxnt
 # ------------------------------------------------------------------------------
 def load_dxnt():
+    print "Extracting files from " + SPSRC + "..."
+    
     _files = (
         # as dxnt.cab
         """
@@ -136,26 +148,23 @@ def load_dxnt():
         """
     ).split()
 
-    _array = []
-    for f in _files: _array.append(os.path.join("i386", f))
-
-    # Extracet from SP image
-    check_call(
-        ["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + W_TEMP, SPSRC] + _array,
-        stdout=open(os.devnull, "w"))
-
-    # Extrace from TEMP
     for f in _files:
-        _src = os.path.join(W_TEMP, os.path.basename(f))
-        _dst = W_SYSTEM32
-        if f.endswith('.in_'): _dst = os.path.join(_dst, "../inf")
-        check_call(
-            ["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + _dst, _src],
-            stdout=open(os.devnull, "w"))
+        f = os.path.join("i386", f)
+        cabextract("-d", W_TEMP, "-F", f, SPSRC)
+
+        f = os.path.join(W_TEMP, f)
+        if f.endswith(".in_"):
+            cabextract("-d", W_INF, f)
+        elif f.endswith(".sy_"):
+            cabextract("-d", W_DRIVERS, f)
+        else:
+            cabextract("-d", W_SYSTEM32, f)
 
     #----------#
     # dxnt.cab #
     #----------#
+    print "Extracting files from dxnt.cab..."
+    
     _files = """
     d3dim.xpg
     d3dpmesh.xpg
@@ -168,23 +177,17 @@ def load_dxnt():
     gcdef.xpg
     dsound.vxd
     """.split()
-
-    check_call(
-        ["/opt/local/bin/7z", "e", "-y", "-o" + W_SYSTEM32, prefix + "/share/wine/directx9/feb2010/dxnt.cab"] + _files,
-        stdout=open(os.devnull, "w"))
-
-    _files.remove('dsound.vxd')
-
+    
     for f in _files:
-        src = os.path.join(W_SYSTEM32, f)
-        dst = W_SYSTEM32
+        cabextract("-d", W_SYSTEM32, "-F", f, os.path.join(prefix, "share/wine/directx9/feb2010/dxnt.cab"))
 
-        if fnmatch(f, "dxapi.xpg"):
-            dst += "drivers/dxapi.sys"
+        f = os.path.join(W_SYSTEM32, f)
+        if f.endswith("dsound.vxd"):
+            continue
+        elif f.endswith("dxapi.xpg"):
+            shutil.move(f, os.path.join(W_DRIVERS, "dxapi.sys"))
         else:
-            dst += os.path.splitext(f)[0] + ".dll"
-
-        shutil.move(src, dst)
+            shutil.move(f, os.path.join(W_SYSTEM32, os.path.splitext(f)[0] + ".dll"))
 
     Popen(
         [WINELOADER, 'regedit.exe', '-'],
@@ -239,6 +242,8 @@ def load_dxnt():
 # stdole2.tlb
 
 def load_core():
+    print "Extracting files from " + SPSRC + "..."
+    
     _files = (
         # dll
         """
@@ -538,40 +543,29 @@ def load_core():
         """
     ).split()
 
-    _array = []
-    for f in _files: _array.append(os.path.join("i386", f))
-
-    check_call(
-        ["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + W_TEMP, SPSRC] + _array,
-        stdout=open(os.devnull, "w"))
-
     for f in _files:
-        _src = os.path.join(W_TEMP, os.path.basename(f))
-        _dst = W_SYSTEM32
+        f = os.path.join("i386", f)
+        cabextract("-d", W_TEMP, "-F", f, SPSRC)
+
+        f = os.path.join(W_TEMP, f)
 
         if f.endswith((".sy_", ".sys")):
-            _dst = os.path.join(_dst, "drivers")
+            _dst = W_DRIVERS
+        else:
+            _dst = W_SYSTEM32
 
         if f.endswith(("_")):
-            check_call(
-                ["/opt/local/bin/7z", "e", "-y", "-ssc-", "-o" + _dst, _src],
-                stdout=open(os.devnull, "w"))
-
+            cabextract("-d", _dst, f)
         else:
-            shutil.copy2(_src, _dst)
-
-        if f.endswith((".ex_", ".exe")):
-            os.chmod(os.path.join(_dst, os.path.splitext(os.path.basename(f))[0] + ".exe"), 0755)
+            shutil.copy2(f, _dst)
 
     #-----------#
     # netfx.cab #
     #-----------#
-    check_call(
-        ["/opt/local/bin/7z", "e", "-y", "-o" + W_TEMP, SPSRC, "i386/root/cmpnents/netfx/i386/netfx.cab"],
-        stdout=open(os.devnull, "w"))
-    check_call(
-        ["/opt/local/bin/7z", "e", "-y", "-o" + W_SYSTEM32, os.path.join(W_TEMP, "netfx.cab"), "msvcp70.dll", "msvcr70.dll"],
-        stdout=open(os.devnull, "w"))
+    _src = "i386/root/cmpnents/netfx/i386/netfx.cab"
+    cabextract("-d", W_TEMP, "-F", _src, SPSRC)
+    _src = os.path.join(W_TEMP, _src)
+    cabextract("-d", W_SYSTEM32, "-F", "msvc?70.dll", _src)
 
     #--------------#
     # RegisterDlls #
@@ -723,6 +717,8 @@ RegisterDlls = RegisterDllsSection
 # Visual C++
 #-------------------------------------------------------------------------------
 def load_vcrun():
+    print "Starting Visual C++ runtime setup..."
+    
     inf       = os.path.join(prefix, "share/wine/vcredist.inf")
     vcrun2005 = os.path.join(prefix, "share/wine/vcrun2005/vcredist_x86.exe")
     vcrun2008 = os.path.join(prefix, "share/wine/vcrun2008sp1/vcredist_x86.exe")
@@ -738,21 +734,27 @@ def load_vcrun():
 # DirectX 9.0c
 #-------------------------------------------------------------------------------
 def load_dx9():
+    print "Starting DirectX 9 setup..."
+    
     inf         = os.path.join(prefix, "share/wine/dxredist.inf")
     dx9feb2010  = os.path.join(prefix, "share/wine/directx9/feb2010/dxsetup.exe")
     dx9jun2010  = os.path.join(prefix, "share/wine/directx9/jun2010/dxsetup.exe")
 
     wine("rundll32.exe", "setupapi,InstallHinfSection", "DefaultInstall", "128", inf)
+    os.environ["WINEDLLOVERRIDES"] = "setupapi=n"
     # note: dxsetup.exe will return the exit status 1
-    call([WINELOADER, dx9feb2010, "/silent"], env={"WINEDLLOVERRIDES": "setupapi=n"})
+    call([WINELOADER, dx9feb2010, "/silent"])
     wine("wineboot.exe", "-r")
-    call([WINELOADER, dx9jun2010, "/silent"], env={"WINEDLLOVERRIDES": "setupapi=n"})
+    call([WINELOADER, dx9jun2010, "/silent"])
     wine("wineboot.exe", "-r")
+    del os.environ["WINEDLLOVERRIDES"]
 
     #-------------------#
     # Direct3D settings #
     #-------------------#
-    SPDisplaysDataType  = check_output(['/usr/sbin/system_profiler', 'SPDisplaysDataType'])
+    SPDisplaysDataType  = Popen(
+                            ['/usr/sbin/system_profiler', 'SPDisplaysDataType'],
+                            stdout=PIPE).communicate()[0]
     _value = {
         "VideoPciDeviceID": re.search('Device ID:.*(0x....)', SPDisplaysDataType).group(1),
         "VideoPciVendorID": re.search('Vendor:.*(0x....)',    SPDisplaysDataType).group(1)
@@ -769,7 +771,6 @@ def load_dx9():
 if __name__ == "__main__":
     # todo: init.inf
     wine("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", "/usr/local/src/NXWine/inf/init.inf")
-
     load_dxnt()
     load_core()
     load_vcrun()

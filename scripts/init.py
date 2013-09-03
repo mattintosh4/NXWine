@@ -37,6 +37,8 @@ def cabextract(*args):
 # ------------------------------------------------------------------------------
 # dxnt
 # ------------------------------------------------------------------------------
+# 2013-09-03: dpnet.dll は dxnt.cab 内のものを用いること
+#
 def load_dxnt():
     print "Extracting files from " + SPSRC + "..."
     
@@ -66,7 +68,6 @@ def load_dxnt():
         dplayx.dl_
         dpmodemx.dl_
         dpnaddr.dl_
-        dpnet.dl_
         dpnhpast.dl_
         dpnhupnp.dl_
         dpnlobby.dl_
@@ -173,21 +174,25 @@ def load_dxnt():
     d3dxof.xpg
     diactfrm.xpg
     dimap.xpg
+    dpnet.dll
+    dsound.vxd
     dxapi.xpg
     gcdef.xpg
-    dsound.vxd
     """.split()
     
     for f in _files:
         cabextract("-d", W_SYSTEM32, "-F", f, os.path.join(prefix, "share/wine/directx9/feb2010/dxnt.cab"))
 
         f = os.path.join(W_SYSTEM32, f)
-        if f.endswith("dsound.vxd"):
+        if f.endswith(("dpnet.dll", "dsound.vxd")):
             continue
         elif f.endswith("dxapi.xpg"):
-            shutil.move(f, os.path.join(W_DRIVERS, "dxapi.sys"))
+            _dst = os.path.join(W_DRIVERS, "dxapi.sys")
         else:
-            shutil.move(f, os.path.join(W_SYSTEM32, os.path.splitext(f)[0] + ".dll"))
+            _dst = os.path.join(os.path.splitext(f)[0] + ".dll")
+
+        shutil.move(f, _dst)
+        print f, "->", _dst
 
     Popen(
         [WINELOADER, 'regedit.exe', '-'],

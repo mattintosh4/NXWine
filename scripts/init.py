@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from subprocess import call, check_call, Popen, PIPE
+from subprocess import *
 import os
 import sys
 import re

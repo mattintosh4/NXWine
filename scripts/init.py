@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from subprocess import *
+from subprocess import call, check_call, Popen, PIPE
 import os
 import sys
 import re
@@ -26,7 +26,7 @@ tempfile.tempdir    = os.path.join(W_DRIVE_C, "windows/temp")
 W_TEMP              = tempfile.mkdtemp()
 
 
-def wine(*args):
+def w_try(*args):
     try:
         check_call((WINELOADER,) + args)
     except:
@@ -717,7 +717,7 @@ RegisterDlls = RegisterDllsSection
 11,,zipfldr.dll     ,1
 """)
 
-    wine("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", _inf)
+    w_try("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", _inf)
 
 #-------------------------------------------------------------------------------
 # Visual C++
@@ -730,11 +730,11 @@ def load_vcrun():
     vcrun2008 = os.path.join(prefix, "share/wine/vcrun2008sp1/vcredist_x86.exe")
     vcrun2010 = os.path.join(prefix, "share/wine/vcrun2010sp1/vcredist_x86.exe")
 
-    wine('rundll32.exe', 'setupapi,InstallHinfSection', 'DefaultInstall', '128', inf)
-    wine(vcrun2005, '/q')
-    wine(vcrun2008, '/q')
-    wine(vcrun2010, '/q')
-    wine('wineboot.exe', '-r')
+    w_try('rundll32.exe', 'setupapi,InstallHinfSection', 'DefaultInstall', '128', inf)
+    w_try(vcrun2005, '/q')
+    w_try(vcrun2008, '/q')
+    w_try(vcrun2010, '/q')
+    w_try('wineboot.exe', '-r')
 
 #-------------------------------------------------------------------------------
 # DirectX 9.0c
@@ -746,13 +746,13 @@ def load_dx9():
     dx9feb2010  = os.path.join(prefix, "share/wine/directx9/feb2010/dxsetup.exe")
     dx9jun2010  = os.path.join(prefix, "share/wine/directx9/jun2010/dxsetup.exe")
 
-    wine("rundll32.exe", "setupapi,InstallHinfSection", "DefaultInstall", "128", inf)
+    w_try("rundll32.exe", "setupapi,InstallHinfSection", "DefaultInstall", "128", inf)
     os.environ["WINEDLLOVERRIDES"] = "setupapi=n"
     # note: dxsetup.exe will return the exit status 1
     call([WINELOADER, dx9feb2010, "/silent"])
-    wine("wineboot.exe", "-r")
+    w_try("wineboot.exe", "-r")
     call([WINELOADER, dx9jun2010, "/silent"])
-    wine("wineboot.exe", "-r")
+    w_try("wineboot.exe", "-r")
     del os.environ["WINEDLLOVERRIDES"]
 
     #-------------------#
@@ -776,7 +776,7 @@ def load_dx9():
 
 if __name__ == "__main__":
     # todo: init.inf
-    wine("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", "/usr/local/src/NXWine/inf/init.inf")
+    w_try("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", "/usr/local/src/NXWine/inf/init.inf")
     load_dxnt()
     load_core()
     load_vcrun()

@@ -776,7 +776,7 @@ def load_dx9():
 
 if __name__ == "__main__":
     # todo: init.inf
-    w_try("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", "/usr/local/src/NXWine/inf/init.inf")
+    w_try("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", os.path.join(prefix, "share/wine/init.inf"))
     load_dxnt()
     load_core()
     load_vcrun()

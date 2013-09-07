@@ -9,16 +9,19 @@ import shutil
 import tempfile
 
 
-
 prefix      = "/usr/local/wine"
-WINE        = os.path.join(prefix, "libexec", "wine")
 WINELOADER  = os.path.join(prefix, "bin", "wine")
 CABEXTRACT  = os.path.join(prefix, "bin", "cabextract")
 
-W_DRIVE_C   = Popen([WINE, "winepath.exe", "-u", "c:"], stdout=PIPE).communicate()[0].strip()
+
+W_DRIVE_C   = Popen(
+    [os.path.join(prefix, "libexec", "wine"), "winepath.exe", "-u", "c:"],
+    stdout=PIPE).communicate()[0].strip()
+
 if not os.path.exists(W_DRIVE_C):
     print "Could not find WINEPREFIX."
     sys.exit(1)
+
 W_SYSTEM32  = os.path.join(W_DRIVE_C, "windows", "system32")
 W_DRIVERS   = os.path.join(W_DRIVE_C, "windows", "system32", "drivers")
 W_INF       = os.path.join(W_DRIVE_C, "windows", "inf")
@@ -28,11 +31,26 @@ W_TEMP      = tempfile.mkdtemp(dir=os.path.join(W_DRIVE_C, "windows", "temp"))
 SPSRC       = os.path.expanduser("~/Library/Caches/winetricks/xpsp3jp/WindowsXP-KB936929-SP3-x86-JPN.exe")
 
 
-def w_try(*args):
-    try:
+class Wine:
+
+    def run(self, *args):
         check_call((WINELOADER,) + args)
-    except:
-        sys.exit()
+
+    def regedit(self, *args):
+        self.run("regedit.exe", *args)
+
+    def regedit_stdin(self, strings):
+        Popen((WINELOADER, "regedit.exe", "-"), stdin=PIPE).communicate(strings)
+
+    def rundll32(self, f, InstallHinfSection="DefaultInstall"):
+        self.run("rundll32.exe", "setupapi.dll,InstallHinfSection", InstallHinfSection, "128", f)
+
+wine            = Wine()
+w_try           = wine.run
+w_regedit       = wine.regedit
+w_regedit_stdin = wine.regedit_stdin
+w_rundll32      = wine.rundll32
+
 
 def cabextract(*args):
     check_call((CABEXTRACT, "-q", "-L") + args)
@@ -197,7 +215,7 @@ def load_dxnt():
         shutil.move(f, _dst)
         print f, "->", _dst
 
-    Popen([WINELOADER, 'regedit.exe', '-'], stdin=PIPE).communicate("""\
+    w_regedit_stdin("""\
 [HKEY_CURRENT_USER\Software\Wine\DllOverrides]
 "*amstream"     ="native"
 "*d3dim"        ="native"
@@ -722,7 +740,7 @@ RegisterDlls = RegisterDllsSection
     _inf_fd, _inf_path = tempfile.mkstemp(suffix=".inf", dir=W_TEMP)
     os.write(_inf_fd, _inf_data)
     os.close(_inf_fd)
-    w_try("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", _inf_path)
+    w_rundll32(_inf_path)
 
 #-------------------------------------------------------------------------------
 # Visual C++
@@ -735,7 +753,7 @@ def load_vcrun():
     vcrun2008 = os.path.join(prefix, "share/wine/vcrun2008sp1/vcredist_x86.exe")
     vcrun2010 = os.path.join(prefix, "share/wine/vcrun2010sp1/vcredist_x86.exe")
 
-    w_try('rundll32.exe', 'setupapi,InstallHinfSection', 'DefaultInstall', '128', inf)
+    w_rundll32(inf)
     w_try(vcrun2005, '/q')
     w_try(vcrun2008, '/q')
     w_try(vcrun2010, '/q')
@@ -751,7 +769,7 @@ def load_dx9():
     dx9feb2010  = os.path.join(prefix, "share/wine/directx9/feb2010/dxsetup.exe")
     dx9jun2010  = os.path.join(prefix, "share/wine/directx9/jun2010/dxsetup.exe")
 
-    w_try("rundll32.exe", "setupapi,InstallHinfSection", "DefaultInstall", "128", inf)
+    w_rundll32(inf)
     os.environ["WINEDLLOVERRIDES"] = "setupapi=n"
     # note: dxsetup.exe will return the exit status 1
     call([WINELOADER, dx9feb2010, "/silent"])
@@ -771,7 +789,7 @@ def load_dx9():
         "VideoPciVendorID": re.search("Vendor:.*(0x....)",    SPDisplaysDataType).group(1)
     }
     
-    Popen([WINELOADER, "regedit.exe", "-"], stdin=PIPE).communicate("""\
+    w_regedit_stdin("""\
 [HKEY_CURRENT_USER\\Software\\Wine\\Direct3D]
 "*VideoPciDeviceID"=dword:{VideoPciDeviceID}
 "*VideoPciVendorID"=dword:{VideoPciVendorID}
@@ -781,7 +799,7 @@ def load_dx9():
 
 if __name__ == "__main__":
     # todo: init.inf
-    w_try("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", os.path.join(prefix, "share/wine/init.inf"))
+    w_rundll32(os.path.join(prefix, "share/wine/init.inf"))
     load_dxnt()
     load_core()
     load_vcrun()

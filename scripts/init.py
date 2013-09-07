@@ -11,19 +11,21 @@ import tempfile
 
 
 prefix      = "/usr/local/wine"
-WINE        = os.path.join(prefix, "libexec/wine")
-WINELOADER  = os.path.join(prefix, "bin/wine")
-CABEXTRACT  = os.path.join(prefix, "bin/cabextract")
-
-SPSRC       = os.path.expanduser("~/Library/Caches/winetricks/xpsp3jp/WindowsXP-KB936929-SP3-x86-JPN.exe")
+WINE        = os.path.join(prefix, "libexec", "wine")
+WINELOADER  = os.path.join(prefix, "bin", "wine")
+CABEXTRACT  = os.path.join(prefix, "bin", "cabextract")
 
 W_DRIVE_C   = Popen([WINE, "winepath.exe", "-u", "c:"], stdout=PIPE).communicate()[0].strip()
-W_SYSTEM32  = os.path.join(W_DRIVE_C, "windows/system32")
-W_INF       = os.path.join(W_DRIVE_C, "windows/inf")
-W_DRIVERS   = os.path.join(W_DRIVE_C, "windows/system32/drivers")
+if not os.path.exists(W_DRIVE_C):
+    print "Could not find WINEPREFIX."
+    sys.exit(1)
+W_SYSTEM32  = os.path.join(W_DRIVE_C, "windows", "system32")
+W_DRIVERS   = os.path.join(W_DRIVE_C, "windows", "system32", "drivers")
+W_INF       = os.path.join(W_DRIVE_C, "windows", "inf")
+W_TEMP      = tempfile.mkdtemp(dir=os.path.join(W_DRIVE_C, "windows", "temp"))
 
-tempfile.tempdir    = os.path.join(W_DRIVE_C, "windows/temp")
-W_TEMP              = tempfile.mkdtemp()
+# Windows XP Service Pack 3
+SPSRC       = os.path.expanduser("~/Library/Caches/winetricks/xpsp3jp/WindowsXP-KB936929-SP3-x86-JPN.exe")
 
 
 def w_try(*args):
@@ -195,9 +197,7 @@ def load_dxnt():
         shutil.move(f, _dst)
         print f, "->", _dst
 
-    Popen(
-        [WINELOADER, 'regedit.exe', '-'],
-        stdin=PIPE).communicate("""\
+    Popen([WINELOADER, 'regedit.exe', '-'], stdin=PIPE).communicate("""\
 [HKEY_CURRENT_USER\Software\Wine\DllOverrides]
 "*amstream"     ="native"
 "*d3dim"        ="native"
@@ -483,7 +483,7 @@ def load_core():
         """
 
         # ocx
-        + """\
+        + """
         asctrls.oc_
         flash.oc_
         hhctrl.oc_
@@ -576,8 +576,7 @@ def load_core():
     #--------------#
     # RegisterDlls #
     #--------------#
-    _inf = tempfile.mkstemp(suffix=".inf")[1]
-    open(_inf, "w").write("""\
+    _inf_data = """\
 [version]
 signature = $CHICAGO$
 
@@ -715,9 +714,11 @@ RegisterDlls = RegisterDllsSection
 11,,xmlprov.dll     ,1
 11,,xmlprovi.dll    ,1
 11,,zipfldr.dll     ,1
-""")
-
-    w_try("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", _inf)
+"""
+    _inf_fd, _inf_path = tempfile.mkstemp(suffix=".inf", dir=W_TEMP)
+    os.write(_inf_fd, _inf_data)
+    os.close(_inf_fd)
+    w_try("rundll32.exe", "setupapi.dll,InstallHinfSection", "DefaultInstall", "128", _inf_path)
 
 #-------------------------------------------------------------------------------
 # Visual C++
@@ -759,11 +760,11 @@ def load_dx9():
     # Direct3D settings #
     #-------------------#
     SPDisplaysDataType  = Popen(
-                            ['/usr/sbin/system_profiler', 'SPDisplaysDataType'],
+                            ["/usr/sbin/system_profiler", "SPDisplaysDataType"],
                             stdout=PIPE).communicate()[0]
     _value = {
-        "VideoPciDeviceID": re.search('Device ID:.*(0x....)', SPDisplaysDataType).group(1),
-        "VideoPciVendorID": re.search('Vendor:.*(0x....)',    SPDisplaysDataType).group(1)
+        "VideoPciDeviceID": re.search("Device ID:.*(0x....)", SPDisplaysDataType).group(1),
+        "VideoPciVendorID": re.search("Vendor:.*(0x....)",    SPDisplaysDataType).group(1)
     }
     
     Popen([WINELOADER, "regedit.exe", "-"], stdin=PIPE).communicate("""\

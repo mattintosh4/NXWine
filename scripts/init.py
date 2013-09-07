@@ -369,6 +369,7 @@ def load_core():
         shsvcs.dl_
         slbcsp.dl_
         slbiop.dl_
+        spoolss.dl_
         stobject.dl_
         strmdll.dl_
         strmfilt.dl_

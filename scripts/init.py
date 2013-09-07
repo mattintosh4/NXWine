@@ -4,7 +4,6 @@
 from subprocess import call, check_call, Popen, PIPE
 import os
 import sys
-import re
 import shutil
 import tempfile
 
@@ -781,14 +780,17 @@ def load_dx9():
     #-------------------#
     # Direct3D settings #
     #-------------------#
-    SPDisplaysDataType  = Popen(
-                            ["/usr/sbin/system_profiler", "SPDisplaysDataType"],
-                            stdout=PIPE).communicate()[0]
-    _value = {
-        "VideoPciDeviceID": re.search("Device ID:.*(0x....)", SPDisplaysDataType).group(1),
-        "VideoPciVendorID": re.search("Vendor:.*(0x....)",    SPDisplaysDataType).group(1)
+    import plistlib
+    import re
+
+    p = Popen(["system_profiler", "-xml", "SPDisplaysDataType"], stdout=PIPE).communicate()[0]
+    d = plistlib.readPlistFromString(p)
+
+    _value  = {
+        "VideoPciDeviceID":                       d[0]["_items"][0]["spdisplays_device-id"],
+        "VideoPciVendorID": re.search("(0x....)", d[0]["_items"][0]["spdisplays_vendor"]).group(1)
     }
-    
+
     w_regedit_stdin("""\
 [HKEY_CURRENT_USER\\Software\\Wine\\Direct3D]
 "*VideoPciDeviceID"=dword:{VideoPciDeviceID}

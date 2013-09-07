@@ -310,6 +310,7 @@ def load_core():
         hid.dl_
         imm32.dl_
         ip/dpcdll.dl_
+        ip/pidgen.dll
         iyuv_32.dl_
         jscript.dl_
         mciavi32.dl_
@@ -326,16 +327,18 @@ def load_core():
         msacm32.dl_
         msadds.dl_
         msasn1.dl_
+        mscms.dl_
+        msftedit.dl_
         mscoree.dll
         mscorwks.dll
         msctf.dl_
         msctfp.dl_
+        msrle32.dl_
         msvbvm60.dl_
         msvcrt40.dl_
         msvfw32.dl_
         mswmdm.dl_
         netapi32.dl_
-        ntdll.dll
         odbc32.dl_
         odbc32gt.dl_
         odbcbcp.dl_
@@ -375,6 +378,7 @@ def load_core():
         strmfilt.dl_
         userenv.dl_
         vbscript.dl_
+        wavemsp.dl_
         win32spl.dl_
         winmm.dl_
         wmadmod.dl_
@@ -474,7 +478,6 @@ def load_core():
         grpconv.ex_
         odbcad32.ex_
         odbcconf.ex_
-        pinball.ex_
         smss.ex_
         spider.ex_
         taskmgr.ex_
@@ -680,6 +683,7 @@ RegisterDlls = RegisterDllsSection
 11,,vbisurf.ax      ,1
 11,,vbscript.dll    ,1
 11,,vidcap.ax       ,1
+11,,wavemsp.dll     ,1
 11,,wmadmod.dll     ,1
 11,,wmadmoe.dll     ,1
 11,,wmdmlog.dll     ,1

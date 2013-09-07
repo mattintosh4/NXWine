@@ -458,7 +458,6 @@ def load_core():
         msh261.dr_
         msh263.dr_
         wdmaud.dr_
-        winspool.dr_
         """
 
         # exe

@@ -57,7 +57,7 @@ def cabextract(*args):
 # ------------------------------------------------------------------------------
 # dxnt
 # ------------------------------------------------------------------------------
-# 2013-09-03: dpnet.dll は dxnt.cab 内のものを用いること
+# 2013-09-03: dpnet.dll は dxnt.cab 内のものを使用すること
 #
 def load_dxnt():
     print "Extracting files from " + SPSRC + "..."
@@ -269,306 +269,312 @@ def load_core():
     
     _files = (
         # dll
-        """
-        aclua.dl_
-        aclui.dl_
-        activeds.dl_
-        actxprxy.dl_
-        adsldp.dl_
-        adsldpc.dl_
-        advapi32.dl_
-        advpack.dl_
-        apphelp.dl_
-        asms/10/msft/windows/gdiplus/gdiplus.dll
-        asms/52/msft/windows/net/dxmrtp/dxmrtp.dll
-        asms/60/msft/vcrtl/atl.dll
-        asms/60/msft/vcrtl/msvcp60.dll
-        asms/60/msft/windows/common/controls/comctl32.dll
-        asms/70/msft/windows/mswincrt/msvcirt.dll
-        asms/70/msft/windows/mswincrt/msvcrt.dll
-        aspnet_filter.dll
-        aspnet_isapi.dll
-        asycfilt.dl_
-        authz.dl_
-        avifil32.dl_
-        batmeter.dl_
-        browseui.dl_
-        comaddin.dl_
-        comadmin.dl_
-        comdlg32.dl_
-        compatui.dl_
-        compstui.dl_
-        comrepl.dl_
-        comres.dl_
-        comsetup.dl_
-        comsnap.dl_
-        comsvcs.dl_
-        comuid.dl_
-        ddrawex.dl_
-        devenum.dl_
-        devmgr.dl_
-        dispex.dl_
-        ds32gt.dl_
-        dsprop.dl_
-        dsprpres.dl_
-        dsquery.dl_
-        dssec.dl_
-        dssenh.dl_
-        dsuiext.dl_
-        dxmasf.dl_
-        dxtmsft.dl_
-        dxtrans.dl_
-        encdec.dl_
-        fontext.dl_
-        fontsub.dl_
-        fusion.dll
-        glu32.dl_
-        hhsetup.dl_
-        hid.dl_
-        imm32.dl_
-        ip/dpcdll.dl_
-        ip/pidgen.dll
-        iyuv_32.dl_
-        jscript.dl_
-        mciavi32.dl_
-        mciseq.dl_
-        mciwave.dl_
-        mfc40u.dl_
-        mfc42.dl_
-        mfc42u.dl_
-        mfcsubs.dl_
-        midimap.dl_
-        mp43dmod.dl_
-        mp4sdmod.dl_
-        mpg4dmod.dl_
-        msacm32.dl_
-        msadds.dl_
-        msasn1.dl_
-        mscms.dl_
-        msftedit.dl_
-        mscoree.dll
-        mscorwks.dll
-        msctf.dl_
-        msctfp.dl_
-        msrle32.dl_
-        msvbvm60.dl_
-        msvcrt40.dl_
-        msvfw32.dl_
-        mswmdm.dl_
-        netapi32.dl_
-        odbc32.dl_
-        odbc32gt.dl_
-        odbcbcp.dl_
-        odbcconf.dl_
-        odbccp32.dl_
-        odbccr32.dl_
-        odbccu32.dl_
-        odbcint.dl_
-        ole32.dl_
-        oleaut32.dl_
-        olecli32.dl_
-        olecnv32.dl_
-        oledb32.dl_
-        oledb32r.dl_
-        oledlg.dl_
-        oleprn.dl_
-        olepro32.dl_
-        query.dl_
-        qutil.dl_
-        rtutils.dl_
-        s3gnb.dl_
-        scecli.dl_
-        setupapi.dl_
-        shdoclc.dl_
-        shdocvw.dl_
-        shell32.dl_
-        shgina.dl_
-        shimgvw.dl_
-        shlwapi.dl_
-        shmedia.dl_
-        shsvcs.dl_
-        slbcsp.dl_
-        slbiop.dl_
-        spoolss.dl_
-        stobject.dl_
-        strmdll.dl_
-        strmfilt.dl_
-        userenv.dl_
-        vbscript.dl_
-        wavemsp.dl_
-        win32spl.dl_
-        winmm.dl_
-        wmadmod.dl_
-        wmadmoe.dl_
-        wmasf.dl_
-        wmdmlog.dl_
-        wmdmps.dl_
-        wmidx.dl_
-        wmm2ae.dl_
-        wmm2ext.dl_
-        wmm2filt.dl_
-        wmm2fxa.dl_
-        wmm2fxb.dl_
-        wmpcd.dl_
-        wmpcore.dl_
-        wmphoto.dl_
-        wmploc.dl_
-        wmploc.js_
-        wmpui.dl_
-        wmsdmod.dl_
-        wmsdmoe.dl_
-        wmsdmoe2.dl_
-        wmspdmod.dl_
-        wmspdmoe.dl_
-        wmstream.dl_
-        wmvcore.dl_
-        wmvdmod.dl_
-        wmvdmoe2.dl_
-        ws2_32.dl_
-        wshcon.dl_
-        wshext.dl_
-        wsock32.dl_
-        wzcsapi.dl_
-        xactsrv.dl_
-        xmllite.dl_
-        xmlprov.dl_
-        xmlprovi.dl_
-        xolehlp.dl_
-        zipfldr.dl_
-        """
+        [
+            "aclua.dl_"     ,
+            "aclui.dl_"     ,
+            "activeds.dl_"  ,
+            "actxprxy.dl_"  ,
+            "adsldp.dl_"    ,
+            "adsldpc.dl_"   ,
+            "advapi32.dl_"  ,
+            "advpack.dl_"   ,
+            "apphelp.dl_"   ,
+            "asms/10/msft/windows/gdiplus/gdiplus.dll"          ,
+            "asms/52/msft/windows/net/dxmrtp/dxmrtp.dll"        ,
+            "asms/60/msft/vcrtl/atl.dll"                        ,
+            "asms/60/msft/vcrtl/msvcp60.dll"                    ,
+            "asms/60/msft/windows/common/controls/comctl32.dll" ,
+            "asms/70/msft/windows/mswincrt/msvcirt.dll"         ,
+            "asms/70/msft/windows/mswincrt/msvcrt.dll"          ,
+            "asycfilt.dl_"  ,
+            "authz.dl_"     ,
+            "avifil32.dl_"  ,
+            "batmeter.dl_"  ,
+            "browseui.dl_"  ,
+            "comaddin.dl_"  ,
+            "comadmin.dl_"  ,
+            "comdlg32.dl_"  ,
+            "compatui.dl_"  ,
+            "compstui.dl_"  ,
+            "comrepl.dl_"   ,
+            "comres.dl_"    ,
+            "comsetup.dl_"  ,
+            "comsnap.dl_"   ,
+            "comsvcs.dl_"   ,
+            "comuid.dl_"    ,
+            "devmgr.dl_"    ,
+            "dispex.dl_"    ,
+            "ds32gt.dl_"    ,
+            "dsprop.dl_"    ,
+            "dsprpres.dl_"  ,
+            "dsquery.dl_"   ,
+            "dssec.dl_"     ,
+            "dssenh.dl_"    ,
+            "dsuiext.dl_"   ,
+            "dxmasf.dl_"    ,
+            "dxtmsft.dl_"   ,
+            "dxtrans.dl_"   ,
+            "encdec.dl_"    ,
+            "fusion.dll"    ,
+            "glu32.dl_"     ,
+            "hhsetup.dl_"   ,
+            "hid.dl_"       ,
+            "imagehlp.dll"  ,
+            "imm32.dl_"     ,
+            "ip/dpcdll.dl_" ,
+            "ip/pidgen.dll" ,
+            "iyuv_32.dl_"   ,
+            "jscript.dl_"   ,
+            "mciavi32.dl_"  ,
+            "mciseq.dl_"    ,
+            "mciwave.dl_"   ,
+            "mfc40u.dl_"    ,
+            "mfc42.dl_"     ,
+            "mfc42u.dl_"    ,
+            "mfcsubs.dl_"   ,
+            "midimap.dl_"   ,
+            "mp43dmod.dl_"  ,
+            "mp4sdmod.dl_"  ,
+            "mpg4dmod.dl_"  ,
+            "msacm32.dl_"   ,
+            "msadds.dl_"    ,
+            "msasn1.dl_"    ,
+            "mscms.dl_"     ,
+            "msftedit.dl_"  ,
+            "msctf.dl_"     ,
+            "msctfp.dl_"    ,
+            "msrle32.dl_"   ,
+            "msvbvm60.dl_"  ,
+            "msvcrt40.dl_"  ,
+            "msvfw32.dl_"   ,
+            "mswmdm.dl_"    ,
+            "msxml.dl_"     ,
+            "msxml2.dl_"    ,
+            "msxml3.dl_"    ,
+            "msxml6.dl_"    ,
+            "msxml6r.dl_"   ,
+            "netapi32.dl_"  ,
+            "odbc32.dl_"    ,
+            "odbc32gt.dl_"  ,
+            "odbcbcp.dl_"   ,
+            "odbcconf.dl_"  ,
+            "odbccp32.dl_"  ,
+            "odbccr32.dl_"  ,
+            "odbccu32.dl_"  ,
+            "odbcint.dl_"   ,
+            "ole32.dl_"     ,
+            "oleaut32.dl_"  ,
+            "olecli32.dl_"  ,
+            "olecnv32.dl_"  ,
+            "oledb32.dl_"   ,
+            "oledb32r.dl_"  ,
+            "oledlg.dl_"    ,
+            "oleprn.dl_"    ,
+            "olepro32.dl_"  ,
+            "query.dl_"     ,
+            "qutil.dl_"     ,
+            "rtutils.dl_"   ,
+            "s3gnb.dl_"     ,
+            "samlib.dl_"    ,
+            "scecli.dl_"    ,
+            "setupapi.dl_"  ,
+            "shdoclc.dl_"   ,
+            "shdocvw.dl_"   ,
+            "shell32.dl_"   ,
+            "shgina.dl_"    ,
+            "shimgvw.dl_"   ,
+            "shlwapi.dl_"   ,
+            "shmedia.dl_"   ,
+            "shsvcs.dl_"    ,
+            "slbcsp.dl_"    ,
+            "slbiop.dl_"    ,
+            "spoolss.dl_"   ,
+            "stobject.dl_"  ,
+            "strmdll.dl_"   ,
+            "strmfilt.dl_"  ,
+            "userenv.dl_"   ,
+            "vbscript.dl_"  ,
+            "wavemsp.dl_"   ,
+            "win32spl.dl_"  ,
+            "winmm.dl_"     ,
+            "wmadmod.dl_"   ,
+            "wmadmoe.dl_"   ,
+            "wmasf.dl_"     ,
+            "wmdmlog.dl_"   ,
+            "wmdmps.dl_"    ,
+            "wmidx.dl_"     ,
+            "wmm2ae.dl_"    ,
+            "wmm2ext.dl_"   ,
+            "wmm2filt.dl_"  ,
+            "wmm2fxa.dl_"   ,
+            "wmm2fxb.dl_"   ,
+            "wmpcd.dl_"     ,
+            "wmpcore.dl_"   ,
+            "wmphoto.dl_"   ,
+            "wmploc.dl_"    ,
+            "wmploc.js_"    ,
+            "wmpui.dl_"     ,
+            "wmsdmod.dl_"   ,
+            "wmsdmoe.dl_"   ,
+            "wmsdmoe2.dl_"  ,
+            "wmspdmod.dl_"  ,
+            "wmspdmoe.dl_"  ,
+            "wmstream.dl_"  ,
+            "wmvcore.dl_"   ,
+            "wmvdmod.dl_"   ,
+            "wmvdmoe2.dl_"  ,
+            "ws2_32.dl_"    ,
+            "wshbth.dl_"    ,
+            "wshcon.dl_"    ,
+            "wshext.dl_"    ,
+            "wship6.dl_"    ,
+            "wshirda.dl_"   ,
+            "wshrm.dl_"     ,
+            "wshtcpip.dl_"  ,
+            "wsock32.dl_"   ,
+            "wzcsapi.dl_"   ,
+            "xactsrv.dl_"   ,
+            "xmllite.dl_"   ,
+            "xmlprov.dl_"   ,
+            "xmlprovi.dl_"  ,
+            "xolehlp.dl_"   ,
+            "zipfldr.dl_"   ,
+        ]
 
         # acm
-        + """
-        l3codeca.ac_
-        msadp32.ac_
-        msaud32.ac_
-        """
+        + [
+            "imaadp32.ac_"  ,
+            "l3codeca.ac_"  ,
+            "msadp32.ac_"   ,
+            "msaud32.ac_"   ,
+            "sl_anet.ac_"   ,
+        ]
 
         # ax
-        + """
-        dshowext.ax_
-        ip/vbicodec.ax_
-        ip/wstpager.ax_
-        ip/wstrendr.ax_
-        mpg2data.ax_
-        mpg4ds32.ax_
-        msadds32.ax_
-        msscds32.ax_
-        vbisurf.ax_
-        vidcap.ax_
-        wmv8ds32.ax_
-        wmvds32.ax_
-        """
+        + [
+            "dshowext.ax_"      ,
+            "ip/vbicodec.ax_"   ,
+            "ip/wstpager.ax_"   ,
+            "ip/wstrendr.ax_"   ,
+            "mpg2data.ax_"      ,
+            "mpg4ds32.ax_"      ,
+            "msadds32.ax_"      ,
+            "msscds32.ax_"      ,
+            "vbisurf.ax_"       ,
+            "vidcap.ax_"        ,
+            "wmv8ds32.ax_"      ,
+            "wmvds32.ax_"       ,
+        ]
 
         # com
-        + """
-        format.co_
-        more.co_
-        tree.co_
-        """
+        + [
+            "format.co_"    ,
+            "more.co_"      ,
+            "tree.co_"      ,
+        ]
 
         # cpl
-        + """
-        hdwwiz.cp_
-        mmsys.cp_
-        odbccp32.cp_
-        timedate.cp_
-        """
+        + [
+            "hdwwiz.cp_"    ,
+            "mmsys.cp_"     ,
+            "odbccp32.cp_"  ,
+            "timedate.cp_"  ,
+        ]
 
         # drv
-        + """
-        msh261.dr_
-        msh263.dr_
-        wdmaud.dr_
-        """
+        + [
+            "msh261.dr_"    ,
+            "msh263.dr_"    ,
+            "wdmaud.dr_"    ,
+        ]
 
         # exe
-        + """
-        admin.exe
-        aspnet_regiis.exe
-        aspnet_state.exe
-        aspnet_wp.exe
-        author.exe
-        comrepl.ex_
-        comrereg.ex_
-        cscript.ex_
-        grpconv.ex_
-        odbcad32.ex_
-        odbcconf.ex_
-        smss.ex_
-        spider.ex_
-        taskmgr.ex_
-        vbc.exe
-        wscript.ex_
-        """
+        + [
+            "admin.exe"         ,
+            "aspnet_regiis.exe" ,
+            "aspnet_state.exe"  ,
+            "aspnet_wp.exe"     ,
+            "author.exe"        ,
+            "comrepl.ex_"       ,
+            "comrereg.ex_"      ,
+            "cscript.ex_"       ,
+            "grpconv.ex_"       ,
+            "odbcad32.ex_"      ,
+            "odbcconf.ex_"      ,
+            "smss.ex_"          ,
+            "spider.ex_"        ,
+            "taskmgr.ex_"       ,
+            "wscript.ex_"       ,
+        ]
 
         # ocx
-        + """
-        asctrls.oc_
-        flash.oc_
-        hhctrl.oc_
-        msdxm.oc_
-        msscript.oc_
-        proctexe.oc_
-        sysmon.oc_
-        tdc.oc_
-        wmp.oc_
-        wshom.oc_
-        """
+        + [
+            "asctrls.oc_"   ,
+            "flash.oc_"     ,
+            "hhctrl.oc_"    ,
+            "msdxm.oc_"     ,
+            "msscript.oc_"  ,
+            "proctexe.oc_"  ,
+            "sysmon.oc_"    ,
+            "tdc.oc_"       ,
+            "wmp.oc_"       ,
+            "wshom.oc_"     ,
+        ]
 
         # sys
-        + """
-        avc.sy_
-        avcstrm.sy_
-        bdasup.sy_
-        ccdecode.sy_
-        dmboot.sy_
-        dmio.sy_
-        dmusic.sy_
-        kmixer.sy_
-        ksecdd.sys
-        ntio.sy_
-        ntio404.sy_
-        ntio411.sy_
-        ntio412.sy_
-        ntio804.sy_
-        s3gnbm.sy_
-        swmidi.sy_
-        sysaudio.sy_
-        watchdog.sy_
-        wdmaud.sy_
-        win32k.sy_
-        wmiacpi.sy_
-        wvchntxx.sy_
-        """
+        + [
+            "avc.sy_"       ,
+            "avcstrm.sy_"   ,
+            "bdasup.sy_"    ,
+            "ccdecode.sy_"  ,
+            "dmboot.sy_"    ,
+            "dmio.sy_"      ,
+            "dmusic.sy_"    ,
+            "kmixer.sy_"    ,
+            "ksecdd.sys"    ,
+            "ntio.sy_"      ,
+            "ntio404.sy_"   ,
+            "ntio411.sy_"   ,
+            "ntio412.sy_"   ,
+            "ntio804.sy_"   ,
+            "s3gnbm.sy_"    ,
+            "swmidi.sy_"    ,
+            "sysaudio.sy_"  ,
+            "watchdog.sy_"  ,
+            "wdmaud.sy_"    ,
+            "win32k.sy_"    ,
+            "wmiacpi.sy_"   ,
+            "wvchntxx.sy_"  ,
+        ]
 
         # tlb
-        + """
-        msado20.tl_
-        msado21.tl_
-        msado25.tl_
-        msado26.tl_
-        msado27.tl_
-        mscorlib.tlb
-        msdatsrc.tl_
-        mshtml.tl_
-        simpdata.tl_
-        stdole2.tl_
-        stdole32.tl_
-        """
+        + [
+            "msado20.tl_"   ,
+            "msado21.tl_"   ,
+            "msado25.tl_"   ,
+            "msado26.tl_"   ,
+            "msado27.tl_"   ,
+            "mscorlib.tlb"  ,
+            "msdatsrc.tl_"  ,
+            "mshtml.tl_"    ,
+            "simpdata.tl_"  ,
+            "stdole2.tl_"   ,
+            "stdole32.tl_"  ,
+        ]
 
         # tsp
-        + """
-        h323.ts_
-        hidphone.ts_
-        ipconf.ts_
-        kmddsp.ts_
-        ndptsp.ts_
-        remotesp.ts_
-        unimdm.ts_
-        """
-    ).split()
+        + [
+            "h323.ts_"      ,
+            "hidphone.ts_"  ,
+            "ipconf.ts_"    ,
+            "kmddsp.ts_"    ,
+            "ndptsp.ts_"    ,
+            "remotesp.ts_"  ,
+            "unimdm.ts_"    ,
+        ]
+    )
 
+    i = 1.0
     for f in _files:
         f = os.path.join("i386", f)
         cabextract("-d", W_TEMP, "-F", f, SPSRC)
@@ -584,6 +590,9 @@ def load_core():
             cabextract("-d", _dst, f)
         else:
             shutil.copy2(f, _dst)
+
+        print int((i / len(_files)) * 100), "%"
+        i += 1
 
     #-----------#
     # netfx.cab #
@@ -612,8 +621,6 @@ RegisterDlls = RegisterDllsSection
 
 11,,actxprxy.dll    ,1
 11,,advpack.dll     ,1
-11,,asctrls.ocx     ,1
-11,,bdaplgin.ax     ,1
 11,,browseui.dll    ,1
 11,,ddrawex.dll     ,1
 11,,devenum.dll     ,1
@@ -651,33 +658,17 @@ RegisterDlls = RegisterDllsSection
 11,,dxtrans.dll     ,1
 11,,encapi.dll      ,1
 11,,encdec.dll      ,1
-11,,flash.ocx       ,1
-11,,fontext.dll     ,1
-11,,hhctrl.ocx      ,1
-11,,ipsink.ax       ,1
 11,,jscript.dll     ,1
-11,,ksproxy.ax      ,1
-11,,kswdmcap.ax     ,1
-11,,l3codeca.acm    ,1
 11,,mp43dmod.dll    ,1
 11,,mp4sdmod.dll    ,1
-11,,mpg2data.ax     ,1
-11,,mpg2splt.ax     ,1
 11,,mpg4dmod.dll    ,1
-11,,mpg4ds32.ax     ,1
-11,,msadds32.ax     ,1
-11,,msdvbnp.ax      ,1
-11,,msdxm.ocx       ,1
-11,,msscds32.ax     ,1
-11,,msscript.ocx    ,1
 11,,msvbvm60.dll    ,1
 11,,mswebdvd.dll    ,1
 11,,mswmdm.dll      ,1
+11,,msxml6.dll      ,1
 11,,oledb32.dll     ,1
 11,,oledb32r.dll    ,1
 11,,oleprn.dll      ,1
-11,,proctexe.ocx    ,1
-11,,psisrndr.ax     ,1
 11,,qasf.dll        ,1
 11,,qcap.dll        ,1
 11,,qdv.dll         ,1
@@ -694,12 +685,7 @@ RegisterDlls = RegisterDllsSection
 11,,slbcsp.dll      ,1
 11,,slbiop.dll      ,1
 11,,stobject.dll    ,1
-11,,sysmon.ocx      ,1
-11,,tdc.ocx         ,1
-11,,vbicodec.ax     ,1
-11,,vbisurf.ax      ,1
 11,,vbscript.dll    ,1
-11,,vidcap.ax       ,1
 11,,wavemsp.dll     ,1
 11,,wmadmod.dll     ,1
 11,,wmadmoe.dll     ,1
@@ -710,7 +696,6 @@ RegisterDlls = RegisterDllsSection
 11,,wmm2filt.dll    ,1
 11,,wmm2fxa.dll     ,1
 11,,wmm2fxb.dll     ,1
-11,,wmp.ocx         ,1
 11,,wmpcd.dll       ,1
 11,,wmpcore.dll     ,1
 11,,wmphoto.dll     ,1
@@ -721,25 +706,80 @@ RegisterDlls = RegisterDllsSection
 11,,wmspdmod.dll    ,1
 11,,wmspdmoe.dll    ,1
 11,,wmstream.dll    ,1
-11,,wmv8ds32.ax     ,1
 11,,wmvcore.dll     ,1
 11,,wmvdmod.dll     ,1
 11,,wmvdmoe2.dll    ,1
-11,,wmvds32.ax      ,1
 11,,wshcon.dll      ,1
 11,,wshext.dll      ,1
-11,,wshom.ocx       ,1
 11,,wstdecod.dll    ,1
-11,,wstpager.ax     ,1
-11,,wstrendr.ax     ,1
 11,,xmlprov.dll     ,1
 11,,xmlprovi.dll    ,1
 11,,zipfldr.dll     ,1
+
+;;;;;;;
+; ACM ;
+;;;;;;;
+
+11,,l3codeca.acm    ,1
+
+;;;;;;
+; AX ;
+;;;;;;
+
+11,,bdaplgin.ax     ,1
+11,,ipsink.ax       ,1
+11,,ksproxy.ax      ,1
+11,,kswdmcap.ax     ,1
+11,,mpg2data.ax     ,1
+11,,mpg2splt.ax     ,1
+11,,mpg4ds32.ax     ,1
+11,,msadds32.ax     ,1
+11,,msdvbnp.ax      ,1
+11,,msscds32.ax     ,1
+11,,psisrndr.ax     ,1
+11,,vbicodec.ax     ,1
+11,,vbisurf.ax      ,1
+11,,vidcap.ax       ,1
+11,,wmv8ds32.ax     ,1
+11,,wmvds32.ax      ,1
+11,,wstpager.ax     ,1
+11,,wstrendr.ax     ,1
+
+;;;;;;;
+; OCX ;
+;;;;;;;
+
+11,,asctrls.ocx     ,1
+11,,flash.ocx       ,1
+11,,hhctrl.ocx      ,1
+11,,msdxm.ocx       ,1
+11,,msscript.ocx    ,1
+11,,proctexe.ocx    ,1
+11,,sysmon.ocx      ,1
+11,,tdc.ocx         ,1
+11,,wmp.ocx         ,1
+11,,wshom.ocx       ,1
 """
+
     _inf_fd, _inf_path = tempfile.mkstemp(suffix=".inf", dir=W_TEMP)
     os.write(_inf_fd, _inf_data)
     os.close(_inf_fd)
     w_rundll32(_inf_path)
+
+#-------------------------------------------------------------------------------
+# .NET Framework 2.0
+#-------------------------------------------------------------------------------
+def load_dotnetfx20():
+    print "Starting .NET Framework 2.0 setup..."
+
+    os.putenv("WINEDLLOVERRIDES", "mscoree=n")
+    dotnetfx20 = "/usr/local/src/NXWine/sources/nativedlls/dotnetfx20/NetFx20SP2_x86.exe"
+#    dotnetfx20 = "/usr/local/src/NXWine/sources/nativedlls/dotnetfx20/dotnetfx.exe"
+
+    call([WINELOADER, dotnetfx20, "/passive"])
+    os.unsetenv("WINEDLLOVERRIDES")
+
+    w_try("wineboot.exe", "-r")
 
 #-------------------------------------------------------------------------------
 # Visual C++
@@ -756,7 +796,7 @@ def load_vcrun():
     w_try(vcrun2005, '/q')
     w_try(vcrun2008, '/q')
     w_try(vcrun2010, '/q')
-    w_try('wineboot.exe', '-r')
+    w_try("wineboot.exe", "-r")
 
 #-------------------------------------------------------------------------------
 # DirectX 9.0c
@@ -799,11 +839,12 @@ def load_dx9():
 
 #-------------------------------------------------------------------------------
 
-if __name__ == "__main__":
-    # todo: init.inf
-    w_rundll32(os.path.join(prefix, "share/wine/init.inf"))
-    load_dxnt()
-    load_core()
-    load_vcrun()
-    load_dx9()
-    shutil.rmtree(W_TEMP)
+#if __name__ == "__main__":
+# todo: init.inf
+load_dotnetfx20()
+w_rundll32(os.path.join(prefix, "share/wine/init.inf"))
+load_dxnt()
+load_core()
+load_vcrun()
+load_dx9()
+shutil.rmtree(W_TEMP)

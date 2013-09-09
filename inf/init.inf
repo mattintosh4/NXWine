@@ -37,10 +37,10 @@ GothicPropFile  = ヒラギノ角ゴ Pro W3.otf
 GothicPropName  = ヒラギノ角ゴ Pro W3
 GothicUIFile    = ヒラギノ角ゴ Pro W3.otf
 GothicUIName    = ヒラギノ角ゴ Pro W3
-MinchoMonoFile  = ヒラギノ明朝 Pro W3.otf     ;sazanami-mincho.ttf
-MinchoMonoName  = ヒラギノ明朝 Pro W3         ;さざなみ明朝
-MinchoPropFile  = ヒラギノ明朝 Pro W3.otf     ;sazanami-mincho.ttf
-MinchoPropName  = ヒラギノ明朝 Pro W3         ;さざなみ明朝
+MinchoMonoFile  = ヒラギノ明朝 Pro W3.otf
+MinchoMonoName  = ヒラギノ明朝 Pro W3
+MinchoPropFile  = ヒラギノ明朝 Pro W3.otf
+MinchoPropName  = ヒラギノ明朝 Pro W3
 
 
 [Control Panel]

@@ -767,13 +767,14 @@ def load_dotnetfx20():
     print "Starting .NET Framework 2.0 setup..."
 
     dotnetfx20 = "/usr/local/src/NXWine/sources/nativedlls/dotnetfx20/NetFx20SP2_x86.exe"
+    dotnetfx40 = "/usr/local/src/NXWine/sources/nativedlls/dotnetfx40/dotNetFx40_Client_x86_x64.exe"
 
     w_regedit_stdin("""\
 [HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
 "mscoree"="native"
 """)
     call([WINELOADER, dotnetfx20, "/passive"])
-
+    call([WINELOADER, dotnetfx40, "/passive"])
 #-------------------------------------------------------------------------------
 # Visual Basic Runtime
 #-------------------------------------------------------------------------------

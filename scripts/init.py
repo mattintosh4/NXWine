@@ -286,7 +286,6 @@ def load_core():
             "asms/60/msft/windows/common/controls/comctl32.dll" ,
             "asms/70/msft/windows/mswincrt/msvcirt.dll"         ,
             "asms/70/msft/windows/mswincrt/msvcrt.dll"          ,
-            "asycfilt.dl_"  ,
             "authz.dl_"     ,
             "avifil32.dl_"  ,
             "batmeter.dl_"  ,
@@ -344,7 +343,6 @@ def load_core():
             "msctf.dl_"     ,
             "msctfp.dl_"    ,
             "msrle32.dl_"   ,
-            "msvbvm60.dl_"  ,
             "msvcrt40.dl_"  ,
             "msvfw32.dl_"   ,
             "mswmdm.dl_"    ,
@@ -363,14 +361,12 @@ def load_core():
             "odbccu32.dl_"  ,
             "odbcint.dl_"   ,
             "ole32.dl_"     ,
-            "oleaut32.dl_"  ,
             "olecli32.dl_"  ,
             "olecnv32.dl_"  ,
             "oledb32.dl_"   ,
             "oledb32r.dl_"  ,
             "oledlg.dl_"    ,
             "oleprn.dl_"    ,
-            "olepro32.dl_"  ,
             "query.dl_"     ,
             "qutil.dl_"     ,
             "rtutils.dl_"   ,
@@ -558,7 +554,6 @@ def load_core():
             "msdatsrc.tl_"  ,
             "mshtml.tl_"    ,
             "simpdata.tl_"  ,
-            "stdole2.tl_"   ,
             "stdole32.tl_"  ,
         ]
 
@@ -662,7 +657,6 @@ RegisterDlls = RegisterDllsSection
 11,,mp43dmod.dll    ,1
 11,,mp4sdmod.dll    ,1
 11,,mpg4dmod.dll    ,1
-11,,msvbvm60.dll    ,1
 11,,mswebdvd.dll    ,1
 11,,mswmdm.dll      ,1
 11,,msxml6.dll      ,1
@@ -780,6 +774,28 @@ def load_dotnetfx20():
     os.unsetenv("WINEDLLOVERRIDES")
 
     w_try("wineboot.exe", "-r")
+#-------------------------------------------------------------------------------
+# Visual Basic Runtime
+#-------------------------------------------------------------------------------
+def load_vbrun():
+    print "Starting Visual Basic runtime setup..."
+
+    vbrun6sp6 = os.path.join(prefix, "share/wine/vbrun6sp6/vbrun60sp6.exe")
+
+    os.remove(os.path.join(W_SYSTEM32, "comcat.dll"))
+    os.remove(os.path.join(W_SYSTEM32, "oleaut32.dll"))
+    os.remove(os.path.join(W_SYSTEM32, "olepro32.dll"))
+    os.remove(os.path.join(W_SYSTEM32, "stdole2.tlb"))
+
+    w_regedit_stdin("""\
+[HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
+"comcat.dll"    ="native"
+"oleaut32.dll"  ="native"
+"olepro32.dll"  ="native"
+"stdole2.tlb"   ="native"
+""")
+
+    call([WINELOADER, vbrun6sp6, "/Q"])
 
 #-------------------------------------------------------------------------------
 # Visual C++
@@ -842,6 +858,7 @@ def load_dx9():
 #if __name__ == "__main__":
 # todo: init.inf
 load_dotnetfx20()
+load_vbrun()
 w_rundll32(os.path.join(prefix, "share/wine/init.inf"))
 load_dxnt()
 load_core()

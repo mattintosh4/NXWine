@@ -798,7 +798,7 @@ def load_vbrun():
     call([WINELOADER, vbrun6sp6, "/Q"])
 
 #-------------------------------------------------------------------------------
-# Visual C++
+# Visual C++ Runtime
 #-------------------------------------------------------------------------------
 def load_vcrun():
     print "Starting Visual C++ runtime setup..."

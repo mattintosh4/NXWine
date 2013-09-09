@@ -766,14 +766,14 @@ RegisterDlls = RegisterDllsSection
 def load_dotnetfx20():
     print "Starting .NET Framework 2.0 setup..."
 
-    os.putenv("WINEDLLOVERRIDES", "mscoree=n")
     dotnetfx20 = "/usr/local/src/NXWine/sources/nativedlls/dotnetfx20/NetFx20SP2_x86.exe"
-#    dotnetfx20 = "/usr/local/src/NXWine/sources/nativedlls/dotnetfx20/dotnetfx.exe"
 
+    w_regedit_stdin("""\
+[HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides]
+"mscoree"="native"
+""")
     call([WINELOADER, dotnetfx20, "/passive"])
-    os.unsetenv("WINEDLLOVERRIDES")
 
-    w_try("wineboot.exe", "-r")
 #-------------------------------------------------------------------------------
 # Visual Basic Runtime
 #-------------------------------------------------------------------------------

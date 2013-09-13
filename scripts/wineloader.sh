@@ -18,24 +18,29 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-WINE=/Applications/NXWine.app/Contents/Resources/libexec/wine
+PREFIX=/Applications/NXWine.app/Contents/Resources
+WINE=${PREFIX}/libexec/wine
 
-# note: usage options and non-arguments have to be processed before standard run.
-case $1 in (--help|--version|"") exec $WINE "$@";; esac
+case $1 in
+  --help|--version|"")
+    exec ${WINE} "$@"
+  ;;
+esac
 
-set -- $WINE "$@"
+export PATH=${PREFIX}/bin:${PATH}
 
-export PATH=/Applications/NXWine.app/Contents/Resources:${PATH}
-export LANG=${LANG:=ja_JP.UTF-8}
+if [ "${LANG+set}" != set ]; then
+  export LANG=ja_JP.UTF-8
+fi
 
 if [ "${WINEPREFIX+set}" != set ]; then
   export WINEPREFIX=$(osascript -e 'POSIX path of (path to library folder from user domain)')NXWine/prefixies/default
 fi
 
 if [ ! -d "${WINEPREFIX}" ] || [ "$2" = --force-init ]; then
-  $WINE wineboot.exe -i
-  /Applications/NXWine.app/Contents/Resources/share/wine/init.py
+  ${WINE} wineboot.exe -i
+  ${PREFIX}/share/wine/init.py
 fi
 
 printf '\033[4;32m%s\033[m\n' "$*" >&2
-exec "$@"
+exec ${WINE} "$@"

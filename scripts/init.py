@@ -569,7 +569,6 @@ def load_core():
         ]
     )
 
-    i = 1.0
     for f in _files:
         f = os.path.join("i386", f)
         cabextract("-d", W_TEMP, "-F", f, SPSRC)
@@ -585,9 +584,6 @@ def load_core():
             cabextract("-d", _dst, f)
         else:
             shutil.copy2(f, _dst)
-
-        print int((i / len(_files)) * 100), "%"
-        i += 1
 
     #-----------#
     # netfx.cab #

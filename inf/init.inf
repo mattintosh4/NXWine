@@ -62,13 +62,13 @@ HKCU,%FontReplacements%,"ＭＳ Ｐ明朝"              ,,"%MinchoPropName%"
 HKCU,%FontReplacements%,"ＭＳ ゴシック"             ,,"%GothicMonoName%"
 HKCU,%FontReplacements%,"ＭＳ Ｐゴシック"            ,,"%GothicPropName%"
 HKCU,%FontReplacements%,"メイリオ"                ,,"%GothicPropName%"
-HKLM,%FontLink%,"FontLinkControl"                  ,0x00010001,0x00000000
-HKLM,%FontLink%,"FontLinkDefaultChar"              ,0x00010001,0x000030fb
-HKLM,%FontSystemLink%,"Lucida Sans Unicode"   ,0x00010000,"MSGOTHIC.TTC,MS UI Gothic","ヒラギノ角ゴ Pro W3.otf"
-HKLM,%FontSystemLink%,"MS PGothic"            ,0x00010000,"LucidaGrande.ttc,Lucida Grande","ヒラギノ角ゴ Pro W3.otf"
-HKLM,%FontSystemLink%,"MS UI Gothic"          ,0x00010000,"LucidaGrande.ttc,Lucida Grande","ヒラギノ角ゴ Pro W3.otf"
-HKLM,%FontSystemLink%,"Microsoft Sans Serif"  ,0x00010000,"MSGOTHIC.TTC,MS UI Gothic","ヒラギノ角ゴ Pro W3.otf"
-HKLM,%FontSystemLink%,"Tahoma"                ,0x00010000,"MSGOTHIC.TTC,MS UI Gothic","ヒラギノ角ゴ Pro W3.otf"
+;HKLM,%FontLink%,"FontLinkControl"                  ,0x00010001,0x00000000
+;HKLM,%FontLink%,"FontLinkDefaultChar"              ,0x00010001,0x000030fb
+;HKLM,%FontSystemLink%,"Lucida Sans Unicode"   ,0x00010000,"MSGOTHIC.TTC,MS UI Gothic","ヒラギノ角ゴ Pro W3.otf"
+;HKLM,%FontSystemLink%,"MS PGothic"            ,0x00010000,"LucidaGrande.ttc,Lucida Grande","ヒラギノ角ゴ Pro W3.otf"
+;HKLM,%FontSystemLink%,"MS UI Gothic"          ,0x00010000,"LucidaGrande.ttc,Lucida Grande","ヒラギノ角ゴ Pro W3.otf"
+;HKLM,%FontSystemLink%,"Microsoft Sans Serif"  ,0x00010000,"MSGOTHIC.TTC,MS UI Gothic","ヒラギノ角ゴ Pro W3.otf"
+;HKLM,%FontSystemLink%,"Tahoma"                ,0x00010000,"MSGOTHIC.TTC,MS UI Gothic","ヒラギノ角ゴ Pro W3.otf"
 HKLM,%FontMapper%,"ARIAL"              ,0x00010001,0x00000000
 HKLM,%FontMapper%,"COURIER NEW"        ,0x00010001,0x00008000
 HKLM,%FontMapper%,"COURIER"            ,0x00010001,0x00008800

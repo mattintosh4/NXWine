@@ -126,8 +126,7 @@ BuildDevel_ ()
       ./configure $configure_args --disable-{asm-optimizations,xmms-plugin}
     ;;
     freetype)
-      #git checkout -f master
-      git checkout -f 2b29ed6
+      git checkout -f master
       ./autogen.sh
       ./configure $configure_args
     ;;
@@ -428,15 +427,15 @@ Bootstrap_ ()
   
   # ------------------------------------- begin build
   BuildDeps_  gsm
-  BuildDevel_ icu-release-51-2
+#  BuildDevel_ icu-release-51-2
   BuildDeps_  gettext
   BuildDeps_  libtool
   BuildDevel_ readline
   BuildDevel_ zlib
   BuildDevel_ xz
-  BuildDevel_ python
-  BuildDevel_ libxml2
-  BuildDevel_ libxslt
+#  BuildDevel_ python
+#  BuildDevel_ libxml2
+#  BuildDevel_ libxslt
 } # end Bootstrap_
 
 BuildStage1_ ()
@@ -448,24 +447,25 @@ BuildStage1_ ()
 
 BuildStage2_ ()
 {
-  BuildDevel_ libtasn1
-  BuildDevel_ nettle
-  BuildDevel_ gnutls
-  BuildDevel_ libusb
-  BuildDevel_ libusb-compat-0.1
-  BuildDevel_ sane-backends
-  BuildDevel_ orc
-  BuildDeps_  unixODBC
-} # end BuildStage2_
-
-BuildStage3_ ()
-{
   BuildDevel_ libpng
-  BuildDevel_ freetype                # freetype required libpng
+  BuildDevel_ freetype                # freetype requires libpng
   BuildDevel_ libjpeg-turbo
   BuildDevel_ libtiff
   BuildDevel_ Little-CMS
 } # end BuildStage3_
+
+BuildStage3_ ()
+{
+  BuildDevel_ libtasn1
+  BuildDevel_ nettle                  # nettle requires gmp
+  BuildDevel_ gnutls
+  BuildDevel_ libusb
+  BuildDevel_ libusb-compat-0.1
+  BuildDevel_ sane-backends           # sane-backends requires jpeg
+  BuildDevel_ orc
+  BuildDeps_  unixODBC
+} # end BuildStage2_
+
 
 BuildStage3a_ ()
 {
@@ -590,7 +590,7 @@ BuildStage6_ ()
     
     ## Visual Basic 6.0 SP 6
     ## http://www.microsoft.com/ja-jp/download/details.aspx?id=24417
-    7z e -o$datadir/wine/vbrun60sp6 $srcroot/nativedlls/VB6.0-KB290887-X86.exe vbrun60sp6.exe
+    7z e -o$datadir/wine/vbrun60sp6 $srcroot/nativedlls/vbrun6sp6/VB6.0-KB290887-X86.exe vbrun60sp6.exe
   }
   InstallNativedlls_
     
@@ -598,37 +598,45 @@ BuildStage6_ ()
   wine_version=$(GIT_DIR=$workroot/wine/.git git describe HEAD 2>/dev/null)
   : ${wine_version:?}
   
-  m4  -D_PLIST=$destroot/Contents/Info.plist \
-      -D_PROJ_DOMAIN=$proj_domain \
-      -D_PROJ_VERSION=$proj_version \
-      -D_WINE_VERSION=$wine_version \
-<<\@EOS | sh -x
-changequote([, ])dnl
-define([_PB], [/usr/libexec/PlistBuddy -c "$1" _PLIST])dnl
-define([_DT], [dnl
-_PB(Add :CFBundleDocumentTypes:$1:CFBundleTypeExtensions array)
-_PB(Add :CFBundleDocumentTypes:$1:CFBundleTypeExtensions:0 string $2)
-_PB(Add :CFBundleDocumentTypes:$1:CFBundleTypeIconFile string droplet)
-_PB(Add :CFBundleDocumentTypes:$1:CFBundleTypeName string $3)
-_PB(Add :CFBundleDocumentTypes:$1:CFBundleTypeRole string Viewer)])dnl
-dnl
-dnl
-_PB([Set :CFBundleIconFile droplet])
-_PB([Add :NSHumanReadableCopyright string _WINE_VERSION, Copyright © 2013 mattintosh4, https://github.com/mattintosh4/NXWine])
-_PB([Add :CFBundleVersion string _PROJ_VERSION])
-_PB([Add :CFBundleIdentifier string _PROJ_DOMAIN])
-_DT(1,  exe,  Windows Executable File)
-_DT(2,  msi,  Microsoft Windows Installer)
-_DT(3,  lnk,  Windows Shortcut File)
-_DT(4,  7z,   7z Archive)
-_DT(5,  cab,  cab Archive)
-_DT(6,  lha,  lha Archive)
-_DT(7,  lzh,  lzh Archive)
-_DT(8,  lzma, lzma Archive)
-_DT(9,  rar,  rar Archive)
-_DT(10, xz,   xz Archive)
-_DT(11, zip,  zip Archive)
-@EOS
+  plist=$destroot/Contents/Info.plist
+  while read
+  do
+    /usr/libexec/PlistBuddy -c "$REPLY" $plist
+  done <<EOS
+Set :CFBundleIconFile         string droplet
+Add :NSHumanReadbuleCopyright string ${wine_version}, Copyright © 2013 mattintosh4, https://github.com/mattintosh4/NXWine
+Add :CFBundleVersion          string ${proj_version}
+Add :CFBundleIdentifier       string ${proj_domain}
+EOS
+  
+  i=1
+  while read e n
+  do
+    while read
+    do
+      /usr/libexec/PlistBuddy -c "$REPLY" $plist
+    done <<EOS
+Add :CFBundleDocumentTypes:${i}:CFBundleTypeExtensions    array
+Add :CFBundleDocumentTypes:${i}:CFBundleTypeExtensions:0  string ${e}
+Add :CFBundleDocumentTypes:${i}:CFBundleTypeIconFile      string droplet
+Add :CFBundleDocumentTypes:${i}:CFBundleTypeName          string ${n}
+Add :CFBundleDocumentTypes:${i}:CFBundleTypeRole          string Viewer
+EOS
+    ((i++))
+  done <<__EOS__
+exe   Windows Executble File
+msi   Microsoft Windows Installer
+lnk   Windows Shortcut File
+7z    7z archive
+cab   cab Archive
+lha   lha Archive
+lzh   lzh Archive
+lzma  lzma Archive
+rar   rar Archive
+xz    xz Archive
+zip   zip Archive
+__EOS__
+  
   
   # faenza icon theme
   (set -- faenza-icon-theme_1.3 && unzip -od $docdir/$1 $srcroot/$1.zip AUTHORS ChangeLog COPYING README) || false

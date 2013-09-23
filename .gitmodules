@@ -1,0 +1,3 @@
+[submodule "/usr/local/src/NXWine/osx-wine-inf"]
+	path = /usr/local/src/NXWine/osx-wine-inf
+	url = https://gist.github.com/6591305.git

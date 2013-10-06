@@ -1,3 +1,6 @@
 [submodule "/usr/local/src/NXWine/osx-wine-inf"]
 	path = /usr/local/src/NXWine/osx-wine-inf
 	url = https://gist.github.com/6591305.git
+[submodule "osx-wine-patch"]
+	path = osx-wine-patch
+	url = https://mattintosh4@github.com/mattintosh4/osx-wine-patch.git
